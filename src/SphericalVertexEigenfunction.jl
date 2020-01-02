@@ -4,6 +4,10 @@ function SphericalVertexEigenfunction(domain::SphericalTriangle,
     SphericalVertexEigenfunction(domain, vertex, arb[])
 end
 
+"""
+    set_eigenfunction!(u, coefficients)
+> Set the coefficients for the expansion of the eigenfunction.
+"""
 function set_eigenfunction!(u::SphericalVertexEigenfunction,
                             coefficients::Vector)
     copy!(u.coefficients, u.domain.parent.(coefficients))
@@ -25,9 +29,14 @@ function mu(u::SphericalVertexEigenfunction{arb},
     u.domain.parent(-k*inv(u.domain.angles[u.vertex]))*u.domain.parent(π)
 end
 
+"""
+    u(θ::arb, ϕ::arb, λ::arb, k::Integer)
+> Evaluate the k-th basis function for the eigenfunction with the
+  given λ on the point given by (θ, ϕ).
+"""
 function (u::SphericalVertexEigenfunction)(θ::arb,
                                            ϕ::arb,
-                                           λ,
+                                           λ::arb,
                                            k::Integer)
     ν = θ.parent(-0.5) + sqrt(θ.parent(0.25) + λ)
     μ = θ.parent(mu(u, k))
@@ -35,26 +44,29 @@ function (u::SphericalVertexEigenfunction)(θ::arb,
 end
 
 function (u::SphericalVertexEigenfunction)((θ, ϕ),
-                                           λ,
+                                           λ::arb,
                                            k::Integer)
-    ν = θ.parent(-0.5) + sqrt(θ.parent(0.25) + λ)
-    μ = θ.parent(mu(u, k))
-    legendre_p_safe(ν, μ, cos(θ))*sin(μ*ϕ)
+    u(θ, ϕ, λ, k)
 end
 
+"""
+    u(θ::arb, ϕ::arb, λ::arb, k::Integer)
+> Evaluate the eigenfunction with the given λ on the point given by
+  (θ, ϕ).
+"""
 function (u::SphericalVertexEigenfunction)(θ::arb,
                                            ϕ::arb,
-                                           λ)
-    sum(u.coefficients .* u.(θ, ϕ, λ, 1:length(u.coefficients)))
-end
-
-function (u::SphericalVertexEigenfunction)((θ, ϕ),
-                                           λ)
+                                           λ::arb)
     res = θ.parent(0)
 
     for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u((θ, ϕ), λ, k)
+        res += u.coefficients[k]*u(θ, ϕ, λ, k)
     end
 
     res
+end
+
+function (u::SphericalVertexEigenfunction)((θ, ϕ),
+                                           λ::arb)
+    u(θ, ϕ, λ)
 end

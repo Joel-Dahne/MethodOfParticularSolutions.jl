@@ -13,8 +13,8 @@ function sigma(λ,
     interior = interior_points(domain, num_interior)
 
     # Evaluate the basis of the eigenfunction on the points
-    A_B = BigFloat.(eigenfunction.(boundary, λ, (1:N)'))
-    A_I = BigFloat.(eigenfunction.(interior, λ, (1:N)'))
+    A_B = BigFloat.(eigenfunction.(boundary, domain.parent(λ), (1:N)'))
+    A_I = BigFloat.(eigenfunction.(interior, domain.parent(λ), (1:N)'))
 
     A = [A_B; A_I]
 
@@ -41,8 +41,8 @@ function sigma_coefficients(λ,
     interior = interior_points(domain, num_interior)
 
     # Evaluate the basis of the eigenfunction on the points
-    A_B = BigFloat.(eigenfunction.(boundary, λ, (1:N)'))
-    A_I = BigFloat.(eigenfunction.(interior, λ, (1:N)'))
+    A_B = BigFloat.(eigenfunction.(boundary, domain.parent(λ), (1:N)'))
+    A_I = BigFloat.(eigenfunction.(interior, domain.parent(λ), (1:N)'))
 
     A = [A_B; A_I]
 
