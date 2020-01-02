@@ -6,7 +6,7 @@ end
 
 function set_eigenfunction!(u::SphericalVertexEigenfunction,
                             coefficients::Vector)
-    u.coefficients = u.domain.parent.(coefficients)
+    copy!(u.coefficients, u.domain.parent.(coefficients))
 end
 
 """
