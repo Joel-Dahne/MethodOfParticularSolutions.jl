@@ -17,6 +17,8 @@ export SphericalTriangle,
 
     sigma, sigma_coefficients,
 
+    cartesian, spherical,
+
     mps
 
 include("arb.jl")
