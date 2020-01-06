@@ -5,15 +5,6 @@ function SphericalVertexEigenfunction(domain::SphericalTriangle,
 end
 
 """
-    set_eigenfunction!(u, coefficients)
-> Set the coefficients for the expansion of the eigenfunction.
-"""
-function set_eigenfunction!(u::SphericalVertexEigenfunction,
-                            coefficients::Vector)
-    copy!(u.coefficients, u.domain.parent.(coefficients))
-end
-
-"""
     coordinate_transformation(u::SphericalVertexEigenfunction)
 > Return a coordinate transformation T which switches from spherical
   coordinates (θ, ϕ) to (θ', ϕ'), in the new coordinate system the
@@ -28,7 +19,9 @@ end
 function coordinate_transformation(u::SphericalVertexEigenfunction)
     # TODO: The performance could most likely be improved
     if u.vertex == 1
-        T = (θ, ϕ) -> θ, ϕ
+        T = (θ, ϕ) -> begin
+            θ, ϕ
+        end
     elseif u.vertex == 2
         # Rotate by α along the y-axis so that the second vertex ends
         # up at the north pole, then rotate by β around the z-axis so
@@ -65,51 +58,6 @@ function coordinate_transformation(u::SphericalVertexEigenfunction)
     end
 
     return T
-end
-
-"""
-    coordinate_transformation(u::SphericalVertexEigenfunction, θ::arb, ϕ::arb)
-> Perform the coordinate transformation given by
-  coordinate_transformation(u) directly on θ and ϕ. This can be more
-  efficient if the transformation is not used multiple times.
-"""
-function coordinate_transformation(u::SphericalVertexEigenfunction,
-                                   θ::arb,
-                                   ϕ::arb)
-    # TODO: The performance could most likely be improved
-    if u.vertex == 1
-        nothing
-    elseif u.vertex == 2
-        # Rotate by α along the y-axis so that the second vertex ends
-        # up at the north pole, then rotate by β around the z-axis so
-        # that the boundary ends up parallel to the y-axis.
-        α = -acos(vertex(u.domain, 2)[3])
-        β = angles(u.domain)[2] - u.domain.parent(π)
-        L = LinearMap(RotZY(β, α))
-
-        xyz = cartesian(θ, ϕ)
-        xyz = L(xyz)
-        (θ, ϕ) = spherical(xyz)
-    elseif u.vertex == 3
-        # Rotate by α along the z-axis so that the third vertex
-        # ends up parallel to the y-axis, then rotate by β around
-        # the y-axis so that it ends up at the north pole. Finally
-        # rotate by γ so along the z-axis so that the boundary
-        # ends up parallel to the y-axis.
-        α = -angles(u.domain)[1]
-        β = -acos(vertex(u.domain, 3)[3])
-        γ = u.domain.parent(π)
-        L = LinearMap(RotZYZ(γ, β, α))
-
-        xyz = cartesian(θ, ϕ)
-        xyz = L(xyz)
-        (θ, ϕ) = spherical(xyz)
-
-    else
-        throw(ErrorException("vertex must be between 1 and 3 not $vertex"))
-    end
-
-    return θ, ϕ
 end
 
 """

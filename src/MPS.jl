@@ -24,12 +24,16 @@ export SphericalTriangle,
 include("arb.jl")
 include("utilities.jl")
 
-include("domain.jl")
-include("eigenfunction.jl")
+# Include types for domains and eigenfunctions
+include("domain/domain_types.jl")
+include("eigenfunction/eigenfunction_types.jl")
 
-include("SphericalTriangle.jl")
+# Include methods for domains
+include("domain/SphericalTriangle.jl")
 
-include("SphericalVertexEigenfunction.jl")
+# Include methods for eigenfunctions
+include("eigenfunction/AbstractSphericalEigenfunction.jl")
+include("eigenfunction/SphericalVertexEigenfunction.jl")
 
 include("sigma.jl")
 include("mps.jl")
