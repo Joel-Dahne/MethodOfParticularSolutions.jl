@@ -49,6 +49,15 @@ function vertex(domain::SphericalTriangle, i::Integer)
 end
 
 """
+    center(domain::SphericalTriangle)
+> Return (θ, ϕ) for the center of the spherical triangle, given by the
+  normalised sum of the vertices.
+"""
+function center(domain::SphericalTriangle)
+    spherical(sum(vertex(domain, i) for i in 1:3))
+end
+
+"""
     greatcircleplane(domain::SphericalTriangle)
 > Return coefficients a, b, c giving the plane ax + by + cz = 0 which
   is parallel to the great circle that defines the bottom boundary of
@@ -74,7 +83,53 @@ function greatcircle(ϕ::arb, a::arb, b::arb, c::arb)
 end
 
 """
-    interior_points(domain::SphericalTriangle,
+    boundary_points(domain::SphericalTriangle,
+                    i::Integer,
+                    n::Integer)
+> Return (θ, ϕ) for n points on the boundary opposite of vertex number
+  i.
+"""
+function boundary_points(domain::SphericalTriangle,
+                         i::Integer,
+                         n::Integer)
+    i >= 1 && i <= 3 || throw(ErrorException("attempt to use vertex number $i from a spherical triangle"))
+    RR = domain.parent
+
+    points = Vector{NamedTuple{(:θ, :ϕ),Tuple{arb,arb}}}(undef, n)
+
+    v = vertex(domain, mod1(i + 1, 3))
+    w = vertex(domain, mod1(i + 2, 3))
+
+    for j in 1:n
+        t = RR(j//(n + 1))
+
+        xyz = v .+ t.*(w - v)
+        points[j] = spherical(xyz)
+    end
+
+    points
+end
+
+"""
+    boundary_points(domain::SphericalTriangle,
+                    eigenfunction::AbstractSphericalEigenfunction,
+                    n::Integer)
+> Return (θ, ϕ) for n/3 points on each boundary of the spherical
+  triangle. They are returned in order, so first n/3 points from the
+  first boundary, then n/3 from the second and finally n/3 from the
+  third. In case n is not divisible by 3 then it takes one extra point
+  from the first and possibly the second boundary.
+"""
+function boundary_points(domain::SphericalTriangle,
+                         eigenfunction::AbstractSphericalEigenfunction,
+                         n::Integer)
+    [boundary_points(domain, 1, div(n, 3) + ifelse(n % 3 >= 1, 1, 0));
+     boundary_points(domain, 2, div(n, 3) + ifelse(n % 3 >= 2, 1, 0));
+     boundary_points(domain, 3, div(n, 3))]
+end
+
+"""
+    boundary_points(domain::SphericalTriangle,
                     eigenfunction::SphericalVertexEigenfunction,
                     n::Integer)
 > Return (θ, ϕ) for n points on the boundary opposite of the vertex
@@ -83,22 +138,7 @@ end
 function boundary_points(domain::SphericalTriangle,
                          eigenfunction::SphericalVertexEigenfunction,
                          n::Integer)
-    RR = domain.parent
-
-    points = Vector{NamedTuple{(:θ, :ϕ),Tuple{arb,arb}}}(undef, n)
-
-    v = vertex(domain, mod1(eigenfunction.vertex + 1, 3))
-    w = vertex(domain, mod1(eigenfunction.vertex + 2, 3))
-
-    for i in 1:n
-        t = RR(i//(n + 1))
-
-        xyz = v .+ t.*(w - v)
-        r = sqrt(sum(xyz.^2))
-        points[i] = (θ = acos(xyz[3]/r), ϕ = atan(xyz[2], xyz[1]))
-    end
-
-    points
+    boundary_points(domain, eigenfunction.vertex, n)
 end
 
 """

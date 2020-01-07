@@ -8,12 +8,14 @@ using GenericSVD
 using Optim
 
 export SphericalTriangle,
-    angles, vertex, greatcircleplane, greatcircle,
+    angles, vertex, center, greatcircleplane, greatcircle,
     boundary_points, interior_points,
 
     set_eigenfunction!,
 
     SphericalVertexEigenfunction, mu,
+
+    SphericalInteriorEigenfunction,
 
     sigma, sigma_coefficients,
 
@@ -34,6 +36,7 @@ include("domain/SphericalTriangle.jl")
 # Include methods for eigenfunctions
 include("eigenfunction/AbstractSphericalEigenfunction.jl")
 include("eigenfunction/SphericalVertexEigenfunction.jl")
+include("eigenfunction/SphericalInteriorEigenfunction.jl")
 
 include("sigma.jl")
 include("mps.jl")
