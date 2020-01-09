@@ -98,13 +98,6 @@ function (u::SphericalVertexEigenfunction)(θ::arb,
     legendre_p_safe(ν, μ, cos(θ))*sin(μ*ϕ)
 end
 
-function (u::SphericalVertexEigenfunction)((θ, ϕ),
-                                           λ::arb,
-                                           k::Integer;
-                                           notransform::Bool = false)
-    u(θ, ϕ, λ, k, notransform = notransform)
-end
-
 """
     u(θ::arb, ϕ::arb, λ::arb; notransform::Bool = false)
 > Evaluate the eigenfunction with the given λ on the point given by
@@ -128,10 +121,4 @@ function (u::SphericalVertexEigenfunction)(θ::arb,
     end
 
     res
-end
-
-function (u::SphericalVertexEigenfunction)((θ, ϕ),
-                                           λ::arb;
-                                           notransform::Bool = false)
-    u(θ, ϕ, λ)
 end

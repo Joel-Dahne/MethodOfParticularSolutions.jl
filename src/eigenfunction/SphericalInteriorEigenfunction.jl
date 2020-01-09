@@ -61,13 +61,6 @@ function (u::SphericalInteriorEigenfunction)(θ::arb,
     end
 end
 
-function (u::SphericalInteriorEigenfunction)((θ, ϕ),
-                                             λ::arb,
-                                             k::Integer;
-                                             notransform::Bool = false)
-    u(θ, ϕ, λ, k, notransform = notransform)
-end
-
 """
     u(θ::arb, ϕ::arb, λ::arb; notransform::Bool = false)
 > Evaluate the eigenfunction with the given λ on the point given by
@@ -91,10 +84,4 @@ function (u::SphericalInteriorEigenfunction)(θ::arb,
     end
 
     res
-end
-
-function (u::SphericalInteriorEigenfunction)((θ, ϕ),
-                                             λ::arb;
-                                             notransform::Bool = false)
-    u(θ, ϕ, λ)
 end

@@ -19,3 +19,16 @@ function coordinate_transformation(u::AbstractSphericalEigenfunction,
                                    ϕ::arb)
     coordinate_transformation(u)(θ, ϕ)
 end
+
+function (u::AbstractSphericalEigenfunction)((θ, ϕ),
+                                             λ::arb,
+                                             k::Integer;
+                                             notransform::Bool = false)
+    u(θ, ϕ, λ, k, notransform = notransform)
+end
+
+function (u::AbstractSphericalEigenfunction)((θ, ϕ),
+                                             λ::arb;
+                                             notransform::Bool = false)
+    u(θ, ϕ, λ, notransform = notransform)
+end
