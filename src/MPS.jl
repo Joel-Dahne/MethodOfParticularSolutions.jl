@@ -11,7 +11,7 @@ export SphericalTriangle,
     angles, vertex, center, greatcircleplane, greatcircle,
     boundary_points, interior_points,
 
-    set_eigenfunction!,
+    coefficients, set_eigenfunction!,
 
     SphericalVertexEigenfunction, mu,
 

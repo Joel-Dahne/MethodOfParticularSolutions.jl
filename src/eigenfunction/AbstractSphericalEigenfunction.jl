@@ -1,4 +1,12 @@
 """
+    coefficients(u::AbstractSphericalEigenfunction)
+> Return the coefficients of the eigenfunction.
+"""
+function coefficients(u::AbstractSphericalEigenfunction)
+    u.coefficients
+end
+
+"""
     set_eigenfunction!(u::AbstractSphericalEigenfunction, coefficients)
 > Set the coefficients for the expansion of the eigenfunction.
 """
@@ -8,8 +16,6 @@ function set_eigenfunction!(u::AbstractSphericalEigenfunction,
     copy!(u.coefficients, u.domain.parent.(coefficients))
 end
 
-"""
-"""
 """
     coordinate_transformation(u::AbstractSphericalEigenfunction)
     coordinate_transformation(u::AbstractSphericalEigenfunction, θ::arb, ϕ::arb)
