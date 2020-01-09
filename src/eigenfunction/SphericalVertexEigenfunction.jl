@@ -5,6 +5,22 @@ function SphericalVertexEigenfunction(domain::SphericalTriangle,
 end
 
 """
+    mu(eigenfunction::SphericalVertexEigenfunction,
+       k::Integer = 1)
+> Return k*μ0 as an arb ball, which is the parameter used for the
+  Legendre function.
+"""
+function mu(u::SphericalVertexEigenfunction{fmpq},
+            k::Integer = 1)
+    u.domain.parent(-k*inv(u.domain.angles[u.vertex]))
+end
+
+function mu(u::SphericalVertexEigenfunction{arb},
+            k::Integer = 1)
+    u.domain.parent(-k*inv(u.domain.angles[u.vertex]))*u.domain.parent(π)
+end
+
+"""
     coordinate_transformation(u::SphericalVertexEigenfunction)
 > Return a coordinate transformation T which switches from spherical
   coordinates (θ, ϕ) to (θ', ϕ'), in the new coordinate system the
@@ -60,31 +76,6 @@ function coordinate_transformation(u::SphericalVertexEigenfunction)
     return T
 end
 
-"""
-    mu(eigenfunction::SphericalVertexEigenfunction,
-       k::Integer = 1)
-> Return k*μ0 as an arb ball, which is the parameter used for the
-  Legendre function.
-"""
-function mu(u::SphericalVertexEigenfunction{fmpq},
-            k::Integer = 1)
-    u.domain.parent(-k*inv(u.domain.angles[u.vertex]))
-end
-
-function mu(u::SphericalVertexEigenfunction{arb},
-            k::Integer = 1)
-    u.domain.parent(-k*inv(u.domain.angles[u.vertex]))*u.domain.parent(π)
-end
-
-"""
-    u(θ::arb, ϕ::arb, λ::arb, k::Integer; notransform::Bool = false)
-> Evaluate the k-th basis function for the eigenfunction with the
-  given λ on the point given by (θ, ϕ). If notransform is true then
-  do not perform a coordinate transform on θ and ϕ first, this assumes
-  that they already given in the coordinate system used by u. See
-  coordinate_transform for details about the coordinate transform
-  used.
-"""
 function (u::SphericalVertexEigenfunction)(θ::arb,
                                            ϕ::arb,
                                            λ::arb,
@@ -96,29 +87,4 @@ function (u::SphericalVertexEigenfunction)(θ::arb,
         θ, ϕ = coordinate_transformation(u, θ, ϕ)
     end
     legendre_p_safe(ν, μ, cos(θ))*sin(μ*ϕ)
-end
-
-"""
-    u(θ::arb, ϕ::arb, λ::arb; notransform::Bool = false)
-> Evaluate the eigenfunction with the given λ on the point given by
-  (θ, ϕ). If notransform is true then do not perform a coordinate
-  transform on θ and ϕ first, this assumes that they already given in
-  the coordinate system used by u. See coordinate_transform for
-  details about the coordinate transform used.
-"""
-function (u::SphericalVertexEigenfunction)(θ::arb,
-                                           ϕ::arb,
-                                           λ::arb;
-                                           notransform::Bool = false)
-    res = θ.parent(0)
-
-    if !notransform
-        θ, ϕ = coordinate_transformation(u, θ, ϕ)
-    end
-
-    for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(θ, ϕ, λ, k, notransform = true)
-    end
-
-    res
 end

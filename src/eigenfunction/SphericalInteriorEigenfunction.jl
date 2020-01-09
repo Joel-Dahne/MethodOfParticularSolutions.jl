@@ -31,15 +31,6 @@ function coordinate_transformation(u::SphericalInteriorEigenfunction)
     return T
 end
 
-"""
-    u(θ::arb, ϕ::arb, λ::arb, k::Integer; notransform::Bool = false)
-> Evaluate the k-th basis function for the eigenfunction with the
-  given λ on the point given by (θ, ϕ). If notransform is true then
-  do not perform a coordinate transform on θ and ϕ first, this assumes
-  that they already given in the coordinate system used by u. See
-  coordinate_transform for details about the coordinate transform
-  used.
-"""
 function (u::SphericalInteriorEigenfunction)(θ::arb,
                                              ϕ::arb,
                                              λ::arb,
@@ -59,29 +50,4 @@ function (u::SphericalInteriorEigenfunction)(θ::arb,
         μ = u.domain.parent(div(k, 2))
         return legendre_p_safe(ν, μ, cos(θ))*sin(μ*ϕ)
     end
-end
-
-"""
-    u(θ::arb, ϕ::arb, λ::arb; notransform::Bool = false)
-> Evaluate the eigenfunction with the given λ on the point given by
-  (θ, ϕ). If notransform is true then do not perform a coordinate
-  transform on θ and ϕ first, this assumes that they already given in
-  the coordinate system used by u. See coordinate_transform for
-  details about the coordinate transform used.
-"""
-function (u::SphericalInteriorEigenfunction)(θ::arb,
-                                             ϕ::arb,
-                                             λ::arb;
-                                             notransform::Bool = false)
-    res = θ.parent(0)
-
-    if !notransform
-        θ, ϕ = coordinate_transformation(u, θ, ϕ)
-    end
-
-    for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(θ, ϕ, λ, k, notransform = true)
-    end
-
-    res
 end
