@@ -100,3 +100,10 @@ function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{arb, arb},
                                              notransform::Bool = false)
     u(θ, ϕ, λ, notransform = notransform)
 end
+
+function norm(u::AbstractSphericalEigenfunction,
+              λ::arb)
+    @error "no rigorous implementation of norm for $(typeof(u)), computing approximate norm"
+    interior = interior_points(u.domain, 1000)
+    sum(abs(u(i, λ)) for i in interior)/length(interior)
+end

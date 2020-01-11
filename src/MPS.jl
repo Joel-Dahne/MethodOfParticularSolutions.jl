@@ -42,6 +42,7 @@ include("eigenfunction/SphericalInteriorEigenfunction.jl")
 include("eigenfunction/SphericalCombinedEigenfunction.jl")
 
 include("sigma.jl")
+include("enclose.jl")
 include("mps.jl")
 
 end # module

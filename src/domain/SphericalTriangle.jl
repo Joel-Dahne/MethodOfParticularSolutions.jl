@@ -49,6 +49,14 @@ function vertex(domain::SphericalTriangle, i::Integer)
 end
 
 """
+    area(domain::SphericalTriangle)
+> Compute the area of the spherical triangle.
+"""
+function area(domain::SphericalTriangle)
+    sum(angles(domain)) - domain.parent(π)
+end
+
+"""
     center(domain::SphericalTriangle)
 > Return (θ, ϕ) for the center of the spherical triangle, given by the
   normalised sum of the vertices.

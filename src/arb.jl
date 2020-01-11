@@ -1,4 +1,15 @@
 """
+    max(x::arb, y::arb)
+> Return a ball containing the maximum of x and y.
+"""
+function Base.max(x::arb, y::arb)
+    z = parent(x)()
+    ccall((:arb_max, Nemo.libarb), Nothing,
+          (Ref{arb}, Ref{arb}, Ref{arb}, Int), z, x, y, parent(x).prec)
+    return z
+end
+
+"""
     atan(x::arb, y::arb)
 > Return atan(x, y) = arg(x + yi).
 """

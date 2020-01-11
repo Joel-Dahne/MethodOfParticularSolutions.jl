@@ -12,11 +12,13 @@ function mps(domain::AbstractDomain,
         @warn "Failed to compute minimum of σ(λ)"
     end
 
+    λ = res.minimizer
+
     # Compute the eigenfunction corresponding to the computed
     # minimum of σ(λ).
     coefficients = sigma_coefficients(λ, domain, eigenfunction, N)
     set_eigenfunction!(eigenfunction, coefficients)
 
     # Return the enclosure of the eigenvalue
-    enclose_eigenvalue(domain, eigenfunction)
+    enclose_eigenvalue(domain, eigenfunction, domain.parent(λ))
 end
