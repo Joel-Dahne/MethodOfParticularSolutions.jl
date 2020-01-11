@@ -78,9 +78,9 @@ end
   See also: [`coordinate_transform`](@ref)
 """
 function (u::AbstractSphericalEigenfunction)(θ::arb,
-                                           ϕ::arb,
-                                           λ::arb;
-                                           notransform::Bool = false)
+                                             ϕ::arb,
+                                             λ::arb;
+                                             notransform::Bool = false)
     res = θ.parent(0)
 
     if !notransform

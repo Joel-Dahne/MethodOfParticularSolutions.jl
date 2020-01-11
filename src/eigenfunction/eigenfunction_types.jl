@@ -14,3 +14,9 @@ struct SphericalInteriorEigenfunction{T <: Union{fmpq, arb}} <: AbstractSpherica
     ϕ::arb # ϕ value for the interior point
     coefficients::Vector{arb}
 end
+
+struct SphericalCombinedEigenfunction{T <: Union{fmpq, arb}} <: AbstractSphericalEigenfunction
+    domain::SphericalTriangle{T}
+    us::Vector{<:AbstractSphericalEigenfunction}
+    orders::Vector{Int}
+end

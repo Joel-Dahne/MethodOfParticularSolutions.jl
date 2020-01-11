@@ -17,6 +17,8 @@ export SphericalTriangle,
 
     SphericalInteriorEigenfunction,
 
+    SphericalCombinedEigenfunction, basis_function,
+
     sigma, sigma_coefficients,
 
     cartesian, spherical,
@@ -37,6 +39,7 @@ include("domain/SphericalTriangle.jl")
 include("eigenfunction/AbstractSphericalEigenfunction.jl")
 include("eigenfunction/SphericalVertexEigenfunction.jl")
 include("eigenfunction/SphericalInteriorEigenfunction.jl")
+include("eigenfunction/SphericalCombinedEigenfunction.jl")
 
 include("sigma.jl")
 include("mps.jl")
