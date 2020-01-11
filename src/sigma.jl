@@ -54,10 +54,6 @@ function sigma_coefficients(λ,
     # singular value
     v = svd(Q[1:num_boundary, :]).V[:, end]
 
-    # Compute the coefficients
+    # Compute and return the coefficients
     coefficients = q \ (Q*v)
-
-    # Return the coefficients normalized so that the first one is
-    # equal to 1
-    return coefficients./coefficients[1]
 end
