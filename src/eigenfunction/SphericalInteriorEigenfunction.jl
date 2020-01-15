@@ -45,9 +45,9 @@ function (u::SphericalInteriorEigenfunction)(θ::arb,
         return legendre_p_safe(ν, μ, cos(θ))
     elseif k % 2 == 0
         μ = u.domain.parent(div(k, 2))
-        return legendre_p_safe(ν, μ, cos(θ))*cos(μ*ϕ)
+        return legendre_p_safe(ν, μ, cos(θ))*sin(μ*ϕ)
     else
         μ = u.domain.parent(div(k, 2))
-        return legendre_p_safe(ν, μ, cos(θ))*sin(μ*ϕ)
+        return legendre_p_safe(ν, μ, cos(θ))*cos(μ*ϕ)
     end
 end
