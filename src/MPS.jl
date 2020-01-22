@@ -1,6 +1,7 @@
 module MPS
 
 using Nemo
+using ArbToolsNemo
 using Random
 using CoordinateTransformations
 using LinearAlgebra
@@ -26,6 +27,7 @@ export SphericalTriangle,
     mps
 
 include("arb.jl")
+include("arb_series.jl")
 include("utilities.jl")
 
 # Include types for domains and eigenfunctions

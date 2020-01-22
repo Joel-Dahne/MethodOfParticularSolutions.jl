@@ -1,26 +1,4 @@
 """
-    max(x::arb, y::arb)
-> Return a ball containing the maximum of x and y.
-"""
-function Base.max(x::arb, y::arb)
-    z = parent(x)()
-    ccall((:arb_max, Nemo.libarb), Nothing,
-          (Ref{arb}, Ref{arb}, Ref{arb}, Int), z, x, y, parent(x).prec)
-    return z
-end
-
-"""
-    atan(x::arb, y::arb)
-> Return atan(x, y) = arg(x + yi).
-"""
-function atan(x::arb, y::arb)
-    z = parent(x)()
-    ccall((:arb_atan2, Nemo.libarb), Nothing,
-          (Ref{arb}, Ref{arb}, Ref{arb}, Int), z, x, y, parent(x).prec)
-    return z
-end
-
-"""
     legendre_p(ν::arb, μ::arb, z::arb)
 > Returns the associated Legendre function of the first kind evaluated
   for degree ν, order μ, and argument z. When μ is zero, this reduces
@@ -81,30 +59,4 @@ function getinterval(::Type{BigFloat}, x::arb)
           a, b, x)
 
     (a, b)
-end
-
-"""
-    convert(::Type{BigFloat}, x::arb)
-> Return the midpoint of x as a BigFloat rounded down to the current
-  precision of BigFloat.
-"""
-function BigFloat(x::arb)
-    GC.@preserve x begin
-        t = ccall((:arb_mid_ptr, Nemo.libarb), Ptr{Nemo.arf_struct}, (Ref{arb}, ), x)
-        # 4 == round to nearest
-        m = BigFloat()
-        ccall((:arf_get_mpfr, Nemo.libarb), Float64,
-              (Ref{BigFloat}, Ptr{Nemo.arf_struct}, Base.MPFR.MPFRRoundingMode),
-              m, t, Base.MPFR.MPFRRoundNearest)
-    end
-    return m
-end
-
-"""
-    convert(::Type{BigFloat}, x::arb)
-> Return the midpoint of x as a BigFloat rounded down to the current
-  precision of BigFloat.
-"""
-function Base.convert(::Type{BigFloat}, x::arb)
-    return BigFloat(x)
 end

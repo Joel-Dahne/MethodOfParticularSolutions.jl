@@ -31,11 +31,11 @@ function coordinate_transformation(u::SphericalInteriorEigenfunction)
     return T
 end
 
-function (u::SphericalInteriorEigenfunction)(θ::arb,
-                                             ϕ::arb,
+function (u::SphericalInteriorEigenfunction)(θ::T,
+                                             ϕ::T,
                                              λ::arb,
                                              k::Integer;
-                                             notransform::Bool = false)
+                                             notransform::Bool = false) where {T <: Union{arb, arb_series}}
     ν = u.domain.parent(-0.5) + sqrt(u.domain.parent(0.25) + λ)
     if !notransform
         θ, ϕ = coordinate_transformation(u, θ, ϕ)

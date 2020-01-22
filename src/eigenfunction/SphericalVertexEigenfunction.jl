@@ -76,13 +76,13 @@ function coordinate_transformation(u::SphericalVertexEigenfunction)
     return T
 end
 
-function (u::SphericalVertexEigenfunction)(θ::arb,
-                                           ϕ::arb,
+function (u::SphericalVertexEigenfunction)(θ::T,
+                                           ϕ::T,
                                            λ::arb,
                                            k::Integer;
-                                           notransform::Bool = false)
-    ν = θ.parent(-0.5) + sqrt(θ.parent(0.25) + λ)
-    μ = θ.parent(mu(u, k))
+                                           notransform::Bool = false) where {T <: Union{arb, arb_series}}
+    ν = u.domain.parent(-0.5) + sqrt(u.domain.parent(0.25) + λ)
+    μ = u.domain.parent(mu(u, k))
     if !notransform
         θ, ϕ = coordinate_transformation(u, θ, ϕ)
     end

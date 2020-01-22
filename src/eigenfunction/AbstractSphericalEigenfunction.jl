@@ -32,8 +32,8 @@ function coordinate_transformation(u::AbstractSphericalEigenfunction)
 end
 
 function coordinate_transformation(u::AbstractSphericalEigenfunction,
-                                   θ::arb,
-                                   ϕ::arb)
+                                   θ::T,
+                                   ϕ::T) where {T <: Union{arb, arb_series}}
     coordinate_transformation(u)(θ, ϕ)
 end
 
@@ -49,11 +49,11 @@ end
 
   See also: [`coordinate_transform`](@ref)
 """
-function (u::AbstractSphericalEigenfunction)(θ::arb,
-                                             ϕ::arb,
+function (u::AbstractSphericalEigenfunction)(θ::T,
+                                             ϕ::T,
                                              λ::arb,
                                              k::Integer;
-                                             notransform::Bool = false)
+                                             notransform::Bool = false) where {T <: Union{arb, arb_series}}
     throw(ErrorException("evaluation of basis function not implemented for eigenfunction of type $(typeof(u))"))
 end
 
@@ -77,11 +77,11 @@ end
 
   See also: [`coordinate_transform`](@ref)
 """
-function (u::AbstractSphericalEigenfunction)(θ::arb,
-                                             ϕ::arb,
+function (u::AbstractSphericalEigenfunction)(θ::T,
+                                             ϕ::T,
                                              λ::arb;
-                                             notransform::Bool = false)
-    res = θ.parent(0)
+                                             notransform::Bool = false) where {T <: Union{arb, arb_series}}
+    res = u.domain.parent(0)
 
     if !notransform
         θ, ϕ = coordinate_transformation(u, θ, ϕ)
@@ -94,10 +94,10 @@ function (u::AbstractSphericalEigenfunction)(θ::arb,
     res
 end
 
-function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{arb, arb},
-                                                           NamedTuple{(:θ, :ϕ),Tuple{arb, arb}}},
+function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{T, T},
+                                                           NamedTuple{(:θ, :ϕ),Tuple{T, T}}},
                                              λ::arb;
-                                             notransform::Bool = false)
+                                             notransform::Bool = false) where {T <: Union{arb, arb_series}}
     u(θ, ϕ, λ, notransform = notransform)
 end
 
