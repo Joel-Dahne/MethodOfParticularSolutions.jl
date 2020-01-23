@@ -19,6 +19,8 @@ function mps(domain::AbstractDomain,
     coefficients = sigma_coefficients(λ, domain, eigenfunction, N)
     set_eigenfunction!(eigenfunction, coefficients)
 
-    # Return the enclosure of the eigenvalue
-    enclose_eigenvalue(domain, eigenfunction, domain.parent(λ))
+    # Compute the enclosure of the eigenvalue
+    λ = enclose_eigenvalue(domain, eigenfunction, domain.parent(λ))
+
+    return λ, eigenfunction
 end

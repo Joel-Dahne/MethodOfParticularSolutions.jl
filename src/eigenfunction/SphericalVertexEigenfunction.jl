@@ -7,8 +7,8 @@ end
 """
     mu(eigenfunction::SphericalVertexEigenfunction,
        k::Integer = 1)
-> Return k*μ0 as an arb ball, which is the parameter used for the
-  Legendre function.
+> Return k*μ0 as an arb ball, the parameter used for the Legendre
+  function.
 """
 function mu(u::SphericalVertexEigenfunction{fmpq},
             k::Integer = 1)

@@ -15,7 +15,7 @@ end
 function legendre_p_safe(ν::arb, μ::arb, z::arb)
     res = parent(z)(NaN)
     prec = parent(z).prec
-    while !isfinite(res) && prec <= 8*parent(z).prec
+    while !isfinite(res) && prec <= 16*parent(z).prec
         ccall((:arb_hypgeom_legendre_p, Nemo.libarb), Nothing,
               (Ref{arb}, Ref{arb}, Ref{arb}, Ref{arb}, Cint, Clong),
               res, ν, μ, z, 0, prec)
