@@ -37,6 +37,13 @@ function coordinate_transformation(u::AbstractSphericalEigenfunction,
     coordinate_transformation(u)(θ, ϕ)
 end
 
+function coordinate_transformation(u::AbstractSphericalEigenfunction,
+                                   (θ, ϕ)::Union{Tuple{T, T},
+                                                   NamedTuple{(:θ, :ϕ),Tuple{T, T}}}
+                                   ) where {T <: Union{arb, arb_series}}
+    coordinate_transformation(u)(θ, ϕ)
+end
+
 """
     u(θ::arb, ϕ::arb, λ::arb, k::Integer; notransform::Bool = false)
     u((θ::arb, ϕ::arb), λ::arb, k::Integer; notransform::Bool = false)
