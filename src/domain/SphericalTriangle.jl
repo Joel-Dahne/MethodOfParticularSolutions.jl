@@ -15,12 +15,21 @@ function angles(domain::SphericalTriangle{fmpq})
     domain.parent(π).*domain.angles
 end
 
-"""
-    angles(domain::SphericalTriangle)
-> Return the angles of the spherical triangle as arb balls.
-"""
 function angles(domain::SphericalTriangle{arb})
     domain.angles
+end
+
+"""
+    angle(domain::SphericalTriangle, i::Integer)
+> Return the angle for vertex i of the spherical triangle as an arb
+  ball.
+"""
+function angle(domain::SphericalTriangle{fmpq}, i::Integer)
+    domain.parent(π)*domain.angles[i]
+end
+
+function angle(domain::SphericalTriangle{arb}, i::Integer)
+    domain.angles[i]
 end
 
 """
@@ -173,7 +182,7 @@ function interior_points(domain::SphericalTriangle,
     points = Vector{NamedTuple{(:θ, :ϕ),Tuple{arb,arb}}}(undef, n)
 
     # Maximum value of ϕ
-    A = angles(domain)[1]
+    A = angle(domain, 1)
 
     # Compute coefficients for plane determining the great circle
     # giving the lower boundary of the spherical triangle.

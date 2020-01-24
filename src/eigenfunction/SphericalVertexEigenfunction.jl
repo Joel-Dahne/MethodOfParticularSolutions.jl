@@ -43,7 +43,7 @@ function coordinate_transformation(u::SphericalVertexEigenfunction)
         # up at the north pole, then rotate by β around the z-axis so
         # that the boundary ends up parallel to the y-axis.
         α = -acos(vertex(u.domain, 2)[3])
-        β = angles(u.domain)[2] - u.domain.parent(π)
+        β = angle(u.domain, 2) - u.domain.parent(π)
         L = LinearMap(RotZY(β, α))
 
         T = (θ, ϕ) -> begin
@@ -58,7 +58,7 @@ function coordinate_transformation(u::SphericalVertexEigenfunction)
         # the y-axis so that it ends up at the north pole. Finally
         # rotate by γ so along the z-axis so that the boundary
         # ends up parallel to the y-axis.
-        α = -angles(u.domain)[1]
+        α = -angle(u.domain, 1)
         β = -acos(vertex(u.domain, 3)[3])
         γ = u.domain.parent(π)
         L = LinearMap(RotZYZ(γ, β, α))
