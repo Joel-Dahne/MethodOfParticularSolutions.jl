@@ -3,6 +3,7 @@ module MPS
 using Nemo
 using ArbToolsNemo
 using Random
+using StaticArrays
 using CoordinateTransformations
 using LinearAlgebra
 using GenericSVD

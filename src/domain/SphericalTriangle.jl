@@ -38,17 +38,17 @@ end
 function vertex(domain::SphericalTriangle, i::Integer)
     RR = domain.parent
     if i == 1
-        return RR.([0, 0, 1])
+        return RR.(SVector(0, 0, 1))
     elseif i == 2
         α, β, γ = angles(domain)
         S = RR(α + β + γ)/2
         θ = 2asin(sqrt(-cos(S)*cos(S - γ)/(sin(RR(α))*sin(RR(β)))))
-        return [sin(θ), RR(0), cos(θ)]
+        return SVector(sin(θ), RR(0), cos(θ))
     elseif i == 3
         α, β, γ = angles(domain)
         S = RR(α + β + γ)/2
         θ = 2asin(sqrt(-cos(S)*cos(S - β)/(sin(RR(α))*sin(RR(γ)))))
-        return [sin(θ)*cos(RR(α)), sin(θ)*sin(RR(α)), cos(θ)]
+        return SVector(sin(θ)*cos(RR(α)), sin(θ)*sin(RR(α)), cos(θ))
     else
         throw(ErrorException("attempt to get vertex number $i from a spherical triangle"))
     end

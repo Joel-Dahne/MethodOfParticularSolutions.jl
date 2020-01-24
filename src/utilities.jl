@@ -1,14 +1,7 @@
 function cartesian(θ, ϕ)
     sθ, cθ = sincos(θ)
     sϕ, cϕ = sincos(ϕ)
-    [sθ*cϕ, sθ*sϕ, cθ]
-end
-
-function cartesian(θ::arb_poly, ϕ::arb_poly)
-    n = length(θ)
-    sθ, cθ = sincos(θ)
-    sϕ, cϕ = sincos(ϕ)
-    [mullow(sθ, cϕ, n), mullow(sθ, sϕ, n), cθ]
+    SVector(sθ*cϕ, sθ*sϕ, cθ)
 end
 
 cartesian((θ, ϕ)) = cartesian(θ, ϕ)
