@@ -9,7 +9,7 @@ end
 
 """
     angles(domain::SphericalTriangle)
-> Return the angles of the spherical triangle as arb balls.
+> Return the angles of the spherical triangle.
 """
 function angles(domain::SphericalTriangle{fmpq})
     domain.parent(π).*domain.angles
@@ -21,8 +21,7 @@ end
 
 """
     angle(domain::SphericalTriangle, i::Integer)
-> Return the angle for vertex i of the spherical triangle as an arb
-  ball.
+> Return the angle for vertex i of the spherical triangle.
 """
 function angle(domain::SphericalTriangle{fmpq}, i::Integer)
     domain.parent(π)*domain.angles[i]
@@ -34,9 +33,7 @@ end
 
 """
     vertex(domain::SphericalTriangle, i::Integer)
-> Return cartesian coordinates for vertex i of the spherical triangle,
-  i = 1 is the vertex at the north pole and then it goes counter
-  clockwise.
+> Return cartesian coordinates for vertex i of the spherical triangle.
 """
 function vertex(domain::SphericalTriangle, i::Integer)
     RR = domain.parent
