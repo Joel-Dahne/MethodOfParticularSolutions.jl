@@ -6,6 +6,18 @@ function SphericalCombinedEigenfunction(domain::SphericalTriangle,
     SphericalCombinedEigenfunction(domain, us, orders)
 end
 
+function Base.show(io::IO, u::SphericalCombinedEigenfunction)
+    println(io, "Combined eigenfunction")
+    println(io, "domain: $(u.domain)")
+    println(io, "eigenfunctions:")
+    recur_io = IOContext(io, :compact => true)
+    for v in u.us
+        print(io, "- ")
+        show(recur_io, v)
+    end
+    print(io, "number of set coefficients: $(length(coefficients(u)))")
+end
+
 """
     basis_function(u::SphericalCombinedEigenfunction,
                    k::Integer)

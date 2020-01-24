@@ -4,6 +4,14 @@ function SphericalVertexEigenfunction(domain::SphericalTriangle,
     SphericalVertexEigenfunction(domain, vertex, arb[])
 end
 
+function Base.show(io::IO, u::SphericalVertexEigenfunction)
+    println(io, "Vertex eigenfunction from vertex $(u.vertex)")
+    if !haskey(io, :compact) || !io[:compact]
+        println(io, "domain: $(u.domain)")
+        print(io, "number of set coefficients: $(length(u.coefficients))")
+    end
+end
+
 """
     mu(eigenfunction::SphericalVertexEigenfunction,
        k::Integer = 1)

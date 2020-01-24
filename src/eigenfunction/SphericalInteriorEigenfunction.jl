@@ -4,6 +4,15 @@ function SphericalInteriorEigenfunction(domain::SphericalTriangle,
     SphericalInteriorEigenfunction(domain, θ, ϕ, arb[])
 end
 
+function Base.show(io::IO, u::SphericalInteriorEigenfunction)
+    println(io, "Interior eigenfunction")
+    if !haskey(io, :compact) || !io[:compact]
+        println(io, "interior point: (θ, ϕ) = ($(u.θ), $(u.ϕ))")
+        println(io, "domain: $(u.domain)")
+        print(io, "number of set coefficients: $(length(u.coefficients))")
+    end
+end
+
 """
     coordinate_transformation(u::SphericalInteriorEigenfunction)
 > Return a coordinate transformation T which switches from spherical
