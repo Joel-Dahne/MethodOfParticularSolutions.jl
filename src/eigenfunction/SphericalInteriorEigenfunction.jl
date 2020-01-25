@@ -4,6 +4,15 @@ function SphericalInteriorEigenfunction(domain::SphericalTriangle,
     SphericalInteriorEigenfunction(domain, θ, ϕ, arb[])
 end
 
+function SphericalInteriorEigenfunction(domain::SphericalTriangle,
+                                        xyz::AbstractVector{arb})
+    SphericalInteriorEigenfunction(domain, spherical(xyz)..., arb[])
+end
+
+function SphericalInteriorEigenfunction(domain::SphericalTriangle)
+    SphericalInteriorEigenfunction(domain, spherical(center(domain))..., arb[])
+end
+
 function Base.show(io::IO, u::SphericalInteriorEigenfunction)
     println(io, "Interior eigenfunction")
     if !haskey(io, :compact) || !io[:compact]
@@ -13,50 +22,65 @@ function Base.show(io::IO, u::SphericalInteriorEigenfunction)
     end
 end
 
-"""
-    coordinate_transformation(u::SphericalInteriorEigenfunction)
-> Return a coordinate transformation T which switches from spherical
-  coordinates (θ, ϕ) to (θ', ϕ'), in the new coordinate system the
-  point from which the eigenfunction originates is put at the north
-  pole.
-
-  This is computed by switching to cartesian coordinates, performing
-  two rotations and then switching back to spherical coordinates.
-"""
-function coordinate_transformation(u::SphericalInteriorEigenfunction)
-    # TODO: The performance could most likely be improved
-
+function coordinate_transformation(u::SphericalInteriorEigenfunction,
+                                   xyz::AbstractVector{T}
+                                   ) where {T <: Union{arb, arb_series}}
     # Rotate by u.ϕ along the along the z-axis so that the ϕ value of
     # the point becomes zero, the rotate by u.θ along the y-axis so
     # that the point ends up on the north pole.
     L = LinearMap(RotYZ(-u.θ, -u.ϕ))
-    T = (θ, ϕ) -> begin
-        xyz = cartesian(θ, ϕ)
-        xyz = L(xyz)
-        (θ, ϕ) = spherical(xyz)
-        return θ, ϕ
+    L(xyz)
+end
+
+function coordinate_transformation(u::SphericalInteriorEigenfunction,
+                                   θ::T,
+                                   ϕ::T
+                                   ) where {T <: Union{arb, arb_series}}
+    # TODO: The performance could most likely be improved by
+    # performing the rotation the z-axis while still in spherical
+    # coordinates.
+    spherical(coordinate_transformation(u, cartesian(θ, ϕ)))
+end
+
+function (u::SphericalInteriorEigenfunction)(xyz::AbstractVector{T},
+                                             λ::arb,
+                                             k::Integer;
+                                             notransform::Bool = false
+                                             ) where {T <: Union{arb, arb_series}}
+    ν::arb = -0.5 + sqrt(0.25 + λ)
+    μ::arb = u.domain.parent(div(k, 2))
+    if !notransform
+        xyz = coordinate_transformation(u, xyz)
     end
 
-    return T
+    if k == 1
+        return legendre_p_safe(ν, μ, xyz[3])
+    elseif k % 2 == 0
+        ϕ = atan(xyz[2], xyz[1])
+        return legendre_p_safe(ν, μ, xyz[3])*sin(μ*ϕ)
+    else
+        ϕ = atan(xyz[2], xyz[1])
+        return legendre_p_safe(ν, μ, xyz[3])*cos(μ*ϕ)
+    end
 end
+
 
 function (u::SphericalInteriorEigenfunction)(θ::T,
                                              ϕ::T,
                                              λ::arb,
                                              k::Integer;
-                                             notransform::Bool = false) where {T <: Union{arb, arb_series}}
-    ν = u.domain.parent(-0.5) + sqrt(u.domain.parent(0.25) + λ)
+                                             notransform::Bool = false
+                                             ) where {T <: Union{arb, arb_series}}
+    ν::arb = -0.5 + sqrt(0.25 + λ)
+    μ::arb = u.domain.parent(div(k, 2))
     if !notransform
         θ, ϕ = coordinate_transformation(u, θ, ϕ)
     end
     if k == 1
-        μ = u.domain.parent(0)
         return legendre_p_safe(ν, μ, cos(θ))
     elseif k % 2 == 0
-        μ = u.domain.parent(div(k, 2))
         return legendre_p_safe(ν, μ, cos(θ))*sin(μ*ϕ)
     else
-        μ = u.domain.parent(div(k, 2))
         return legendre_p_safe(ν, μ, cos(θ))*cos(μ*ϕ)
     end
 end

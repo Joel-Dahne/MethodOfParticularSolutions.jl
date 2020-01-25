@@ -64,16 +64,18 @@ end
 
 """
     center(domain::SphericalTriangle)
-> Return (θ, ϕ) for the center of the spherical triangle, given by the
+> Compute the center of the spherical triangle, given by the
   normalised sum of the vertices.
 """
 function center(domain::SphericalTriangle)
-    spherical(sum(vertex(domain, i) for i in 1:3))
+    xyz = sum(vertex(domain, i) for i in 1:3)
+    r = sqrt(sum(xyz.^2))
+    xyz./r
 end
 
 """
     greatcircleplane(domain::SphericalTriangle)
-> Return coefficients a, b, c giving the plane ax + by + cz = 0 which
+> Compute coefficients a, b, c giving the plane ax + by + cz = 0 which
   is parallel to the great circle that defines the bottom boundary of
   the spherical triangle.
 """
@@ -85,7 +87,8 @@ function greatcircleplane(domain::SphericalTriangle)
 end
 
 """
-Compute the θ value corresponding to the give ϕ value on the great
+    greatcircle(ϕ::arb, a::arb, b::arb, c::arb)
+> Compute the θ value corresponding to the give ϕ value on the great
 circle defined by the plane ax + by + cz = 0.
 """
 function greatcircle(ϕ::arb, a::arb, b::arb, c::arb)
@@ -100,25 +103,21 @@ end
     boundary_points(domain::SphericalTriangle,
                     i::Integer,
                     n::Integer)
-> Return (θ, ϕ) for n points on the boundary opposite of vertex number
-  i.
+> Return n points on the boundary opposite of vertex number i.
 """
 function boundary_points(domain::SphericalTriangle,
                          i::Integer,
                          n::Integer)
     i >= 1 && i <= 3 || throw(ErrorException("attempt to use vertex number $i from a spherical triangle"))
-    RR = domain.parent
-
-    points = Vector{NamedTuple{(:θ, :ϕ),Tuple{arb,arb}}}(undef, n)
+    points = Vector{SVector{3, arb}}(undef, n)
 
     v = vertex(domain, mod1(i + 1, 3))
     w = vertex(domain, mod1(i + 2, 3))
 
     for j in 1:n
-        t = RR(j//(n + 1))
+        t = domain.parent(j//(n + 1))
 
-        xyz = v .+ t.*(w - v)
-        points[j] = spherical(xyz)
+        points[j] = normalize(v .+ t.*(w - v))
     end
 
     points
@@ -176,7 +175,7 @@ function interior_points(domain::SphericalTriangle,
     # it's outside we generate ϕ and θ again until we get something
     # which is inside.
 
-    points = Vector{NamedTuple{(:θ, :ϕ),Tuple{arb,arb}}}(undef, n)
+    points = Vector{SVector{3, arb}}(undef, n)
 
     # Maximum value of ϕ
     A = angle(domain, 1)
@@ -199,7 +198,7 @@ function interior_points(domain::SphericalTriangle,
             ϕ = rand(rng)*A
         end
 
-        points[i] = (θ = θ, ϕ = ϕ)
+        points[i] = cartesian(θ, ϕ)
     end
 
     points

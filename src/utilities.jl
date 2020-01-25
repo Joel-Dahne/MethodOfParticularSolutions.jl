@@ -7,10 +7,19 @@ end
 cartesian((θ, ϕ)) = cartesian(θ, ϕ)
 
 function spherical(xyz)
-    r = sqrt(sum(xyz.^2))
-    (θ = acos(xyz[3]/r), ϕ = atan(xyz[2], xyz[1]))
+    (θ = acos(xyz[3]), ϕ = atan(xyz[2], xyz[1]))
 end
 
 function Base.Float64((θ, ϕ)::NamedTuple{(:θ, :ϕ),Tuple{arb,arb}})
     (θ = Float64(θ), ϕ = Float64(ϕ))
+end
+
+function LinearAlgebra.normalize(xyz::SVector{3, arb})
+    r = sqrt(sum(xyz.^2))
+    xyz./r
+end
+
+function LinearAlgebra.normalize(xyz::SVector{3, arb_series})
+    r = sqrt(sum(xyz.^2))
+    xyz./r
 end

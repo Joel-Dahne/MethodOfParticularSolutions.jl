@@ -28,24 +28,12 @@ function mu(u::SphericalVertexEigenfunction{arb},
     u.domain.parent(-k*inv(u.domain.angles[u.vertex]))*u.domain.parent(π)
 end
 
-"""
-    coordinate_transformation(u::SphericalVertexEigenfunction)
-> Return a coordinate transformation T which switches from spherical
-  coordinates (θ, ϕ) to (θ', ϕ'), in the new coordinate system the
-  vertex from which the eigenfunction originates is put at the north
-  pole with one of the adjacent boundaries being parallel to the
-  y-axis.
-
-  This is computed by switching to cartesian coordinates, performing a
-  number of rotations and then switching back to spherical
-  coordinates.
-"""
-function coordinate_transformation(u::SphericalVertexEigenfunction)
+function coordinate_transformation(u::SphericalVertexEigenfunction,
+                                   xyz::AbstractVector{T}
+                                   ) where {T <: Union{arb, arb_series}}
     # TODO: The performance could most likely be improved
     if u.vertex == 1
-        T = (θ, ϕ) -> begin
-            θ, ϕ
-        end
+        return xyz
     elseif u.vertex == 2
         # Rotate by α along the y-axis so that the second vertex ends
         # up at the north pole, then rotate by β around the z-axis so
@@ -53,13 +41,7 @@ function coordinate_transformation(u::SphericalVertexEigenfunction)
         α = -acos(vertex(u.domain, 2)[3])
         β = angle(u.domain, 2) - u.domain.parent(π)
         L = LinearMap(RotZY(β, α))
-
-        T = (θ, ϕ) -> begin
-            xyz = cartesian(θ, ϕ)
-            xyz = L(xyz)
-            (θ, ϕ) = spherical(xyz)
-            return θ, ϕ
-        end
+        return L(xyz)
     elseif u.vertex == 3
         # Rotate by α along the z-axis so that the third vertex
         # ends up parallel to the y-axis, then rotate by β around
@@ -70,29 +52,51 @@ function coordinate_transformation(u::SphericalVertexEigenfunction)
         β = -acos(vertex(u.domain, 3)[3])
         γ = u.domain.parent(π)
         L = LinearMap(RotZYZ(γ, β, α))
-
-        T = (θ, ϕ) -> begin
-            xyz = cartesian(θ, ϕ)
-            xyz = L(xyz)
-            (θ, ϕ) = spherical(xyz)
-            return θ, ϕ
-        end
+        return L(xyz)
     else
         throw(ErrorException("vertex must be between 1 and 3 not $vertex"))
     end
+end
 
-    return T
+function coordinate_transformation(u::SphericalVertexEigenfunction,
+                                   θ::T,
+                                   ϕ::T
+                                   ) where {T <: Union{arb, arb_series}}
+    if u.vertex == 1
+        return θ, ϕ
+    else
+        return spherical(coordinate_transformation(u, cartesian(θ, ϕ)))
+    end
+end
+
+function (u::SphericalVertexEigenfunction)(xyz::AbstractVector{T},
+                                           λ::arb,
+                                           k::Integer;
+                                           notransform::Bool = false
+                                           ) where {T <: Union{arb, arb_series}}
+    ν::arb = -0.5 + sqrt(0.25 + λ)
+    μ::arb = mu(u, k)
+
+    if !notransform
+        xyz = coordinate_transformation(u, xyz)
+    end
+
+    ϕ = atan(xyz[2], xyz[1])
+    legendre_p_safe(ν, μ, xyz[3])*sin(μ*ϕ)
 end
 
 function (u::SphericalVertexEigenfunction)(θ::T,
                                            ϕ::T,
                                            λ::arb,
                                            k::Integer;
-                                           notransform::Bool = false) where {T <: Union{arb, arb_series}}
-    ν = u.domain.parent(-0.5) + sqrt(u.domain.parent(0.25) + λ)
-    μ = u.domain.parent(mu(u, k))
+                                           notransform::Bool = false
+                                           ) where {T <: Union{arb, arb_series}}
+    ν::arb = -0.5 + sqrt(0.25 + λ)
+    μ::arb = mu(u, k)
+
     if !notransform
         θ, ϕ = coordinate_transformation(u, θ, ϕ)
     end
+
     legendre_p_safe(ν, μ, cos(θ))*sin(μ*ϕ)
 end

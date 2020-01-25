@@ -60,20 +60,44 @@ function set_eigenfunction!(u::SphericalCombinedEigenfunction,
     end
 end
 
-function (u::SphericalCombinedEigenfunction)(θ::arb,
-                                             ϕ::arb,
+function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
                                              λ::arb,
                                              k::Integer;
-                                             notransform::Bool = false)
+                                             notransform::Bool = false
+                                             )  where {T <: Union{arb, arb_series}}
+    i, j = basis_function(u, k)
+    u.us[i](xyz, λ, j, notransform = notransform)
+end
+
+function (u::SphericalCombinedEigenfunction)(θ::T,
+                                             ϕ::T,
+                                             λ::arb,
+                                             k::Integer;
+                                             notransform::Bool = false
+                                             ) where {T <: Union{arb, arb_series}}
     i, j = basis_function(u, k)
     u.us[i](θ, ϕ, λ, j, notransform = notransform)
 end
 
-function (u::SphericalCombinedEigenfunction)(θ::arb,
-                                             ϕ::arb,
+function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
                                              λ::arb;
-                                             notransform::Bool = false)
-    res = θ.parent(0)
+                                             notransform::Bool = false
+                                             ) where {T <: Union{arb, arb_series}}
+    res = u.domain.parent(0)
+
+    for v in u.us
+        res += v(xyz, λ, notransform = notransform)
+    end
+
+    res
+end
+
+function (u::SphericalCombinedEigenfunction)(θ::T,
+                                             ϕ::T,
+                                             λ::arb;
+                                             notransform::Bool = false
+                                             ) where {T <: Union{arb, arb_series}}
+    res = u.domain.parent(0)
 
     for v in u.us
         res += v(θ, ϕ, λ, notransform = notransform)
