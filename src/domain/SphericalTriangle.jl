@@ -100,6 +100,25 @@ function greatcircle(ϕ::arb, a::arb, b::arb, c::arb)
 end
 
 """
+    boundary_parameterization(t,
+                              domain::SphericalTriangle,
+                              i::Integer)
+> Compute a parameterization of the boundary opposite of vertex number
+  i.
+
+  The parameterization goes from t = 0 to t = 1.
+"""
+function boundary_parameterization(t,
+                                   domain::SphericalTriangle,
+                                   i::Integer)
+    i >= 1 && i <= 3 || throw(ErrorException("attempt to use vertex number $i from a spherical triangle"))
+    v = vertex(domain, mod1(i + 1, 3))
+    w = vertex(domain, mod1(i + 2, 3))
+
+    normalize(v .+ t.*(w - v))
+end
+
+"""
     boundary_points(domain::SphericalTriangle,
                     i::Integer,
                     n::Integer)

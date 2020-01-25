@@ -11,7 +11,7 @@ using Optim
 
 export SphericalTriangle,
     angles, vertex, center, greatcircleplane, greatcircle,
-    boundary_points, interior_points,
+    boundary_parameterization, boundary_points, interior_points,
 
     coefficients, set_eigenfunction!,
 

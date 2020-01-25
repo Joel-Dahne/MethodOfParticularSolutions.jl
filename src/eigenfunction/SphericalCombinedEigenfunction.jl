@@ -18,6 +18,37 @@ function Base.show(io::IO, u::SphericalCombinedEigenfunction)
     print(io, "number of set coefficients: $(length(coefficients(u)))")
 end
 
+function active_boundaries(u::SphericalCombinedEigenfunction)
+    reduce((x, y) -> x .| y, active_boundaries.(u.us))
+end
+
+"""
+    active_eigenfunctions(u::SphericalCombinedEigenfunction,
+                          i::Integer)
+> Return a SphericalCombinedEigenfunction consisting of all
+  eigenfunction in u which are active on boundary i.
+
+  If there are no such eigenfunctions then nothing is returned.
+
+  The returned eigenfunction shares coefficients with the old one, any
+  changes to the first also applies to the latter and vice versa.
+
+  See also: [`active_boundaries`](@ref)
+"""
+function active_eigenfunctions(u::SphericalCombinedEigenfunction,
+                               i::Integer)
+    indices = [j for j in 1:length(u.us) if active_boundaries(u.us[j])[i]]
+    @show indices
+    if isempty(indices)
+        return nothing
+    end
+
+    vs = u.us[indices]
+    orders = u.orders[indices]
+
+    SphericalCombinedEigenfunction(u.domain, vs, orders)
+end
+
 """
     basis_function(u::SphericalCombinedEigenfunction,
                    k::Integer)

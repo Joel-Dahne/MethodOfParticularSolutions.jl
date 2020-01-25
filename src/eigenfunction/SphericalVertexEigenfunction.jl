@@ -12,6 +12,10 @@ function Base.show(io::IO, u::SphericalVertexEigenfunction)
     end
 end
 
+function active_boundaries(u::SphericalVertexEigenfunction)
+    u.vertex .== (1, 2, 3)
+end
+
 """
     mu(eigenfunction::SphericalVertexEigenfunction,
        k::Integer = 1)
