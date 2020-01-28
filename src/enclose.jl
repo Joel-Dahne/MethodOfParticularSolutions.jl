@@ -7,9 +7,13 @@ end
 
 function maximize(u::AbstractSphericalEigenfunction,
                   λ::arb,
-                  i::Integer)
+                  i::Integer;
+                  store_trace = false,
+                  show_trace = false,
+                  extended_trace = false)
     N = length(coefficients(u))
     f = t -> u(boundary_parameterization(t, u.domain, i), λ)
+
     M = enclosemaximum(f,
                        u.domain.parent(0),
                        u.domain.parent(1),
@@ -18,18 +22,21 @@ function maximize(u::AbstractSphericalEigenfunction,
                        n = N,
                        atol = 0,
                        rtol = 1e-2,
-                       show_trace = false)
+                       store_trace = store_trace,
+                       show_trace = show_trace,
+                       extended_trace = extended_trace)
 end
 
 function maximize(u::AbstractSphericalEigenfunction,
-                  λ::arb)
+                  λ::arb;
+                  kwargs...)
     active = active_boundaries(u)
 
     m = u.domain.parent(0)
 
     for vertex in 1:3
         if active[vertex]
-            m = max(m, maximize(u, λ, vertex))
+            m = max(m, maximize(u, λ, vertex; kwargs...))
         end
     end
 
@@ -37,7 +44,8 @@ function maximize(u::AbstractSphericalEigenfunction,
 end
 
 function maximize(u::SphericalCombinedEigenfunction,
-                  λ::arb)
+                  λ::arb;
+                  kwargs...)
     active = active_boundaries(u)
 
     m = u.domain.parent(0)
@@ -45,7 +53,7 @@ function maximize(u::SphericalCombinedEigenfunction,
     for vertex in 1:3
         if active[vertex]
             v = active_eigenfunctions(u, vertex)
-            m = max(m, maximize(v, λ, vertex))
+            m = max(m, maximize(v, λ, vertex; kwargs...))
         end
     end
 
@@ -54,9 +62,10 @@ end
 
 function enclose_eigenvalue(domain::AbstractDomain,
                             u::AbstractEigenfunction,
-                            λ::arb)
-    m = maximize(u, λ)
-    n = norm(u, λ)
+                            λ::arb;
+                            kwargs...)
+    @timeit_debug "maximize" m = maximize(u, λ; kwargs...)
+    @timeit_debug "norm" n = norm(u, λ)
     ϵ = sqrt(area(domain))*m/n
 
     enclosure = λ/ball(domain.parent(1), ϵ)

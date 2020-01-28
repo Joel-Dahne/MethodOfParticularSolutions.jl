@@ -9,6 +9,8 @@ using LinearAlgebra
 using GenericSVD
 using Optim
 
+using TimerOutputs
+
 export SphericalTriangle,
     angles, vertex, center, greatcircleplane, greatcircle,
     boundary_parameterization, boundary_points, interior_points,
