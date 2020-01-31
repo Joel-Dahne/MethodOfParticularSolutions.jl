@@ -13,8 +13,14 @@
                    "6.78 +/- 8.61e-3"])
 
     for i in 1:4
-        domain, interval = triangle(6 + i)
-        u = SphericalVertexEigenfunction(domain, 1)
+        domain, interval = triangle(6 + i, RR)
+
+        indices = filter(i -> numerator(domain.angles[i]) != 1, 1:3)
+
+        us = [[SphericalVertexEigenfunction(domain, j) for j in indices];
+              SphericalInteriorEigenfunction(domain)]
+        u = SphericalCombinedEigenfunction(domain, us,
+                                           [ones(Int, length(indices)); 3*length(indices)])
 
         λ, u = mps(domain, u, interval, N)
 
