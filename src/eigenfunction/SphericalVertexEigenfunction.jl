@@ -1,7 +1,8 @@
 function SphericalVertexEigenfunction(domain::SphericalTriangle,
-                                      vertex::Int)
+                                      vertex::Int;
+                                      stride::Int = 1)
     vertex >= 1 && vertex <= 3 || throw(ErrorException("vertex must be between 1 and 3 not $vertex"))
-    SphericalVertexEigenfunction(domain, vertex, arb[])
+    SphericalVertexEigenfunction(domain, vertex, stride, arb[])
 end
 
 function Base.show(io::IO, u::SphericalVertexEigenfunction)
@@ -78,6 +79,8 @@ function (u::SphericalVertexEigenfunction)(xyz::AbstractVector{T},
                                            k::Integer;
                                            notransform::Bool = false
                                            ) where {T <: Union{arb, arb_series}}
+    k = 1 + (k - 1)*u.stride
+
     ν::arb = -0.5 + sqrt(0.25 + λ)
     μ::arb = mu(u, k)
 
@@ -95,6 +98,8 @@ function (u::SphericalVertexEigenfunction)(θ::T,
                                            k::Integer;
                                            notransform::Bool = false
                                            ) where {T <: Union{arb, arb_series}}
+    k = 1 + (k - 1)*u.stride
+
     ν::arb = -0.5 + sqrt(0.25 + λ)
     μ::arb = mu(u, k)
 

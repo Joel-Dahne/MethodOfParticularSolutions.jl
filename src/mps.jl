@@ -2,6 +2,8 @@ function mps(domain::AbstractDomain,
              eigenfunction::AbstractEigenfunction,
              enclosure::arb,
              N::Integer = 8;
+             num_boundary = 2N,
+             num_interior = 2N,
              store_trace = false,
              show_trace = false,
              extended_trace = false,
@@ -16,7 +18,9 @@ function mps(domain::AbstractDomain,
     # Setup
 
     # Compute minimum of σ(λ)
-    σ = λ -> sigma(λ, domain, eigenfunction, N)
+    σ = λ -> sigma(λ, domain, eigenfunction, N,
+                   num_boundary = num_boundary,
+                   num_interior = num_interior)
     res = optimize(σ,
                    getinterval(BigFloat, enclosure)...,
                    rel_tol = BigFloat(optim_rel_tol),
@@ -33,7 +37,9 @@ function mps(domain::AbstractDomain,
 
     # Compute the eigenfunction corresponding to the computed
     # minimum of σ(λ).
-    coefficients = sigma_coefficients(λ, domain, eigenfunction, N)
+    coefficients = sigma_coefficients(λ, domain, eigenfunction, N,
+                                      num_boundary = num_boundary,
+                                      num_interior = num_interior)
     set_eigenfunction!(eigenfunction, coefficients)
 
     # Compute the enclosure of the eigenvalue

@@ -1,6 +1,6 @@
 @testset "regular triangles" begin
     N = 16
-    prec = 64
+    prec = 128
 
     RR = RealField(prec)
 
@@ -15,8 +15,7 @@
                    "49.109945263284609919670343151508268353698425615333956068479546500637275248339988486176558994445206617439284515387218370698834970763 +/- 3.91e-130"])
 
     for i in 1:6
-        domain, interval = triangle(i, RR)
-        u = SphericalVertexEigenfunction(domain, 1)
+        domain, u, interval = triangle(i, RR)
 
         λ, u = mps(domain, u, interval, N)
 

@@ -27,5 +27,32 @@ function triangle(i::Integer,
                         "6.777108",
                         ]), r)
 
-    (domain = SphericalTriangle(fmpq.(angles[i]), parent), λ = λs[i])
+    domain = SphericalTriangle(fmpq.(angles[i]), parent)
+
+    if i in 1:6
+        stride = i in [4, 6] ? 2 : 1
+        u = SphericalVertexEigenfunction(domain, 1, stride = stride)
+    elseif i == 7
+        us = [SphericalVertexEigenfunction(domain, 1, stride = 2),
+              SphericalVertexEigenfunction(domain, 2, stride = 1),
+              SphericalVertexEigenfunction(domain, 3, stride = 1),
+              SphericalInteriorEigenfunction(domain, stride = 2)]
+        u = SphericalCombinedEigenfunction(domain, us, [1, 1, 1, 4])
+    elseif i == 8
+        us = [[SphericalVertexEigenfunction(domain, i, stride = 2) for i in 1:3];
+              SphericalInteriorEigenfunction(domain, stride = 1)] #6
+        u = SphericalCombinedEigenfunction(domain, us, [1, 1, 1, 4])
+    elseif i == 9
+        us = [SphericalVertexEigenfunction(domain, 2),
+              SphericalVertexEigenfunction(domain, 3),
+              SphericalInteriorEigenfunction(domain)]
+        u = SphericalCombinedEigenfunction(domain, us, [1, 1, 4])
+    elseif i == 10
+        us = [SphericalVertexEigenfunction(domain, 2),
+              SphericalVertexEigenfunction(domain, 3),
+              SphericalInteriorEigenfunction(domain, stride = 2)]
+        u = SphericalCombinedEigenfunction(domain, us, [1, 1, 4])
+    end
+
+    (domain, u, λs[i])
 end

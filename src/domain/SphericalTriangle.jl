@@ -155,12 +155,17 @@ end
 """
     boundary_points(domain::SphericalTriangle,
                     i::Integer,
-                    n::Integer)
+                    n::Integer;
+                    half::Bool = true)
 > Return n points on the boundary opposite of vertex number i.
+
+  If `half` is true then only take points from the first half of the
+  boundary.
 """
 function boundary_points(domain::SphericalTriangle,
                          i::Integer,
-                         n::Integer)
+                         n::Integer;
+                         half::Bool = false)
     i >= 1 && i <= 3 || throw(ErrorException("attempt to use vertex number $i from a spherical triangle"))
     points = Vector{SVector{3, arb}}(undef, n)
 
@@ -168,7 +173,9 @@ function boundary_points(domain::SphericalTriangle,
     w = vertex(domain, mod1(i + 2, 3))
 
     for j in 1:n
-        t = domain.parent(j//(n + 1))
+        t = ifelse(half,
+                   domain.parent(j//(2n + 1)),
+                   domain.parent(j//(n + 1)))
 
         points[j] = normalize(v .+ t.*(w - v))
     end
@@ -204,7 +211,8 @@ end
 function boundary_points(domain::SphericalTriangle,
                          eigenfunction::SphericalVertexEigenfunction,
                          n::Integer)
-    boundary_points(domain, eigenfunction.vertex, n)
+    boundary_points(domain, eigenfunction.vertex, n,
+                    half = eigenfunction.stride == 2)
 end
 
 """

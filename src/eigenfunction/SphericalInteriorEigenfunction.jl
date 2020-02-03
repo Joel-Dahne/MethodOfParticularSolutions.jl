@@ -1,16 +1,19 @@
 function SphericalInteriorEigenfunction(domain::SphericalTriangle,
                                         θ::arb,
-                                        ϕ::arb)
-    SphericalInteriorEigenfunction(domain, θ, ϕ, arb[])
+                                        ϕ::arb;
+                                        stride::Int = 1)
+    SphericalInteriorEigenfunction(domain, θ, ϕ, stride, arb[])
 end
 
 function SphericalInteriorEigenfunction(domain::SphericalTriangle,
-                                        xyz::AbstractVector{arb})
-    SphericalInteriorEigenfunction(domain, spherical(xyz)..., arb[])
+                                        xyz::AbstractVector{arb};
+                                        stride::Int = 1)
+    SphericalInteriorEigenfunction(domain, spherical(xyz)..., stride = stride)
 end
 
-function SphericalInteriorEigenfunction(domain::SphericalTriangle)
-    SphericalInteriorEigenfunction(domain, spherical(center(domain))..., arb[])
+function SphericalInteriorEigenfunction(domain::SphericalTriangle;
+                                        stride::Int = 1)
+    SphericalInteriorEigenfunction(domain, spherical(center(domain))..., stride = stride)
 end
 
 function Base.show(io::IO, u::SphericalInteriorEigenfunction)
@@ -47,6 +50,8 @@ function (u::SphericalInteriorEigenfunction)(xyz::AbstractVector{T},
                                              k::Integer;
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
+    k = 1 + (k - 1)*u.stride
+
     ν::arb = -0.5 + sqrt(0.25 + λ)
     μ::arb = u.domain.parent(div(k, 2))
     if !notransform
@@ -71,6 +76,8 @@ function (u::SphericalInteriorEigenfunction)(θ::T,
                                              k::Integer;
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
+    k = 1 + (k - 1)*u.stride
+
     ν::arb = -0.5 + sqrt(0.25 + λ)
     μ::arb = u.domain.parent(div(k, 2))
     if !notransform

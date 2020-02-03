@@ -38,7 +38,7 @@ end
 function active_eigenfunctions(u::SphericalCombinedEigenfunction,
                                i::Integer)
     indices = [j for j in 1:length(u.us) if active_boundaries(u.us[j])[i]]
-    @show indices
+
     if isempty(indices)
         return nothing
     end
