@@ -13,6 +13,9 @@ abstract type AbstractSphericalDomain <: AbstractDomain end
   directly. If they are of type fmpq then they represent the angle as
   a rational multiple of π. The vertex with angle α is places on the
   north pole and the vertex with angle β is taken to have y = 0.
+  Vertex 1, 2 and 3 correspond to angles α, β and γ respectively. The
+  boundaries are ordered by which vertex they are opposite of, so
+  boundary 1 is opposite of vertex 1.
 """
 struct SphericalTriangle{T <: Union{fmpq, arb}} <: AbstractSphericalDomain
     angles::Tuple{T, T, T}

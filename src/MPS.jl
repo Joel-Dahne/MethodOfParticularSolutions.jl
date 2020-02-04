@@ -11,9 +11,11 @@ using Optim
 
 using TimerOutputs
 
-export SphericalTriangle,
-    angles, vertex, center, greatcircleplane, greatcircle,
+export AbstractEigenfunction,
     boundary_parameterization, boundary_points, interior_points,
+
+    SphericalTriangle,
+    angles, vertex, center, greatcircleplane, greatcircle,
 
     coefficients, set_eigenfunction!,
 
@@ -38,6 +40,7 @@ include("domain/domain_types.jl")
 include("eigenfunction/eigenfunction_types.jl")
 
 # Include methods for domains
+include("domain/AbstractDomain.jl")
 include("domain/SphericalTriangle.jl")
 
 # Include methods for eigenfunctions
