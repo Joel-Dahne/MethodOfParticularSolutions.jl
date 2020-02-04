@@ -2,6 +2,7 @@ abstract type AbstractDomain end
 
 abstract type AbstractSphericalDomain <: AbstractDomain end
 
+abstract type AbstractPlanarDomain <: AbstractDomain end
 
 """
     SphericalTriangle((α::arb, β::arb, γ::arb)[, RR::ArbField = RealField(64)])
@@ -19,5 +20,18 @@ abstract type AbstractSphericalDomain <: AbstractDomain end
 """
 struct SphericalTriangle{T <: Union{fmpq, arb}} <: AbstractSphericalDomain
     angles::Tuple{T, T, T}
+    parent::ArbField
+end
+
+"""
+    LShape()
+> Create the classical L-shaped domain.
+
+  The only relevant vertex is the re-entrant one with angle 3π/2 and
+  the boundaries are enumerated from 1 to 4 in positive direction
+  skipping the two which are directly adjacent to the re-entrant
+  vertex.
+"""
+struct LShape <: AbstractPlanarDomain
     parent::ArbField
 end
