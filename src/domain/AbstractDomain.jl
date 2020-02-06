@@ -1,4 +1,12 @@
 """
+    area(domain::AbstractDomain)
+> Compute the area of the domain.
+"""
+function area(domain::AbstractDomain)
+    throw(ErrorException("area not implemented for domain of type $(typeof(domain))"))
+end
+
+"""
     boundary_parameterization(t,
                               domain::AbstractDomain,
                               i::Integer)

@@ -11,8 +11,8 @@ using Optim
 
 using TimerOutputs
 
-export AbstractEigenfunction,
-    boundary_parameterization, boundary_points, interior_points,
+export AbstractDomain,
+    area, boundary_parameterization, boundary_points, interior_points,
 
     SphericalTriangle,
     angles, vertex, center, greatcircleplane, greatcircle,

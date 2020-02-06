@@ -54,10 +54,6 @@ function vertex(domain::SphericalTriangle, i::Integer)
     end
 end
 
-"""
-    area(domain::SphericalTriangle)
-> Compute the area of the spherical triangle.
-"""
 function area(domain::SphericalTriangle)
     sum(angles(domain)) - domain.parent(π)
 end
