@@ -19,6 +19,7 @@ export AbstractDomain,
 
     LShape,
 
+    AbstractEigenfunction,
     coefficients, set_eigenfunction!,
 
     SphericalVertexEigenfunction, mu,
@@ -47,6 +48,7 @@ include("domain/SphericalTriangle.jl")
 include("domain/LShape.jl")
 
 # Include methods for eigenfunctions
+include("eigenfunction/AbstractEigenfunction.jl")
 include("eigenfunction/AbstractSphericalEigenfunction.jl")
 include("eigenfunction/SphericalVertexEigenfunction.jl")
 include("eigenfunction/SphericalInteriorEigenfunction.jl")

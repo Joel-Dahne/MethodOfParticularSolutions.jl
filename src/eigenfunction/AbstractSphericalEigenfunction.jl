@@ -9,24 +9,6 @@ function active_boundaries(u::AbstractSphericalEigenfunction)
 end
 
 """
-    coefficients(u::AbstractSphericalEigenfunction)
-> Return the coefficients of the eigenfunction.
-"""
-function coefficients(u::AbstractSphericalEigenfunction)
-    u.coefficients
-end
-
-"""
-    set_eigenfunction!(u::AbstractSphericalEigenfunction, coefficients)
-> Set the coefficients for the expansion of the eigenfunction.
-"""
-function set_eigenfunction!(u::AbstractSphericalEigenfunction,
-                            coefficients::Vector)
-    resize!(u.coefficients, length(coefficients))
-    copy!(u.coefficients, u.domain.parent.(coefficients))
-end
-
-"""
     coordinate_transformation(u::AbstractSphericalEigenfunction, xyz::AbstractVector{T})
     coordinate_transformation(u::AbstractSphericalEigenfunction, θ::T, ϕ::T)
     coordinate_transformation(u::AbstractSphericalEigenfunction, (θ::T, ϕ::T))
@@ -155,11 +137,4 @@ function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{T, T},
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
     u(θ, ϕ, λ, notransform = notransform)
-end
-
-function norm(u::AbstractSphericalEigenfunction,
-              λ::arb)
-    @error "no rigorous implementation of norm for $(typeof(u)), computing approximate norm"
-    interior = interior_points(u.domain, 1000)
-    sqrt(area(u.domain)*sum(abs(u(i, λ))^2 for i in interior)/length(interior))
 end
