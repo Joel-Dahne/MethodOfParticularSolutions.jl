@@ -1,5 +1,8 @@
 function maximize(u::AbstractEigenfunction,
-                  λ::arb)
+                  λ::arb;
+                  store_trace = false,
+                  show_trace = false,
+                  extended_trace = false)
     @error "no rigorous implementation of maximize for $(typeof(u)), computing approximate maximum"
     boundary = boundary_points(u.domain, u, 1000)
     maximum(abs(u(b, λ)) for b in boundary)
