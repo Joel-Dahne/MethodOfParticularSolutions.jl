@@ -63,6 +63,35 @@ function maximize(u::SphericalCombinedEigenfunction,
     m
 end
 
+function maximize(u::LShapeEigenfunction,
+                  λ::arb;
+                  store_trace = false,
+                  show_trace = false,
+                  extended_trace = false)
+    N = length(coefficients(u))
+    m = u.domain.parent(0)
+
+    for i in 1:4
+        f = t -> u(boundary_parameterization(t, u.domain, i), λ)
+
+        m = max(m,
+                enclosemaximum(f,
+                               u.domain.parent(0),
+                               u.domain.parent(1),
+                               absmax = true,
+                               evaltype = :taylor,
+                               n = N,
+                               atol = 0,
+                               rtol = 1e-2,
+                               store_trace = store_trace,
+                               show_trace = show_trace,
+                               extended_trace = extended_trace)
+                )
+    end
+
+    m
+end
+
 function enclose_eigenvalue(domain::AbstractDomain,
                             u::AbstractEigenfunction,
                             λ::arb;

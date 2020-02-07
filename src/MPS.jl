@@ -28,6 +28,8 @@ export AbstractDomain,
 
     SphericalCombinedEigenfunction, basis_function,
 
+    LShapeEigenfunction,
+
     sigma, sigma_coefficients,
 
     cartesian, spherical,
@@ -53,6 +55,7 @@ include("eigenfunction/AbstractSphericalEigenfunction.jl")
 include("eigenfunction/SphericalVertexEigenfunction.jl")
 include("eigenfunction/SphericalInteriorEigenfunction.jl")
 include("eigenfunction/SphericalCombinedEigenfunction.jl")
+include("eigenfunction/LShapeEigenfunction.jl")
 
 include("sigma.jl")
 include("enclose.jl")

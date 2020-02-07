@@ -2,6 +2,8 @@ abstract type AbstractEigenfunction end
 
 abstract type AbstractSphericalEigenfunction <: AbstractEigenfunction end
 
+abstract type AbstractPlanarEigenfunction <: AbstractEigenfunction end
+
 struct SphericalVertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractSphericalEigenfunction
     domain::SphericalTriangle{T}
     vertex::Int
@@ -21,4 +23,10 @@ struct SphericalCombinedEigenfunction{T <: Union{fmpq, arb}} <: AbstractSpherica
     domain::SphericalTriangle{T}
     us::Vector{<:AbstractSphericalEigenfunction}
     orders::Vector{Int}
+end
+
+struct LShapeEigenfunction <: AbstractPlanarEigenfunction
+    domain::LShape
+    stride::Int
+    coefficients::Vector{arb}
 end
