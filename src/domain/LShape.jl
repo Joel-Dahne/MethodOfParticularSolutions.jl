@@ -2,6 +2,10 @@ function Base.show(io::IO, domain::LShape)
     print(io, "L-shaped domain")
 end
 
+function area(domain::LShape)
+    domain.parent(3)
+end
+
 function boundary_parameterization(t,
                                    domain::LShape,
                                    i::Integer)
@@ -23,7 +27,13 @@ function boundary_parameterization(t,
 
     xy = v .+ t.*(w .- v)
 
-    (sqrt(xy[1]^2 + xy[2]^2), atan(xy[2], xy[1]))
+    θ = atan(xy[2], xy[1])
+    if typeof(t) == arb_series
+        θ = ifelse(θ[0] < 0, θ + 2domain.parent(π), θ)
+    else
+        θ = ifelse(θ < 0, θ + 2domain.parent(π), θ)
+    end
+    (sqrt(xy[1]^2 + xy[2]^2), θ)
 end
 
 function boundary_points(domain::LShape,
@@ -59,7 +69,9 @@ function interior_points(domain::LShape,
         end
 
         x, y = domain.parent(x), domain.parent(y)
-        points[i] = (hypot(x, y), atan(y, x))
+        θ = atan(y, x)
+        θ = ifelse(θ < 0, θ + 2domain.parent(π), θ)
+        points[i] = (hypot(x, y), θ)
     end
 
     points
