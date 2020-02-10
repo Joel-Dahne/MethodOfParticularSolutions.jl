@@ -6,3 +6,4 @@ include("triangles.jl")
 
 include("regulartriangles.jl")
 include("singulartriangles.jl")
+include("lshape.jl")

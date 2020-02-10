@@ -1,5 +1,5 @@
 @testset "singular triangles" begin
-    N = 24
+    N = 16
     prec = 64
 
     RR = RealField(prec)
@@ -20,7 +20,6 @@
         λ, u = mps(domain, u, interval, N)
 
         @test overlaps(results[i], λ)
-        @show results[i]
         @show λ
         @show Float64(radius(λ))
     end
