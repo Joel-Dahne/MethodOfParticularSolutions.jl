@@ -1,3 +1,9 @@
+function SphericalTriangle{T}(domain::SphericalTriangle,
+                              parent::ArbField
+                              ) where {T <: Union{fmpq, arb}}
+    SphericalTriangle(domain.angles, parent)
+end
+
 function Base.show(io::IO, domain::SphericalTriangle{fmpq})
     angles_string = ["$(numerator(a))π/$(denominator(a))" for a in domain.angles]
     print(io, "Spherical triangle with angles ($(angles_string[1]), $(angles_string[2]), $(angles_string[3]))")

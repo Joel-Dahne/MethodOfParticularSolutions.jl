@@ -1,3 +1,7 @@
+function LShape(domain::LShape, parent::ArbField)
+    LShape(parent)
+end
+
 function Base.show(io::IO, domain::LShape)
     print(io, "L-shaped domain")
 end

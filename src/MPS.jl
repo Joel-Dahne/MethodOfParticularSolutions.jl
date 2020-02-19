@@ -34,7 +34,7 @@ export AbstractDomain,
 
     cartesian, spherical,
 
-    mps
+    mps, iteratemps
 
 include("arb.jl")
 include("arb_series.jl")
