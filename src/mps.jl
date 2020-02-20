@@ -96,9 +96,15 @@ function iteratemps(domain::AbstractDomain,
                     optim_prec_linear = false,
                     optim_prec_step = nothing,
                     optim_prec_adaptive = false,
-                    optim_prec_adaptive_extra = 5,
-                    extra_prec = 10,
+                    optim_prec_adaptive_extra = 10,
+                    extra_prec = 20,
                     show_trace = false)
+    # Make sure that at least one method for computing the precision
+    # to use for the minimization is specified
+    if isnothing(optim_prec_final) && isnothing(optim_prec_step) && !optim_prec_adaptive
+        throw(ArgumentError("at least one method for determining precision must be specified"))
+    end
+
     # Copy the domain and eigenfunction to avoid changing the originals
     domain = deepcopy(domain)
     eigenfunction = deepcopy(eigenfunction)
@@ -117,19 +123,17 @@ function iteratemps(domain::AbstractDomain,
         num_interior = num_interior_factor*N
 
         ### Compute precision to which σ(λ) should be minimized ###
+        optim_prec = typemax(Int)
 
         # If a final precision for the minimization is specified use
-        # that, otherwise use the precision of the domains parent
-        # minus the extra precision
-        optim_prec = ifelse(isnothing(optim_prec_final),
-                            prec(domain.parent) - extra_prec,
-                            optim_prec_final)
-
-        # Linearly interpolate the precision using the final precision
-        # for the last value of N
-        if optim_prec_linear && !isnothing(optim_prec_final)
-            optim_prec = min(optim_prec,
-                             ceil(Int, optim_prec_final*N/Ns[end]))
+        # that, possibly with a linear interpolation.
+        if !isnothing(optim_prec_final)
+            if optim_prec_linear
+                optim_prec = min(optim_prec,
+                                 ceil(Int, optim_prec_final*N/Ns[end]))
+            else
+                optim_prec = min(optim_prec, optim_prec_final)
+            end
         end
 
         # Set the precision to the relative accuracy of the current
@@ -141,12 +145,17 @@ function iteratemps(domain::AbstractDomain,
 
         # Compute the precision increase between the last two
         # iterations and use the same plus a small constant
-        if optim_prec_adaptive && i > 3 && isfinite(λs[i - 2]) && isfinite(λs[i - 1])
-            optim_prec = min(optim_prec,
-                             max(2ArbToolsNemo.rel_accuracy_bits(λs[i - 1])
-                                 - ArbToolsNemo.rel_accuracy_bits(λs[i - 2]),
-                                 0)
-                             + optim_prec_adaptive_extra)
+        if optim_prec_adaptive
+            if i > 3 && isfinite(λs[i - 2]) && isfinite(λs[i - 1])
+                optim_prec = min(optim_prec,
+                                 max(2ArbToolsNemo.rel_accuracy_bits(λs[i - 1])
+                                     - ArbToolsNemo.rel_accuracy_bits(λs[i - 2]),
+                                     0)
+                                 + optim_prec_adaptive_extra)
+            else
+                optim_prec = min(optim_prec,
+                                 prec(domain.parent) - extra_prec)
+            end
         end
 
         ### Compute precision to use in the computations ###
