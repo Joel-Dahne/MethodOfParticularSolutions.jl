@@ -102,11 +102,20 @@ function greatcircle(ϕ::arb, a::arb, b::arb, c::arb)
 end
 
 """
-    theta_bound(domain::SphericalTriangle)
-> Compute a lower bound of θ on the boundary opposite of the north
-  pole.
+    theta_bound(domain::SphericalTriangle, type = :lower)
+> Compute a bound of θ on the boundary opposite of the north pole. By
+  default a lower bound is computed, an upper bound is computed with
+  `type = :upper`.
 """
-function theta_bound(domain::SphericalTriangle)
+function theta_bound(domain::SphericalTriangle, type = :lower)
+    if type == :lower
+        cmp = min
+    elseif type == :upper
+        cmp = max
+    else
+        throw(ArgumentError("type must be :lower or :upper, got $type"))
+    end
+
     # Compute the critical point with respect to θ on the boundary
     i = 1
     u = vertex(domain, 2)
@@ -122,13 +131,13 @@ function theta_bound(domain::SphericalTriangle)
 
     a, b, c = greatcircleplane(domain)
     # Compute θ for the two endpoints
-    θ = min(greatcircle(spherical(u).ϕ, a, b, c),
+    θ = cmp(greatcircle(spherical(u).ϕ, a, b, c),
             greatcircle(spherical(v).ϕ, a, b, c))
 
     # If the critical point lies in the interval (0, 1) compute the
     # angle corresponding to it
     if !isnonpositive(critical_point) && !isnonnegative(critical_point - 1)
-        θ = min(θ,
+        θ = cmp(θ,
                 greatcircle(spherical(v .+ critical_point.*w).ϕ, a, b, c))
     end
 

@@ -64,6 +64,34 @@ function bessel_j(ν::arb, z::arb_series, n = length(z))
 end
 
 """
+    legendre_p(ν::arb_series, μ::arb, z::arb[, n = length(ν)])
+
+> Compute the Taylor series of the Legendre function with respect to
+  the parameter ν.
+"""
+function legendre_p(ν::arb_series, μ::arb, z::arb, n = length(ν))
+    CC = ComplexField(z.parent.prec)
+    PP = AcbPolyRing(CC, :x)
+    νν = PP(ν.poly)
+    μμ = PP(μ)
+    zz = PP(z)
+
+    a = -νν
+    b = νν + 1
+    c = 1 - μμ
+
+    res = PP()
+
+    ccall((:acb_hypgeom_2f1_series_direct, :libarb), Cvoid, (Ref{acb_poly}, Ref{acb_poly},
+                                                             Ref{acb_poly}, Ref{acb_poly},
+                                                             Ref{acb_poly}, Cint, Clong, Clong),
+          res, a, b, c, 0.5*(1 - zz), 1, 2, CC.prec)
+
+    realres = arb_series(ν.poly.parent([real(coeff(res, i)) for i in 0:degree(res)]), n)
+    ((1 + z)/(1 - z))^(μ/2)*realres
+end
+
+"""
     legendre_p(ν::arb, μ::arb, z::arb_series[, n = length(z)])
 
 > Compute the Taylor series of the Legendre function.

@@ -34,7 +34,9 @@ export AbstractDomain,
 
     cartesian, spherical,
 
-    mps, iteratemps
+    mps, iteratemps,
+
+    certifyindices
 
 include("arb.jl")
 include("arb_series.jl")
@@ -60,5 +62,6 @@ include("eigenfunction/LShapeEigenfunction.jl")
 include("sigma.jl")
 include("enclose.jl")
 include("mps.jl")
+include("index.jl")
 
 end # module
