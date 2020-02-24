@@ -64,4 +64,6 @@ include("enclose.jl")
 include("mps.jl")
 include("index.jl")
 
+include("examples/triangles.jl")
+
 end # module
