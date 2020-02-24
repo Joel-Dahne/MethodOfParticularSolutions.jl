@@ -65,5 +65,6 @@ include("mps.jl")
 include("index.jl")
 
 include("examples/triangles.jl")
+include("examples/denominators.jl")
 
 end # module
