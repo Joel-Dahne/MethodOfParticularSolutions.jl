@@ -115,70 +115,78 @@ function iteratemps(domain::AbstractDomain,
         println("N    optim_prec    prec    λ    accuracy")
     end
 
-    for i in 1:length(Ns)
-        N = Ns[i]
+    try
+        for i in 1:length(Ns)
+            N = Ns[i]
 
-        ### Compute number of boundary and interior points to use ###
-        num_boundary = num_boundary_factor*N
-        num_interior = num_interior_factor*N
+            ### Compute number of boundary and interior points to use ###
+            num_boundary = num_boundary_factor*N
+            num_interior = num_interior_factor*N
 
-        ### Compute precision to which σ(λ) should be minimized ###
-        optim_prec = typemax(Int)
+            ### Compute precision to which σ(λ) should be minimized ###
+            optim_prec = typemax(Int)
 
-        # If a final precision for the minimization is specified use
-        # that, possibly with a linear interpolation.
-        if !isnothing(optim_prec_final)
-            if optim_prec_linear
+            # If a final precision for the minimization is specified use
+            # that, possibly with a linear interpolation.
+            if !isnothing(optim_prec_final)
+                if optim_prec_linear
+                    optim_prec = min(optim_prec,
+                                     ceil(Int, optim_prec_final*N/Ns[end]))
+                else
+                    optim_prec = min(optim_prec, optim_prec_final)
+                end
+            end
+
+            # Set the precision to the relative accuracy of the current
+            # enclosure plus a fixed precision
+            if !isnothing(optim_prec_step)
                 optim_prec = min(optim_prec,
-                                 ceil(Int, optim_prec_final*N/Ns[end]))
-            else
-                optim_prec = min(optim_prec, optim_prec_final)
+                                 ArbToolsNemo.rel_accuracy_bits(enclosure) + optim_prec_step)
+            end
+
+            # Compute the precision increase between the last two
+            # iterations and use the same plus a small constant
+            if optim_prec_adaptive
+                if i > 3 && isfinite(λs[i - 2]) && isfinite(λs[i - 1])
+                    optim_prec = min(optim_prec,
+                                     max(2ArbToolsNemo.rel_accuracy_bits(λs[i - 1])
+                                         - ArbToolsNemo.rel_accuracy_bits(λs[i - 2]),
+                                         0)
+                                     + optim_prec_adaptive_extra)
+                else
+                    optim_prec = min(optim_prec,
+                                     prec(domain.parent) - extra_prec)
+                end
+            end
+
+            ### Compute precision to use in the computations ###
+            new_prec = optim_prec + extra_prec
+            RR = RealField(new_prec)
+            domain = typeof(domain)(domain, RR)
+            eigenfunction.domain = typeof(eigenfunction.domain)(eigenfunction.domain, RR)
+
+            ### Run the computations ###
+            @timeit_debug "$N" begin
+                λ, _ = setprecision(BigFloat, new_prec) do
+                    mps(domain, eigenfunction, enclosure, N,
+                        num_boundary = num_boundary,
+                        num_interior = num_interior,
+                        optim_prec = optim_prec)
+                end
+            end
+
+            λs[i] = λ
+            if isfinite(λ)
+                enclosure = setintersection(enclosure, λ)
+            end
+
+            if show_trace
+                println("$N    $optim_prec    $(prec(domain.parent))    $λ    $(ArbToolsNemo.rel_accuracy_bits(λ))")
             end
         end
-
-        # Set the precision to the relative accuracy of the current
-        # enclosure plus a fixed precision
-        if !isnothing(optim_prec_step)
-            optim_prec = min(optim_prec,
-                             ArbToolsNemo.rel_accuracy_bits(enclosure) + optim_prec_step)
-        end
-
-        # Compute the precision increase between the last two
-        # iterations and use the same plus a small constant
-        if optim_prec_adaptive
-            if i > 3 && isfinite(λs[i - 2]) && isfinite(λs[i - 1])
-                optim_prec = min(optim_prec,
-                                 max(2ArbToolsNemo.rel_accuracy_bits(λs[i - 1])
-                                     - ArbToolsNemo.rel_accuracy_bits(λs[i - 2]),
-                                     0)
-                                 + optim_prec_adaptive_extra)
-            else
-                optim_prec = min(optim_prec,
-                                 prec(domain.parent) - extra_prec)
-            end
-        end
-
-        ### Compute precision to use in the computations ###
-        new_prec = optim_prec + extra_prec
-        RR = RealField(new_prec)
-        domain = typeof(domain)(domain, RR)
-        eigenfunction.domain = typeof(eigenfunction.domain)(eigenfunction.domain, RR)
-
-        ### Run the computations ###
-        λ, _ = setprecision(BigFloat, new_prec) do
-            mps(domain, eigenfunction, enclosure, N,
-                num_boundary = num_boundary,
-                num_interior = num_interior,
-                optim_prec = optim_prec)
-        end
-
-        λs[i] = λ
-        if isfinite(λ)
-            enclosure = setintersection(enclosure, λ)
-        end
-
-        if show_trace
-            println("$N    $optim_prec    $(prec(domain.parent))    $λ    $(ArbToolsNemo.rel_accuracy_bits(λ))")
+    catch e
+        if e isa InterruptException
+            return λs
         end
     end
 
