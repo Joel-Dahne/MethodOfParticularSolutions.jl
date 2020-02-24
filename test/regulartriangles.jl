@@ -1,11 +1,6 @@
 @testset "regular triangles" begin
     N = 16
-    prec = 100
-
-    RR = RealField(prec)
-
-    old_prec = precision(BigFloat)
-    setprecision(BigFloat, prec)
+    RR = RealField(100)
 
     results = RR.(["12.40005165284337790528605341 +/- 4.96e-27",
                    "13.7443552132132318354011215921380207828066502596318748941363320689579830254389619211598920192317 +/- 7.13e-95",
@@ -17,12 +12,12 @@
     for i in 1:6
         domain, u, interval = MPS.triangle(i, RR)
 
-        λ, u = mps(domain, u, interval, N)
+        λ, u = setprecision(BigFloat, prec(RR)) do
+            mps(domain, u, interval, N)
+        end
 
         @test overlaps(results[i], λ)
         @show λ
         @show Float64(radius(λ))
     end
-
-    setprecision(BigFloat, old_prec)
 end
