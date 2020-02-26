@@ -132,7 +132,7 @@ function norm(u::SphericalVertexEigenfunction,
     θ_integral = u.domain.parent(0)
     for k in 1:min(4, length(u.coefficients))
         ν::arb = -0.5 + sqrt(0.25 + λ)
-        μ::arb = mu(u, k)
+        μ::arb = mu(u, 1 + (k - 1)*u.stride)
         c2 = u.coefficients[k]^2
 
         f = θ -> begin
