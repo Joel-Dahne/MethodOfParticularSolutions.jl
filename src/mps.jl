@@ -214,6 +214,8 @@ function iteratemps(domain::AbstractDomain,
     catch e
         if e isa InterruptException
             return λs
+        else
+            rethrow(e)
         end
     end
 
