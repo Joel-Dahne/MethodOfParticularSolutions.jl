@@ -6,6 +6,7 @@ function mps(domain::AbstractDomain,
              num_interior = 2N,
              store_trace = false,
              show_trace = false,
+             show_progress = false,
              extended_trace = false,
              optim_prec::Int = prec(domain.parent),
              optim_store_trace = false,
@@ -19,14 +20,37 @@ function mps(domain::AbstractDomain,
                    num_boundary = num_boundary,
                    num_interior = num_interior)
 
-    tol = domain.parent(2)^(-(optim_prec - 1))
+    tol = BigFloat(domain.parent(2)^(-(optim_prec - 1)))
+
+    if show_progress
+        start_prec = ArbToolsNemo.rel_accuracy_bits(enclosure)
+        optim_progress(state) = begin
+            if state == :done
+                progress = "done"
+            else
+                abs_error = state.metadata["x_upper"] - state.metadata["x_lower"]
+                rel_prec = -log2(abs_error/state.metadata["minimizer"])
+                progress = max((rel_prec - start_prec)/(optim_prec - start_prec), 0)
+            end
+            @info "Computing minimum of σ(λ)" progress = progress
+            false
+        end
+    else
+        optim_progress = nothing
+    end
+
     res = optimize(σ,
                    getinterval(BigFloat, enclosure)...,
-                   rel_tol = BigFloat(tol),
-                   abs_tol = BigFloat(tol),
+                   rel_tol = tol,
+                   abs_tol = tol,
                    store_trace = optim_store_trace,
                    show_trace = optim_show_trace,
-                   extended_trace = optim_extended_trace)
+                   extended_trace = optim_extended_trace,
+                   callback = optim_progress)
+
+    if show_progress
+        optim_progress(:done)
+    end
 
     if !Optim.converged(res)
         @warn "Failed to compute minimum of σ(λ)"
@@ -47,6 +71,7 @@ function mps(domain::AbstractDomain,
                            domain.parent(λ),
                            store_trace = enclose_store_trace,
                            show_trace = enclose_show_trace,
+                           show_progress = show_progress,
                            extended_trace = enclose_extended_trace)
 
     return λ, eigenfunction
@@ -98,7 +123,8 @@ function iteratemps(domain::AbstractDomain,
                     optim_prec_adaptive = false,
                     optim_prec_adaptive_extra = 10,
                     extra_prec = 20,
-                    show_trace = false)
+                    show_trace = false,
+                    show_progress = false)
     # Make sure that at least one method for computing the precision
     # to use for the minimization is specified
     if isnothing(optim_prec_final) && isnothing(optim_prec_step) && !optim_prec_adaptive
@@ -171,7 +197,8 @@ function iteratemps(domain::AbstractDomain,
                     mps(domain, eigenfunction, enclosure, N,
                         num_boundary = num_boundary,
                         num_interior = num_interior,
-                        optim_prec = optim_prec)
+                        optim_prec = optim_prec,
+                        show_progress = show_progress)
                 end
             end
 

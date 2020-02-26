@@ -1,8 +1,6 @@
 function maximize(u::AbstractEigenfunction,
                   λ::arb;
-                  store_trace = false,
-                  show_trace = false,
-                  extended_trace = false)
+                  kwargs...)
     @error "no rigorous implementation of maximize for $(typeof(u)), computing approximate maximum"
     boundary = boundary_points(u.domain, u, 1000)
     maximum(abs(u(b, λ)) for b in boundary)
@@ -13,9 +11,20 @@ function maximize(u::AbstractSphericalEigenfunction,
                   i::Integer;
                   store_trace = false,
                   show_trace = false,
+                  show_progress = false,
                   extended_trace = false)
     N = length(coefficients(u))
     f = t -> u(boundary_parameterization(t, u.domain, i), λ)
+
+    if show_progress
+        enclose_progress(state) = begin
+            sticky = radius(state.maxenclosure)/abs(state.maxenclosure) <= 1e-2 ? :done : true
+            @info "Computing enclosure of maximum" state sticky = sticky
+            false
+        end
+    else
+        enclose_progress = nothing
+    end
 
     M = enclosemaximum(f,
                        u.domain.parent(0),
@@ -27,6 +36,7 @@ function maximize(u::AbstractSphericalEigenfunction,
                        rtol = 1e-2,
                        store_trace = store_trace,
                        show_trace = show_trace,
+                       callback = enclose_progress,
                        extended_trace = extended_trace)
 end
 
@@ -67,6 +77,7 @@ function maximize(u::LShapeEigenfunction,
                   λ::arb;
                   store_trace = false,
                   show_trace = false,
+                  show_progress = false,
                   extended_trace = false)
     N = length(coefficients(u))
     m = u.domain.parent(0)
