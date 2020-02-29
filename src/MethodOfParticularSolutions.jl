@@ -1,4 +1,4 @@
-module MPS
+module MethodOfParticularSolutions
 
 using Nemo
 using ArbToolsNemo

@@ -8,7 +8,7 @@
                    "6.78 +/- 8.61e-3"])
 
     for i in 1:4
-        domain, u, interval = MPS.triangle(6 + i, RR)
+        domain, u, interval = MethodOfParticularSolutions.triangle(6 + i, RR)
 
         indices = filter(i -> numerator(domain.angles[i]) != 1, 1:3)
 

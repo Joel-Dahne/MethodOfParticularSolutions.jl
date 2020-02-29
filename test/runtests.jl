@@ -1,4 +1,4 @@
-using MPS
+using MethodOfParticularSolutions
 using Nemo
 using Test
 
