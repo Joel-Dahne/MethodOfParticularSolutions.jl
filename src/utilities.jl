@@ -14,6 +14,14 @@ function Base.Float64((θ, ϕ)::NamedTuple{(:θ, :ϕ),Tuple{arb,arb}})
     (θ = Float64(θ), ϕ = Float64(ϕ))
 end
 
+function LinearAlgebra.dot(xyz1::SVector{3, arb}, xyz2::SVector{3, arb})
+    sum(xyz1.*xyz2)
+end
+
+function LinearAlgebra.norm(xyz::SVector{3, arb})
+    sqrt(sum(xyz.^2))
+end
+
 function LinearAlgebra.normalize(xyz::SVector{3, arb})
     r = sqrt(sum(xyz.^2))
     xyz./r

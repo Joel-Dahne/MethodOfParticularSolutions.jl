@@ -106,9 +106,16 @@ end
 function enclose_eigenvalue(domain::AbstractDomain,
                             u::AbstractEigenfunction,
                             λ::arb;
+                            norm_rigorous = true,
                             kwargs...)
     @timeit_debug "maximize" m = maximize(u, λ; kwargs...)
-    @timeit_debug "norm" n = norm(u, λ)
+    @timeit_debug "norm" begin
+        if norm_rigorous
+            n = norm(u, λ)
+        else
+            n = norm(u, λ, numpoints = 4length(coefficients(u)))
+        end
+    end
     ϵ = sqrt(area(domain))*m/n
 
     enclosure = λ/ball(domain.parent(1), ϵ)

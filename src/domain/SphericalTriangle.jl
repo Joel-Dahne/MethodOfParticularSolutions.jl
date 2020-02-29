@@ -261,3 +261,24 @@ function interior_points(domain::SphericalTriangle,
 
     points
 end
+
+"""
+    anglesfromvertices(a, b, c)
+> Compute the angles for the spherical triangle having the vertices
+  `a`, `b` and `c`.
+"""
+function anglesfromvertices(a, b, c)
+    v = cross(a, b)
+    w = cross(a, c)
+    α = acos(dot(v, w)/LinearAlgebra.norm(v)/LinearAlgebra.norm(w))
+
+    v = cross(b, a)
+    w = cross(b, c)
+    β = acos(dot(v, w)/LinearAlgebra.norm(v)/LinearAlgebra.norm(w))
+
+    v = cross(c, a)
+    w = cross(c, b)
+    γ = acos(dot(v, w)/LinearAlgebra.norm(v)/LinearAlgebra.norm(w))
+
+    (α, β, γ)
+end
