@@ -1,7 +1,7 @@
 module MethodOfParticularSolutions
 
 using Nemo
-using ArbToolsNemo
+using ArbTools
 using Random
 using StaticArrays
 using CoordinateTransformations

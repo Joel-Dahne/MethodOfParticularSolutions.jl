@@ -24,7 +24,7 @@ function mps(domain::AbstractDomain,
     tol = BigFloat(domain.parent(2)^(-(optim_prec - 1)))
 
     if show_progress
-        start_prec = ArbToolsNemo.rel_accuracy_bits(enclosure)
+        start_prec = ArbTools.rel_accuracy_bits(enclosure)
         optim_progress(state) = begin
             if state == :done
                 progress = "done"
@@ -170,7 +170,7 @@ function iteratemps(domain::AbstractDomain,
             # enclosure plus a fixed precision
             if !isnothing(optim_prec_step)
                 optim_prec = min(optim_prec,
-                                 ArbToolsNemo.rel_accuracy_bits(enclosure) + optim_prec_step)
+                                 ArbTools.rel_accuracy_bits(enclosure) + optim_prec_step)
             end
 
             # Compute the precision increase between the last two
@@ -178,8 +178,8 @@ function iteratemps(domain::AbstractDomain,
             if optim_prec_adaptive
                 if i > 3 && isfinite(λs[i - 2]) && isfinite(λs[i - 1])
                     optim_prec = min(optim_prec,
-                                     max(2ArbToolsNemo.rel_accuracy_bits(λs[i - 1])
-                                         - ArbToolsNemo.rel_accuracy_bits(λs[i - 2]),
+                                     max(2ArbTools.rel_accuracy_bits(λs[i - 1])
+                                         - ArbTools.rel_accuracy_bits(λs[i - 2]),
                                          0)
                                      + optim_prec_adaptive_extra)
                 else
@@ -212,7 +212,7 @@ function iteratemps(domain::AbstractDomain,
             end
 
             if show_trace
-                println("$N    $optim_prec    $(prec(domain.parent))    $λ    $(ArbToolsNemo.rel_accuracy_bits(λ))")
+                println("$N    $optim_prec    $(prec(domain.parent))    $λ    $(ArbTools.rel_accuracy_bits(λ))")
             end
         end
     catch e
