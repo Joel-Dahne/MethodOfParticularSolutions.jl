@@ -189,7 +189,8 @@ function iteratemps(domain::AbstractDomain,
             end
 
             ### Compute precision to use in the computations ###
-            new_prec = optim_prec + extra_prec
+            # Always use at least 53 bits of precision
+            new_prec = max(53, optim_prec + extra_prec)
             RR = RealField(new_prec)
             domain = typeof(domain)(domain, RR)
             eigenfunction.domain = typeof(eigenfunction.domain)(eigenfunction.domain, RR)
