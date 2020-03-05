@@ -52,7 +52,7 @@ function boundary_points(domain::LShape,
         points[i] = (r, θ)
     end
 
-    points
+    return points, fill(nothing, n)
 end
 
 function interior_points(domain::LShape,

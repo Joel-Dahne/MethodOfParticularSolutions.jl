@@ -39,9 +39,9 @@ function coordinate_transformation(u::AbstractSphericalEigenfunction,
 end
 
 """
-    u(xyz::AbstractVector{T}, λ::arb, k::Integer; notransform::Bool = false)
-    u(θ::T, ϕ::T, λ::arb, k::Integer; notransform::Bool = false)
-    u((θ::T, ϕ::T), λ::arb, k::Integer; notransform::Bool = false)
+    u(xyz::AbstractVector{T}, λ::arb, k::Integer; boundary = nothing, notransform::Bool = false)
+    u(θ::T, ϕ::T, λ::arb, k::Integer; boundary = nothing, notransform::Bool = false)
+    u((θ::T, ϕ::T), λ::arb, k::Integer; boundary = nothing, notransform::Bool = false)
 > Evaluate the k-th basis function for the eigenfunction
 
   The point can be given in either Cartesian or spherical coordinates.
@@ -51,11 +51,16 @@ end
   the point first, this assumes that they already given in the
   coordinate system used by u.
 
+  If boundary is set to an integer then the point is assumed to come
+  from the corresponding boundary of the domain, some eigenfunctions
+  are then identically equal to zero.
+
   See also: [`coordinate_transform`](@ref)
 """
 function (u::AbstractSphericalEigenfunction)(xyz::AbstractVector{T},
                                              λ::arb,
                                              k::Integer;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
     throw(ErrorException("evaluation of basis function not implemented"
@@ -66,6 +71,7 @@ function (u::AbstractSphericalEigenfunction)(θ::T,
                                              ϕ::T,
                                              λ::arb,
                                              k::Integer;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
     throw(ErrorException("evaluation of basis function not implemented"
@@ -76,15 +82,16 @@ function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{T, T},
                                                            NamedTuple{(:θ, :ϕ),Tuple{T, T}}},
                                              λ::arb,
                                              k::Integer;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
-    u(θ, ϕ, λ, k, notransform = notransform)
+    u(θ, ϕ, λ, k, boundary = boundary, notransform = notransform)
 end
 
 """
-    u(xyz::AbstractVector{T}, λ::arb; notransform::Bool = false)
-    u(θ::T, ϕ::T, λ::arb; notransform::Bool = false)
-    u((θ::T, ϕ::T), λ::arb; notransform::Bool = false)
+    u(xyz::AbstractVector{T}, λ::arb; boundary = nothing, notransform::Bool = false)
+    u(θ::T, ϕ::T, λ::arb; boundary = nothing, notransform::Bool = false)
+    u((θ::T, ϕ::T), λ::arb; boundary = nothing, notransform::Bool = false)
 > Evaluate the eigenfunction.
 
   The point can be given in either Cartesian or spherical coordinates.
@@ -94,10 +101,15 @@ end
   the point first, this assumes that they already given in the
   coordinate system used by u.
 
+  If boundary is set to an integer then the point is assumed to come
+  from the corresponding boundary of the domain, some eigenfunctions
+  are then identically equal to zero.
+
   See also: [`coordinate_transform`](@ref)
 """
 function (u::AbstractSphericalEigenfunction)(xyz::AbstractVector{T},
                                              λ::arb;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
     res = u.domain.parent(0)
@@ -107,7 +119,7 @@ function (u::AbstractSphericalEigenfunction)(xyz::AbstractVector{T},
     end
 
     for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(xyz, λ, k, notransform = true)
+        res += u.coefficients[k]*u(xyz, λ, k, boundary = boundary, notransform = true)
     end
 
     res
@@ -116,6 +128,7 @@ end
 function (u::AbstractSphericalEigenfunction)(θ::T,
                                              ϕ::T,
                                              λ::arb;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
     res = u.domain.parent(0)
@@ -125,7 +138,7 @@ function (u::AbstractSphericalEigenfunction)(θ::T,
     end
 
     for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(θ, ϕ, λ, k, notransform = true)
+        res += u.coefficients[k]*u(θ, ϕ, λ, k, boundary = boundary, notransform = true)
     end
 
     res
@@ -134,7 +147,8 @@ end
 function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{T, T},
                                                            NamedTuple{(:θ, :ϕ),Tuple{T, T}}},
                                              λ::arb;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
-    u(θ, ϕ, λ, notransform = notransform)
+    u(θ, ϕ, λ, boundary = boundary, notransform = notransform)
 end

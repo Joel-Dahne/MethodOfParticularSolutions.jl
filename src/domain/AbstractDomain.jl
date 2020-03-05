@@ -26,7 +26,8 @@ end
                     u::AbstractEigenfunction,
                     n::Integer)
 > Return n points from boundaries of the domain on which the
-  eigenfunction is not identically zero.
+  eigenfunction is not identically zero, together with information
+  about which boundary they are from.
 """
 function boundary_points(domain::AbstractDomain,
                          u::AbstractEigenfunction,

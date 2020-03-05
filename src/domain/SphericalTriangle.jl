@@ -182,7 +182,7 @@ function boundary_points(domain::SphericalTriangle,
         points[j] = normalize(v .+ t.*(w - v))
     end
 
-    points
+    return points, fill(i, n)
 end
 
 """
@@ -199,9 +199,11 @@ end
 function boundary_points(domain::SphericalTriangle,
                          eigenfunction::AbstractSphericalEigenfunction,
                          n::Integer)
-    [boundary_points(domain, 1, div(n, 3) + ifelse(n % 3 >= 1, 1, 0));
-     boundary_points(domain, 2, div(n, 3) + ifelse(n % 3 >= 2, 1, 0));
-     boundary_points(domain, 3, div(n, 3))]
+    b1, bi1 = boundary_points(domain, 1, div(n, 3) + ifelse(n % 3 >= 1, 1, 0))
+    b2, bi2 = boundary_points(domain, 2, div(n, 3) + ifelse(n % 3 >= 2, 1, 0))
+    b3, bi3 = boundary_points(domain, 3, div(n, 3))
+
+    return [b1; b2; b3], [bi1; bi2; bi3]
 end
 
 """

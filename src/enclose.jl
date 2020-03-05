@@ -14,7 +14,7 @@ function maximize(u::AbstractSphericalEigenfunction,
                   show_progress = false,
                   extended_trace = false)
     N = length(coefficients(u))
-    f = t -> u(boundary_parameterization(t, u.domain, i), λ)
+    f = t -> u(boundary_parameterization(t, u.domain, i), λ, boundary = i)
 
     if show_progress
         enclose_progress(state) = begin

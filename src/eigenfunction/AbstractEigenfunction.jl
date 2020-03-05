@@ -25,6 +25,7 @@ end
 function (u::AbstractEigenfunction)(point,
                                     λ::arb,
                                     k::Integer;
+                                    boundary = nothing,
                                     notransform::Bool = false)
     throw(ErrorException("evaluation not implemented for eigenfunction of type $(typeof(u))"))
 end

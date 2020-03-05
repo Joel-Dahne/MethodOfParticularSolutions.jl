@@ -77,8 +77,16 @@ end
 function (u::SphericalVertexEigenfunction)(xyz::AbstractVector{T},
                                            λ::arb,
                                            k::Integer;
+                                           boundary = nothing,
                                            notransform::Bool = false
                                            ) where {T <: Union{arb, arb_series}}
+    if !isnothing(boundary) && boundary != u.vertex
+        if T == arb
+            return u.domain.parent(0)
+        else
+            return 0*θ
+        end
+    end
     k = 1 + (k - 1)*u.stride
 
     ν::arb = -0.5 + sqrt(0.25 + λ)
@@ -96,8 +104,16 @@ function (u::SphericalVertexEigenfunction)(θ::T,
                                            ϕ::T,
                                            λ::arb,
                                            k::Integer;
+                                           boundary = nothing,
                                            notransform::Bool = false
                                            ) where {T <: Union{arb, arb_series}}
+    if !isnothing(boundary) && boundary != u.vertex
+        if T == arb
+            return u.domain.parent(0)
+        else
+            return 0*θ
+        end
+    end
     k = 1 + (k - 1)*u.stride
 
     ν::arb = -0.5 + sqrt(0.25 + λ)

@@ -48,6 +48,7 @@ end
 function (u::SphericalInteriorEigenfunction)(xyz::AbstractVector{T},
                                              λ::arb,
                                              k::Integer;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
     k = 1 + (k - 1)*u.stride
@@ -74,6 +75,7 @@ function (u::SphericalInteriorEigenfunction)(θ::T,
                                              ϕ::T,
                                              λ::arb,
                                              k::Integer;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
     k = 1 + (k - 1)*u.stride

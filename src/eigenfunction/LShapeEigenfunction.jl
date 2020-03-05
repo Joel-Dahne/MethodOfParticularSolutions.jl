@@ -14,7 +14,8 @@ end
 function (u::LShapeEigenfunction)(r::T,
                                   θ::T,
                                   λ::arb,
-                                  k::Integer
+                                  k::Integer;
+                                  boundary = nothing
                                   ) where {T <: Union{arb, arb_series}}
     k = 1 + (k - 1)*u.stride
 
@@ -25,28 +26,31 @@ end
 
 function (u::LShapeEigenfunction)((r, θ)::Tuple{T, T},
                                   λ::arb,
-                                  k::Integer
+                                  k::Integer;
+                                  boundary = nothing
                                   ) where {T <: Union{arb, arb_series}}
-    u(r, θ, λ, k)
+    u(r, θ, λ, k, boundary = boundary)
 end
 
 function (u::LShapeEigenfunction)(r::T,
                                   θ::T,
-                                  λ::arb,
+                                  λ::arb;
+                                  boundary = nothing
                                   ) where {T <: Union{arb, arb_series}}
     res = u.domain.parent(0)
 
     for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(r, θ, λ, k)
+        res += u.coefficients[k]*u(r, θ, λ, k, boundary = boundary)
     end
 
     res
 end
 
 function (u::LShapeEigenfunction)((r, θ)::Tuple{T, T},
-                                  λ::arb,
+                                  λ::arb;
+                                  boundary = nothing
                                   ) where {T <: Union{arb, arb_series}}
-    u(r, θ, λ)
+    u(r, θ, λ, boundary = boundary)
 end
 
 function norm(u::LShapeEigenfunction,

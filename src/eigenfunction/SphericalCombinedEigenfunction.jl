@@ -94,30 +94,33 @@ end
 function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
                                              λ::arb,
                                              k::Integer;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              )  where {T <: Union{arb, arb_series}}
     i, j = basis_function(u, k)
-    u.us[i](xyz, λ, j, notransform = notransform)
+    u.us[i](xyz, λ, j, boundary = boundary, notransform = notransform)
 end
 
 function (u::SphericalCombinedEigenfunction)(θ::T,
                                              ϕ::T,
                                              λ::arb,
                                              k::Integer;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
     i, j = basis_function(u, k)
-    u.us[i](θ, ϕ, λ, j, notransform = notransform)
+    u.us[i](θ, ϕ, λ, j, boundary = boundary, notransform = notransform)
 end
 
 function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
                                              λ::arb;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
     res = u.domain.parent(0)
 
     for v in u.us
-        res += v(xyz, λ, notransform = notransform)
+        res += v(xyz, λ, boundary = boundary, notransform = notransform)
     end
 
     res
@@ -126,12 +129,13 @@ end
 function (u::SphericalCombinedEigenfunction)(θ::T,
                                              ϕ::T,
                                              λ::arb;
+                                             boundary = nothing,
                                              notransform::Bool = false
                                              ) where {T <: Union{arb, arb_series}}
     res = u.domain.parent(0)
 
     for v in u.us
-        res += v(θ, ϕ, λ, notransform = notransform)
+        res += v(θ, ϕ, λ, boundary = boundary, notransform = notransform)
     end
 
     res
@@ -209,9 +213,9 @@ end
 function norm(u::SphericalCombinedEigenfunction,
               λ::arb)
     n = 1
-    a = normalize(boundary_points(u.domain, 2, n)[end] + boundary_points(u.domain, 3, n)[1])
-    b = normalize(boundary_points(u.domain, 3, n)[end] + boundary_points(u.domain, 1, n)[1])
-    c = normalize(boundary_points(u.domain, 1, n)[end] + boundary_points(u.domain, 2, n)[1])
+    a = normalize(boundary_points(u.domain, 2, n)[1][end] + boundary_points(u.domain, 3, n)[1][1])
+    b = normalize(boundary_points(u.domain, 3, n)[1][end] + boundary_points(u.domain, 1, n)[1][1])
+    c = normalize(boundary_points(u.domain, 1, n)[1][end] + boundary_points(u.domain, 2, n)[1][1])
 
     res = norm(u, λ, (a, b, c), 2)
 
