@@ -11,6 +11,10 @@ function Base.show(io::IO, u::LShapeEigenfunction)
     end
 end
 
+function active_boundaries(u::LShapeEigenfunction)
+    (true, true, true, true)
+end
+
 function (u::LShapeEigenfunction)(r::T,
                                   θ::T,
                                   λ::arb,

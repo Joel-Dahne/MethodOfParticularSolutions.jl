@@ -6,15 +6,15 @@ function maximize(u::AbstractEigenfunction,
     maximum(abs(u(b, λ)) for b in boundary)
 end
 
-function maximize(u::AbstractSphericalEigenfunction,
+function maximize(u::AbstractEigenfunction,
                   λ::arb,
-                  i::Integer;
+                  n::Integer;
                   store_trace = false,
                   show_trace = false,
                   show_progress = false,
                   extended_trace = false)
     N = length(coefficients(u))
-    f = t -> u(boundary_parameterization(t, u.domain, i), λ, boundary = i)
+    f = t -> u(boundary_parameterization(t, u.domain, n), λ, boundary = n)
 
     if show_progress
         enclose_progress(state) = begin
@@ -40,64 +40,17 @@ function maximize(u::AbstractSphericalEigenfunction,
                        extended_trace = extended_trace)
 end
 
-function maximize(u::AbstractSphericalEigenfunction,
+function maximize(u::AbstractEigenfunction,
                   λ::arb;
                   kwargs...)
-    active = active_boundaries(u)
-
+    boundaries = active_boundaries(u)
     m = u.domain.parent(0)
 
-    for vertex in 1:3
-        if active[vertex]
-            m = max(m, maximize(u, λ, vertex; kwargs...))
+    for boundary in findall(boundaries)
+        m = max(m, maximize(u, λ, boundary; kwargs...))
+        if !isfinite(m)
+            return m
         end
-    end
-
-    m
-end
-
-function maximize(u::SphericalCombinedEigenfunction,
-                  λ::arb;
-                  kwargs...)
-    active = active_boundaries(u)
-
-    m = u.domain.parent(0)
-
-    for vertex in 1:3
-        if active[vertex]
-            v = active_eigenfunctions(u, vertex)
-            m = max(m, maximize(v, λ, vertex; kwargs...))
-        end
-    end
-
-    m
-end
-
-function maximize(u::LShapeEigenfunction,
-                  λ::arb;
-                  store_trace = false,
-                  show_trace = false,
-                  show_progress = false,
-                  extended_trace = false)
-    N = length(coefficients(u))
-    m = u.domain.parent(0)
-
-    for i in 1:4
-        f = t -> u(boundary_parameterization(t, u.domain, i), λ)
-
-        m = max(m,
-                enclosemaximum(f,
-                               u.domain.parent(0),
-                               u.domain.parent(1),
-                               absmax = true,
-                               evaltype = :taylor,
-                               n = N,
-                               atol = 0,
-                               rtol = 1e-2,
-                               store_trace = store_trace,
-                               show_trace = show_trace,
-                               extended_trace = extended_trace)
-                )
     end
 
     m
