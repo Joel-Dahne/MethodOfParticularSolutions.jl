@@ -17,6 +17,16 @@ function set_eigenfunction!(u::AbstractEigenfunction,
 end
 
 """
+    active_boundaries(u::AbstractEigenfunction)
+> Return the boundaries which are active for the current
+  eigenfunction. The eigenfunction is guaranteed to be identically
+  equal to zero on the inactive boundaries.
+"""
+function active_boundaries(u::AbstractEigenfunction)
+    throw(ErrorException("active_boundaries not implemented for eigenfunction of type $(typeof(u))"))
+end
+
+"""
     u(point, λ::arb, k::Integer; notransform::Bool = false)
 > Evaluate the k-th basis function for the eigenfunction at the point.
 

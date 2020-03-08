@@ -23,6 +23,20 @@ end
 
 """
     boundary_points(domain::AbstractDomain,
+                    i::Integer,
+                    n::Integer)
+> Return n points from boundary number `i`, together with information
+  about which boundary they are from. The enumeration of the boundary
+  depends on the type of domain used.
+"""
+function boundary_points(domain::AbstractDomain,
+                         i::Integer,
+                         n::Integer)
+    throw(ErrorException("boundary_points not implemented for domain of type $(typeof(domain))"))
+end
+
+"""
+    boundary_points(domain::AbstractDomain,
                     u::AbstractEigenfunction,
                     n::Integer)
 > Return n points from boundaries of the domain on which the
@@ -32,7 +46,16 @@ end
 function boundary_points(domain::AbstractDomain,
                          u::AbstractEigenfunction,
                          n::Integer)
-    throw(ErrorException("boundary_points not implemented for domain of type $(typeof(domain))"))
+    boundaries = active_boundaries(u)
+    active = findall(boundaries)
+    m = length(active)
+    bs = Vector(undef, m)
+    bis = Vector(undef, m)
+    for i in 1:m
+        bs[i], bis[i] = boundary_points(domain, active[i],
+                                        div(n, m) + ifelse(n % m >= i, 1, 0))
+    end
+    return vcat(bs...), vcat(bis...)
 end
 
 """

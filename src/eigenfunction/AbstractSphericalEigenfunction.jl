@@ -1,9 +1,3 @@
-"""
-    active_boundaries(u::AbstractSphericalEigenfunction)
-> Return the boundaries which are active for the current
-  eigenfunction. The eigenfunction is guaranteed to be identically
-  equal to zero on the inactive boundaries.
-"""
 function active_boundaries(u::AbstractSphericalEigenfunction)
     (true, true, true)
 end

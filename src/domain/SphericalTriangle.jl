@@ -187,27 +187,6 @@ end
 
 """
     boundary_points(domain::SphericalTriangle,
-                    eigenfunction::AbstractSphericalEigenfunction,
-                    n::Integer)
-> Return n/3 points on each boundary of the spherical triangle.
-
-  They are returned in order, so first n/3 points from the first
-  boundary, then n/3 from the second and finally n/3 from the third.
-  In case n is not divisible by 3 then it takes one extra point from
-  the first and possibly the second boundary.
-"""
-function boundary_points(domain::SphericalTriangle,
-                         eigenfunction::AbstractSphericalEigenfunction,
-                         n::Integer)
-    b1, bi1 = boundary_points(domain, 1, div(n, 3) + ifelse(n % 3 >= 1, 1, 0))
-    b2, bi2 = boundary_points(domain, 2, div(n, 3) + ifelse(n % 3 >= 2, 1, 0))
-    b3, bi3 = boundary_points(domain, 3, div(n, 3))
-
-    return [b1; b2; b3], [bi1; bi2; bi3]
-end
-
-"""
-    boundary_points(domain::SphericalTriangle,
                     eigenfunction::SphericalVertexEigenfunction,
                     n::Integer)
 > Return n points on the boundary opposite of the vertex used for the
