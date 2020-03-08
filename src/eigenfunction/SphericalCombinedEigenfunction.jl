@@ -121,6 +121,9 @@ function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
 
     for v in u.us
         res += v(xyz, λ, boundary = boundary, notransform = notransform)
+        if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
+            return res
+        end
     end
 
     res
@@ -136,6 +139,9 @@ function (u::SphericalCombinedEigenfunction)(θ::T,
 
     for v in u.us
         res += v(θ, ϕ, λ, boundary = boundary, notransform = notransform)
+        if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
+            return res
+        end
     end
 
     res

@@ -45,6 +45,9 @@ function (u::LShapeEigenfunction)(r::T,
 
     for k in 1:length(u.coefficients)
         res += u.coefficients[k]*u(r, θ, λ, k, boundary = boundary)
+        if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
+            return res
+        end
     end
 
     res

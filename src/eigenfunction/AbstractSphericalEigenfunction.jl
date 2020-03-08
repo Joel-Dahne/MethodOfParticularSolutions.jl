@@ -114,6 +114,9 @@ function (u::AbstractSphericalEigenfunction)(xyz::AbstractVector{T},
 
     for k in 1:length(u.coefficients)
         res += u.coefficients[k]*u(xyz, λ, k, boundary = boundary, notransform = true)
+        if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
+            return res
+        end
     end
 
     res
@@ -133,6 +136,9 @@ function (u::AbstractSphericalEigenfunction)(θ::T,
 
     for k in 1:length(u.coefficients)
         res += u.coefficients[k]*u(θ, ϕ, λ, k, boundary = boundary, notransform = true)
+        if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
+            return res
+        end
     end
 
     res
