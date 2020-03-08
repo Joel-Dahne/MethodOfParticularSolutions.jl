@@ -84,7 +84,7 @@ function (u::SphericalVertexEigenfunction)(xyz::AbstractVector{T},
         if T == arb
             return u.domain.parent(0)
         else
-            return 0*θ
+            return 0*xyz[1]
         end
     end
     k = 1 + (k - 1)*u.stride
