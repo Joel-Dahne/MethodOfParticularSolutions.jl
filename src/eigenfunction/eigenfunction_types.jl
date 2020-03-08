@@ -25,6 +25,11 @@ mutable struct SphericalCombinedEigenfunction{T <: Union{fmpq, arb}} <: Abstract
     orders::Vector{Int}
 end
 
+mutable struct KrewerasEigenfunction{T <: Union{fmpq, arb}} <: AbstractSphericalEigenfunction
+    domain::SphericalTriangle{T}
+    coefficients::Vector{arb}
+end
+
 mutable struct LShapeEigenfunction <: AbstractPlanarEigenfunction
     domain::LShape
     stride::Int

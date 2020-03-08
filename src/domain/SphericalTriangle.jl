@@ -199,6 +199,18 @@ function boundary_points(domain::SphericalTriangle,
                     half = eigenfunction.stride == 2)
 end
 
+"""
+    boundary_points(domain::SphericalTriangle,
+                    eigenfunction::KrewerasEigenfunction,
+                    n::Integer)
+> Return n points from half of boundary one.
+"""
+function boundary_points(domain::SphericalTriangle,
+                         eigenfunction::KrewerasEigenfunction,
+                         n::Integer)
+    boundary_points(domain, 1, n, half = true)
+end
+
 function interior_points(domain::SphericalTriangle,
                          n::Integer;
                          rng = MersenneTwister(42))
