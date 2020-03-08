@@ -1,7 +1,7 @@
 using MethodOfParticularSolutions
 using Nemo
 using Test
+using Printf
 
-include("regulartriangles.jl")
-include("singulartriangles.jl")
+include("sphericaltriangle.jl")
 include("lshape.jl")
