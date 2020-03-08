@@ -227,5 +227,5 @@ function norm(u::AbstractSphericalEigenfunction,
 
     res = norm2(u, λ, (a, b, c), recursion)
 
-    res
+    sqrt(res)
 end
