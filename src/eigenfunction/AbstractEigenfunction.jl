@@ -42,7 +42,7 @@ end
 
 function norm(u::AbstractEigenfunction,
               λ::arb;
-              numpoints = 1000)
+              numpoints::Int = 1000)
     @error "using a non-rigorous implementation of norm for $(typeof(u))"
     interior = interior_points(u.domain, numpoints)
     sqrt(area(u.domain)*sum(abs(u(i, λ))^2 for i in interior)/length(interior))
