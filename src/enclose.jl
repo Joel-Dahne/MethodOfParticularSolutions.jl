@@ -1,18 +1,8 @@
 function maximize(u::AbstractEigenfunction,
-                  λ::arb;
-                  kwargs...)
-    @error "no rigorous implementation of maximize for $(typeof(u)), computing approximate maximum"
-    boundary = boundary_points(u.domain, u, 1000)
-    maximum(abs(u(b, λ)) for b in boundary)
-end
-
-function maximize(u::AbstractEigenfunction,
                   λ::arb,
                   n::Integer;
                   store_trace = false,
-                  show_trace = false,
-                  show_progress = false,
-                  extended_trace = false)
+                  show_progress = false)
     N = length(coefficients(u))
     f = t -> u(boundary_parameterization(t, u.domain, n), λ, boundary = n)
 
@@ -26,42 +16,60 @@ function maximize(u::AbstractEigenfunction,
         enclose_progress = nothing
     end
 
-    M = enclosemaximum(f,
-                       u.domain.parent(0),
-                       u.domain.parent(1),
-                       absmax = true,
-                       evaltype = :taylor,
-                       n = N,
-                       atol = 0,
-                       rtol = 1e-2,
-                       store_trace = store_trace,
-                       show_trace = show_trace,
-                       callback = enclose_progress,
-                       extended_trace = extended_trace)
+    enclosemaximum(f,
+                   u.domain.parent(0),
+                   u.domain.parent(1),
+                   absmax = true,
+                   evaltype = :taylor,
+                   n = N,
+                   atol = 0,
+                   rtol = 1e-2,
+                   store_trace = store_trace,
+                   callback = enclose_progress)
 end
 
 function maximize(u::AbstractEigenfunction,
                   λ::arb;
-                  kwargs...)
+                  store_trace = false,
+                  show_progress = false)
     boundaries = active_boundaries(u)
     m = u.domain.parent(0)
 
+    traces = Dict()
     for boundary in findall(boundaries)
-        m = max(m, maximize(u, λ, boundary; kwargs...))
+        m2 = maximize(u, λ, boundary,
+                      store_trace = store_trace,
+                      show_progress = show_progress)
+        if store_trace
+            m2, trace = m2
+            traces[boundary] = trace
+        end
+        m = max(m, m2)
         if !isfinite(m)
             return m
         end
     end
 
-    m
+    if store_trace
+        return m, traces
+    else
+        return m
+    end
 end
 
 function enclose_eigenvalue(domain::AbstractDomain,
                             u::AbstractEigenfunction,
                             λ::arb;
                             norm_rigorous = true,
-                            kwargs...)
-    @timeit_debug "maximize" m = maximize(u, λ; kwargs...)
+                            store_trace = false,
+                            extended_trace = false,
+                            show_progress = false)
+    @timeit_debug "maximize" m = maximize(u, λ,
+                                          store_trace = extended_trace,
+                                          show_progress = show_progress)
+    if extended_trace
+        m, maximize_trace = m
+    end
     @timeit_debug "norm" begin
         if norm_rigorous
             n = norm(u, λ)
@@ -72,4 +80,12 @@ function enclose_eigenvalue(domain::AbstractDomain,
     ϵ = sqrt(area(domain))*m/n
 
     enclosure = λ/ball(domain.parent(1), ϵ)
+
+    if extended_trace
+        return enclosure, n, m, maximize_trace
+    elseif store_trace
+        return enclosure, n, m
+    else
+       return enclosure
+    end
 end

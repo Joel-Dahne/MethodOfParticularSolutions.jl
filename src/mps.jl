@@ -7,15 +7,10 @@ function mps(domain::AbstractDomain,
              optim_prec::Int = prec(domain.parent),
              norm_rigorous = true,
              store_trace = false,
-             show_trace = false,
-             show_progress = false,
              extended_trace = false,
-             optim_store_trace = false,
+             show_progress = false,
              optim_show_trace = false,
-             optim_extended_trace = false,
-             enclose_store_trace = false,
-             enclose_show_trace = false,
-             enclose_extended_trace = false)
+             maximize_show_trace = false)
     # Compute minimum of σ(λ)
     σ = λ -> sigma(λ, domain, eigenfunction, N,
                    num_boundary = num_boundary,
@@ -26,6 +21,9 @@ function mps(domain::AbstractDomain,
     if show_progress
         start_prec = ArbTools.rel_accuracy_bits(enclosure)
         optim_progress(state) = begin
+            if typeof(state) <: Array
+                state = state[end]
+            end
             if state == :done
                 progress = "done"
             else
@@ -44,9 +42,8 @@ function mps(domain::AbstractDomain,
                    getinterval(BigFloat, enclosure)...,
                    rel_tol = tol,
                    abs_tol = tol,
-                   store_trace = optim_store_trace,
+                   store_trace = extended_trace,
                    show_trace = optim_show_trace,
-                   extended_trace = optim_extended_trace,
                    callback = optim_progress)
 
     if show_progress
@@ -71,12 +68,25 @@ function mps(domain::AbstractDomain,
                            eigenfunction,
                            domain.parent(λ),
                            norm_rigorous = norm_rigorous,
-                           store_trace = enclose_store_trace,
-                           show_trace = enclose_show_trace,
-                           show_progress = show_progress,
-                           extended_trace = enclose_extended_trace)
+                           store_trace = store_trace,
+                           extended_trace = extended_trace,
+                           show_progress = show_progress)
 
-    return λ, eigenfunction
+    if store_trace
+        metadata = Dict()
+        if extended_trace
+            λ, n, m, maximize_trace = λ
+            metadata["optim_res"] = res
+            metadata["maximize_trace"] = maximize_trace
+        else
+            λ, n, m = λ
+        end
+        state = MPSState(N, prec(domain.parent), optim_prec,
+                         n, m, λ, metadata)
+        return λ, state
+    else
+        return λ
+    end
 end
 
 """
@@ -126,7 +136,9 @@ function iteratemps(domain::AbstractDomain,
                     optim_prec_adaptive_extra = 10,
                     extra_prec = 20,
                     norm_rigorous = true,
+                    store_trace = false,
                     show_trace = false,
+                    extended_trace = false,
                     show_progress = false)
     # Make sure that at least one method for computing the precision
     # to use for the minimization is specified
@@ -140,8 +152,11 @@ function iteratemps(domain::AbstractDomain,
 
     λs = Vector{arb}(undef, length(Ns))
 
+    trace = MPSTrace()
+    tracing = store_trace || show_trace || extended_trace
+
     if show_trace
-        println("N    optim_prec    prec    λ    accuracy")
+        show(trace)
     end
 
     try
@@ -197,32 +212,37 @@ function iteratemps(domain::AbstractDomain,
 
             ### Run the computations ###
             @timeit_debug "$N" begin
-                λ, _ = setprecision(BigFloat, new_prec) do
+                λ = setprecision(BigFloat, new_prec) do
                     mps(domain, eigenfunction, enclosure, N,
                         num_boundary = num_boundary,
                         num_interior = num_interior,
                         optim_prec = optim_prec,
                         norm_rigorous = norm_rigorous,
+                        store_trace = tracing,
+                        extended_trace = extended_trace,
                         show_progress = show_progress)
                 end
+            end
+
+            if tracing
+                λ, state = λ
+                update!(trace, state, store_trace, show_trace)
             end
 
             λs[i] = λ
             if isfinite(λ)
                 enclosure = setintersection(enclosure, λ)
             end
-
-            if show_trace
-                println("$N    $optim_prec    $(prec(domain.parent))    $λ    $(ArbTools.rel_accuracy_bits(λ))")
-            end
         end
     catch e
-        if e isa InterruptException
-            return λs
-        else
+        if !(e isa InterruptException)
             rethrow(e)
         end
     end
 
-    return λs
+    if store_trace
+        return λs, trace
+    else
+        return λs
+    end
 end

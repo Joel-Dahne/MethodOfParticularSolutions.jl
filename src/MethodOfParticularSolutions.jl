@@ -10,6 +10,7 @@ using GenericSVD
 using Optim
 
 using TimerOutputs
+using Printf
 
 export AbstractDomain,
     area, boundary_parameterization, boundary_points, interior_points,
@@ -66,6 +67,7 @@ include("sigma.jl")
 include("enclose.jl")
 include("mps.jl")
 include("index.jl")
+include("trace.jl")
 
 include("examples/triangles.jl")
 include("examples/denominators.jl")
