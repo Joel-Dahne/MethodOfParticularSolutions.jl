@@ -14,16 +14,17 @@
                    "[6.7771080545983009573857 +/- 5.76e-23]",
                    ])
 
-    goalradius = [2e-5, 4e-9, 5e-4, 3e-21, 2e-7, 4e-14, 1e-1, 2e-1, 8e-2, 7e-3]
+    goalradius = [2e-5, 4e-9, 5e-4, 3e-21, 2e-7, 4e-14, 1.2e-1, 2e-1, 2e-1, 8e-4]
 
     for i in 1:10
         domain, u, interval = MethodOfParticularSolutions.triangle(i)
-        println("Computing eigenvalue for the $domain")
+        println("$i: Computing eigenvalue for the $domain")
 
         optim_prec_final = ifelse(i != 4, 60, 100)
         λs = iteratemps(domain, u, interval, Ns,
                         optim_prec_final = optim_prec_final,
-                        optim_prec_linear = true)
+                        optim_prec_linear = true,
+                        show_trace = true)
         rad = Float64(radius(λs[end]))
 
         @test overlaps(results[i], λs[end])

@@ -275,3 +275,46 @@ function anglesfromvertices(a, b, c)
 
     (α, β, γ)
 end
+
+"""
+    subtriangle(domain::SphericalTriangle, ratio = 0.5)
+> Return vertices for a spherical triangle in the interior of the
+  domain. The size of the triangle is determined by `ratio`.
+"""
+function subtriangle(domain::SphericalTriangle; ratio = 0.5)
+    v = center(domain)
+
+    a = normalize((1 - ratio)*v + ratio*vertex(domain, 1))
+    b = normalize((1 - ratio)*v + ratio*vertex(domain, 2))
+    c = normalize((1 - ratio)*v + ratio*vertex(domain, 3))
+
+    return (a, b, c)
+end
+
+"""
+    partitiontriangle(a, b, c; iterations::Int = 1)
+> Given the vertices of a spherical triangle return vertices for the
+  four spherical triangle obtained by partitioning the original
+  triangle into smaller ones.
+
+  If `iterations` is not equal to 1 then recursively do this the give
+  number of times, in case `iterations = 0` then return the original
+  triangle.
+"""
+function partitiontriangle(a, b, c; iterations::Int = 1)
+    if iterations < 1
+        return [(a, b, c)]
+    end
+    x = normalize(a + b)
+    y = normalize(b + c)
+    z = normalize(c + a)
+
+    triangles = [(a, x, z), (x, b, y), (z, y, c), (x, y, z)]
+    if iterations == 1
+        return triangles
+    else
+        return collect(Iterators.flatten([partitiontriangle(i, j, k,
+                                                            iterations = iterations - 1)
+                                          for (i, j, k) in triangles]))
+    end
+end

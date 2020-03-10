@@ -186,7 +186,7 @@ function norm2(u::AbstractSphericalEigenfunction,
                             u.domain.parent(1),
                             evaltype = :taylor,
                             n = div(length(coefficients(u)), 4),
-                            atol = 0,
+                            atol = 1e-10,
                             rtol = 1e-3,
                             maxevals = 1000)
 
@@ -205,33 +205,12 @@ function norm2(u::AbstractSphericalEigenfunction,
     end
 end
 
-function norm2(u::AbstractSphericalEigenfunction,
-              λ::arb,
-              (a, b, c),
-              recursions::Int)
-    if recursions == 0
-        res = norm2(u, λ, (a, b, c))
-        return res
-    end
-
-    x = normalize(a + b)
-    y = normalize(b + c)
-    z = normalize(c + a)
-
-    sum(norm2(u, λ, vs, recursions - 1) for vs in [(a, x, z), (x, b, y),
-                                                   (x, y, z), (z, y, c)])
-end
-
 function norm(u::AbstractSphericalEigenfunction,
               λ::arb)
-    n = 1
-    recursions = 1
+    a, b, c = subtriangle(u.domain, ratio = 0.5)
+    triangles = partitiontriangle(a, b, c, iterations = 1)
 
-    a = normalize(boundary_points(u.domain, 2, n)[1][end] + boundary_points(u.domain, 3, n)[1][1])
-    b = normalize(boundary_points(u.domain, 3, n)[1][end] + boundary_points(u.domain, 1, n)[1][1])
-    c = normalize(boundary_points(u.domain, 1, n)[1][end] + boundary_points(u.domain, 2, n)[1][1])
-
-    res = norm2(u, λ, (a, b, c), recursions)
+    res = sum(norm2(u, λ, triangle) for triangle in triangles)
 
     sqrt(res)
 end
