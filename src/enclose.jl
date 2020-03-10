@@ -25,6 +25,7 @@ function maximize(u::AbstractEigenfunction,
                    atol = 0,
                    rtol = 1e-2,
                    store_trace = store_trace,
+                   extended_trace = store_trace,
                    callback = enclose_progress)
 end
 
