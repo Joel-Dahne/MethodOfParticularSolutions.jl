@@ -22,9 +22,9 @@ end
 
 function Base.show(io::IO, tr::MPSTrace)
     @printf io "   N    Prec     Opt prec    Enc prec    "
-    @printf io "   Norm                     Maximum    Enclosure\n"
+    @printf io "   Norm                       Maximum    Enclosure\n"
     @printf io "----    ----     --------    --------    "
-    @printf io "-------    ------------------------    ---------\n"
+    @printf io "-------    --------------------------    ---------\n"
     for st in tr.states
         show(io, st)
     end
