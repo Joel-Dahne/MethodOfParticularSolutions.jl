@@ -29,7 +29,7 @@ function mps(domain::AbstractDomain,
             else
                 abs_error = state.metadata["x_upper"] - state.metadata["x_lower"]
                 rel_prec = -log2(abs_error/state.metadata["minimizer"])
-                progress = max((rel_prec - start_prec)/(optim_prec - start_prec), 0)
+                progress = Float64(max((rel_prec - start_prec)/(optim_prec - start_prec), 0))
             end
             @info "Computing minimum of σ(λ)" progress = progress
             false
