@@ -16,7 +16,7 @@ MPSTrace() = MPSTrace(MPSState[])
 
 function Base.show(io::IO, st::MPSState)
     @printf io "%4d    %4d    %9d    %8d    " st.N st.precision st.optim_prec ArbTools.rel_accuracy_bits(st.enclosure)
-    @printf io "%.5f    %24s    %s\n" Float64(st.norm) ArbTools.format_arb(st.maximum, 5) string(st.enclosure)
+    @printf io "%.5f    %26s    %s\n" Float64(st.norm) ArbTools.format_arb(st.maximum, 5) string(st.enclosure)
     return
 end
 
