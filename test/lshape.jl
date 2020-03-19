@@ -13,12 +13,13 @@
     println("Computing eigenvalue for the $domain")
     λs = iteratemps(domain, u, interval, Ns,
                     optim_prec_final = optim_prec_final,
-                    optim_prec_linear = true)
+                    optim_prec_linear = true,
+                    show_trace = true)
     rad = Float64(radius(λs[end]))
 
     @test overlaps(result, λs[end])
     @test rad < goalradius
-    println("λ ∈ $(λs[end])")
+
     if rad < goalradius
         @printf "radius = %e < %e\n" rad goalradius
     else

@@ -29,7 +29,7 @@
 
         @test overlaps(results[i], λs[end])
         @test rad < goalradius[i]
-        println("λ ∈ $(λs[end])")
+
         if rad < goalradius[i]
             @printf "radius = %e < %e\n" rad goalradius[i]
         else
