@@ -4,6 +4,12 @@ This is a package for computing eigenvalues and eigenfunctions of the
 Laplacian on planar or spherical domains using the method of
 particular solutions in Julia.
 
+It's the implementation of the method described in the article
+[Computation of Tight Enclosures for Laplacian
+Eigenvalues](https://arxiv.org/abs/2003.08095) and version 0.1.0 were
+used to produce the results in it. The article describes the method
+and the mathematical background but does not give any code examples.
+
 ## Installation
 The package is not in the general Julia repositories and does in
 addition depend on
@@ -19,12 +25,99 @@ To see if it works correctly you can run the tests with
 ``` julia
 pkg> test MethodOfParticularSolutions
 ```
+Which should give an output similar to
+```
+1: Computing eigenvalue for the Spherical triangle with angles (3π/4, 1π/3, 1π/2)
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      53           30          10    0.25450        [0.000111 +/- 3.27e-7]    [12.40 +/- 7.39e-3]
+  16      80           60          18    0.19186          [2.1e-7 +/- 3.12e-9]    [12.4001 +/- 6.67e-5]
+radius = 1.827627e-05 < 2.000000e-05
+
+2: Computing eigenvalue for the Spherical triangle with angles (2π/3, 1π/3, 1π/2)
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      53           30          17    0.32456          [8.3e-7 +/- 4.43e-9]    [13.7444 +/- 8.93e-5]
+  16      80           60          31    0.22173       [4.51e-11 +/- 2.37e-14]    [13.74435521 +/- 6.72e-9]
+radius = 3.505609e-09 < 4.000000e-09
+
+3: Computing eigenvalue for the Spherical triangle with angles (2π/3, 1π/4, 1π/2)
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      53           30           7    0.21825         [0.00065 +/- 3.73e-6]    [2.1e+1 +/- 0.499]
+  16      80           60          15    0.11814      [2.4170e-6 +/- 4.76e-11]    [20.572 +/- 5.09e-4]
+radius = 4.815906e-04 < 5.000000e-04
+
+4: Computing eigenvalue for the Spherical triangle with angles (2π/3, 1π/3, 1π/3)
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      70           50          39    0.36021       [4.00e-13 +/- 5.69e-16]    [21.3094076302 +/- 3.38e-11]
+  16     120          100          72    0.19384        [2.5e-23 +/- 4.23e-25]    [21.30940763019044525895 +/- 6.29e-21]
+radius = 2.804714e-21 < 3.000000e-21
+
+5: Computing eigenvalue for the Spherical triangle with angles (3π/4, 1π/4, 1π/3)
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      53           30          13    0.33307        [1.689e-5 +/- 2.84e-9]    [24.46 +/- 4.36e-3]
+  16      80           60          26    0.20911         [1.3e-9 +/- 2.86e-11]    [24.456914 +/- 3.59e-7]
+radius = 1.551502e-07 < 2.000000e-07
+
+6: Computing eigenvalue for the Spherical triangle with angles (2π/3, 1π/4, 1π/4)
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      53           30          27    0.18512        [1.17e-9 +/- 6.57e-12]    [49.109945 +/- 4.78e-7]
+  16      80           60          49    0.13385       [1.14e-16 +/- 6.81e-19]    [49.1099452632846 +/- 4.03e-14]
+radius = 3.026553e-14 < 4.000000e-14
+
+7: Computing eigenvalue for the Spherical triangle with angles (2π/3, 3π/4, 3π/4)
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      53           30           0    0.17597        [0.038244 +/- 2.98e-7]    [+/- 7.30]
+  16      80           60           5    0.13719       [0.0019790 +/- 7.26e-9]    [4e+0 +/- 0.384]
+radius = 1.177990e-01 < 1.200000e-01
+
+8: Computing eigenvalue for the Spherical triangle with angles (2π/3, 2π/3, 2π/3)
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      53           30           2    0.20034        [0.011522 +/- 1.78e-7]    [5e+0 +/- 0.748]
+  16      80           60           4    0.15461       [0.0025643 +/- 4.27e-8]    [5e+0 +/- 0.315]
+radius = 1.517791e-01 < 2.000000e-01
+
+9: Computing eigenvalue for the Spherical triangle with angles (1π/2, 2π/3, 3π/4)
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      53           30    -9223372036854775807    0.11119         [0.10596 +/- 3.00e-6]    nan
+  16      80           60           4    0.07624       [0.0010125 +/- 2.20e-8]    [6e+0 +/- 0.386]
+radius = 1.407946e-01 < 2.000000e-01
+
+10: Computing eigenvalue for the Spherical triangle with angles (1π/2, 2π/3, 2π/3)
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      53           30           1    0.14324        [0.015093 +/- 1.29e-7]    [+/- 8.18]
+  16      80           60          12    0.10970      [7.6107e-6 +/- 1.80e-11]    [6.777 +/- 8.70e-4]
+radius = 7.607602e-04 < 8.000000e-04
+
+Test Summary:       | Pass  Total
+spherical triangles |   20     20
+Computing eigenvalue for the L-shaped domain
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+   8      53           32           3    0.36979          [0.0193 +/- 3.42e-5]    [+/- 10.6]
+  16      84           64           8    0.26842     [0.00036790 +/- 7.70e-10]    [9.6 +/- 0.0628]
+radius = 2.288494e-02 < 3.000000e-02
+Test Summary: | Pass  Total
+L-shape       |    2      2
+   Testing MethodOfParticularSolutions tests passed
+```
 
 ## Example
 We here show an example of using the package for computing the
 fundamental eigenvalue and eigenfunction for the classical example of
-the L-shaped domain. The presentation is very similar to that of
-Betcke and Trefethen in "Reviving the method of particular solutions".
+the L-shaped domain. The presentation follows the same structure as in
+the article mentioned in the beginning which in turn is very similar
+to the presentation by Betcke and Trefethen in "Reviving the method of
+particular solutions". However the focus here is on the code rather
+than the algorithms.
 
 As a first step we load the required packages and set the precision to
 use in the computations, in this case 53 bits.
@@ -115,6 +208,9 @@ plot!(p, Ns, Float64.(radius.(λs)),
 ![Plot of convergence](figures/lshape-convergence.png)
 
 ## References
+
+Dahne, J., & Salvy, B., Computation of tight enclosures for laplacian
+eigenvalues (2020).
 
 Fox, L., P. Henrici, and C. Moler. "Approximations and bounds for
 eigenvalues of elliptic operators." SIAM Journal on Numerical Analysis
