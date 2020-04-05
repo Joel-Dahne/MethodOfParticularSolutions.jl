@@ -167,7 +167,7 @@ are looking for, since the eigenvalue is approximately given by
 ``` julia
 N = 15
 interval = setinterval(RR(9), RR(10))
-(λ, _) = mps(domain, u, interval, N)
+λ = mps(domain, u, interval, N)
 ```
 
 This produces the, rather poor, enclosure `[9.6 +/- 0.0679]` and also
@@ -177,7 +177,7 @@ Using a larger value of `N` we can get a better approximation.
 ``` julia
 N = 32
 interval = setinterval(RR(9), RR(10))
-(λ, _) = mps(domain, u, interval, N)
+λ = mps(domain, u, interval, N)
 ```
 
 This gives us the enclosure `[9.6397 +/- 3.99e-5]` which is slightly
@@ -194,6 +194,7 @@ do) and the rigorous error given by the radius of the enclosing ball.
 Ns = 6:4:60
 λs = iteratemps(domain, u, interval, Ns,
                 optim_prec_final = prec(RR),
+                extra_prec = 0,
                 show_trace = true)
 
 p = plot(Ns[1:end-1], Float64.(abs.(λs[1:end-1] .- λs[end])),
