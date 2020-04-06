@@ -208,6 +208,62 @@ plot!(p, Ns, Float64.(radius.(λs)),
 ```
 ![Plot of convergence](figures/lshape-convergence.png)
 
+### Higher precision
+All of the above computations are done using 53 bits of precision, but
+since Arb supports arbitrary precision arithmetic we can go further.
+We can use `iteratemps` to compute better and better approximations by
+increasing `N` step by step. There are a number of parameters that can
+be tuned for this, some of the most important ones are
+- values of `N` used, in practice start, step and stop value;
+- tolerance used when computing the minimum for each value of `N`;
+- precision used in the computation for each value of `N`.
+
+This is better exemplified using a domain for which the convergence is
+faster than for the L-shaped domain. We take the spherical triangle
+with angles `(2π/3, 1π/3, 1π/3)`, this corresponds to the fourth
+triangle in the arXiv paper and we can get the domain, eigenfunction
+and an interval containing the first eigenvalue with
+
+``` julia
+domain, u, interval = MethodOfParticularSolutions.triangle(4)
+```
+
+For this domain taking `N` in steps of 16 works well. We set the
+tolerance of the minimization by giving a precision to which to
+compute the minimum. In this case we set the precision to be used for
+the final value of `N` to 100 and that it should scale linearly with
+`N`. Finally we set `extra_prec` to 20 which makes it use a precision
+in the computations given by the precision for computing the minimum
+plus 20.
+
+``` julia
+Ns = 16:16:48
+iteratemps(domain, u, interval, Ns,
+           optim_prec_final = 250,
+           optim_prec_linear = true,
+           extra_prec = 20,
+           show_trace = true)
+```
+
+This takes some time to compute but should give output similar to
+
+```
+   N    Prec     Opt prec    Enc prec       Norm                       Maximum    Enclosure
+----    ----     --------    --------    -------    --------------------------    ---------
+  16     104           84          72    0.19384        [2.5e-23 +/- 4.33e-25]    [21.30940763019044525895 +/- 6.29e-21]
+  32     187          167         135    0.13469       [1.60e-42 +/- 2.50e-45]    [21.309407630190445258953481441230517778337 +/- 4.17e-40]
+  48     270          250         197    0.11049       [2.66e-61 +/- 4.61e-64]    [21.309407630190445258953481441230517778336842577146716613113 +/- 1.96e-58]
+3-element Array{arb,1}:
+ [21.30940763019044525895 +/- 6.29e-21]
+ [21.309407630190445258953481441230517778337 +/- 4.17e-40]
+ [21.309407630190445258953481441230517778336842577146716613113 +/- 1.96e-58]
+```
+
+Some more information about the options for `iteratemps` are given in
+the documentation of the function. However this is not necessarily
+complete, the most accurate description you get by reading the actual
+code.
+
 ## References
 
 Dahne, J., & Salvy, B., Computation of tight enclosures for laplacian
