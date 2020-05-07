@@ -79,8 +79,13 @@ function enclose_eigenvalue(domain::AbstractDomain,
         end
     end
     ϵ = sqrt(area(domain))*m/n
-
-    enclosure = λ/ball(domain.parent(1), ϵ)
+    lower = λ/(1 + getinterval(ϵ)[2])
+    upper = λ/(1 - getinterval(ϵ)[2])
+    if lower <= upper
+        enclosure = setinterval(lower, upper)
+    else
+        enclosure = ball(λ, domain.parent(Inf))
+    end
 
     if extended_trace
         return enclosure, n, m, maximize_trace
