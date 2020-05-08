@@ -4,6 +4,7 @@ struct MPSState
     optim_prec::Int
     norm::arb
     maximum::arb
+    minimizer::arb
     enclosure::arb
     metadata::Dict
 end

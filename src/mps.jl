@@ -54,11 +54,11 @@ function mps(domain::AbstractDomain,
         @warn "Failed to compute minimum of σ(λ)"
     end
 
-    λ = res.minimizer
+    λ_minimizer = res.minimizer
 
     # Compute the eigenfunction corresponding to the computed
     # minimum of σ(λ).
-    coefficients = sigma_coefficients(λ, domain, eigenfunction, N,
+    coefficients = sigma_coefficients(λ_minimizer, domain, eigenfunction, N,
                                       num_boundary = num_boundary,
                                       num_interior = num_interior)
     set_eigenfunction!(eigenfunction, coefficients)
@@ -66,7 +66,7 @@ function mps(domain::AbstractDomain,
     # Compute the enclosure of the eigenvalue
     λ = enclose_eigenvalue(domain,
                            eigenfunction,
-                           domain.parent(λ),
+                           domain.parent(λ_minimizer),
                            norm_rigorous = norm_rigorous,
                            store_trace = store_trace,
                            extended_trace = extended_trace,
@@ -82,7 +82,7 @@ function mps(domain::AbstractDomain,
             λ, n, m = λ
         end
         state = MPSState(N, prec(domain.parent), optim_prec,
-                         n, m, λ, metadata)
+                         n, m, domain.parent(λ_minimizer), λ, metadata)
         return λ, state
     else
         return λ
