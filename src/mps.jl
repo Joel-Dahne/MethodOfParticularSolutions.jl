@@ -208,7 +208,7 @@ function iteratemps(domain::AbstractDomain,
             new_prec = max(53, optim_prec + extra_prec)
             RR = RealField(new_prec)
             domain = typeof(domain)(domain, RR)
-            eigenfunction.domain = typeof(eigenfunction.domain)(eigenfunction.domain, RR)
+            set_domain!(eigenfunction, domain)
 
             ### Run the computations ###
             @timeit_debug "$N" begin

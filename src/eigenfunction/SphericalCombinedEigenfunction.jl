@@ -18,6 +18,15 @@ function Base.show(io::IO, u::SphericalCombinedEigenfunction)
     print(io, "number of set coefficients: $(length(coefficients(u)))")
 end
 
+function set_domain!(u::SphericalCombinedEigenfunction,
+                     domain::AbstractDomain)
+    u.domain = domain
+    for v in u.us
+        set_domain!(v, domain)
+    end
+    return u
+end
+
 function active_boundaries(u::SphericalCombinedEigenfunction)
     reduce((x, y) -> x .| y, active_boundaries.(u.us))
 end

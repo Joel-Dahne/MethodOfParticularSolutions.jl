@@ -17,6 +17,16 @@ function set_eigenfunction!(u::AbstractEigenfunction,
 end
 
 """
+    set_domain!(u::AbstractEigenfunction, domain::AbstractDomain)
+> Set the domain for the eigenfunction.
+"""
+function set_domain!(u::AbstractEigenfunction,
+                     domain::AbstractDomain)
+    u.domain = domain
+    domain
+end
+
+"""
     active_boundaries(u::AbstractEigenfunction)
 > Return the boundaries which are active for the current
   eigenfunction. The eigenfunction is guaranteed to be identically
