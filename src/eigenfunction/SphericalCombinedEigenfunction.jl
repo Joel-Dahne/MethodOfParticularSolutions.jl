@@ -27,6 +27,13 @@ function set_domain!(u::SphericalCombinedEigenfunction,
     return u
 end
 
+function recompute!(u::SphericalCombinedEigenfunction)
+    for v in u.us
+        recompute!(v)
+    end
+    u
+end
+
 function active_boundaries(u::SphericalCombinedEigenfunction)
     reduce((x, y) -> x .| y, active_boundaries.(u.us))
 end

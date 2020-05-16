@@ -25,6 +25,11 @@ function Base.show(io::IO, u::SphericalInteriorEigenfunction)
     end
 end
 
+function recompute!(u::SphericalInteriorEigenfunction)
+    u.θ, u.ϕ = spherical(center(u.domain))
+    u
+end
+
 function coordinate_transformation(u::SphericalInteriorEigenfunction,
                                    xyz::AbstractVector{T}
                                    ) where {T <: Union{arb, arb_series}}

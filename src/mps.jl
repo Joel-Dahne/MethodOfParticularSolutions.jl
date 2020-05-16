@@ -136,6 +136,7 @@ function iteratemps(domain::AbstractDomain,
                     optim_prec_adaptive_extra = 10,
                     extra_prec = 20,
                     norm_rigorous = true,
+                    recompute = true,
                     store_trace = false,
                     show_trace = false,
                     extended_trace = false,
@@ -209,6 +210,9 @@ function iteratemps(domain::AbstractDomain,
             RR = RealField(new_prec)
             domain = typeof(domain)(domain, RR)
             set_domain!(eigenfunction, domain)
+            if recompute
+                recompute!(eigenfunction)
+            end
 
             ### Run the computations ###
             @timeit_debug "$N" begin

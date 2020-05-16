@@ -23,7 +23,17 @@ end
 function set_domain!(u::AbstractEigenfunction,
                      domain::AbstractDomain)
     u.domain = domain
-    domain
+    u
+end
+
+"""
+    recompute!(u::AbstractEigenfunction)
+> Recompute the values for the eigenfunction. This method in unsafe in
+  the way that it overwrites previous values and therefore only
+  handles default options.
+"""
+function recompute!(u::AbstractEigenfunction)
+    u
 end
 
 """
