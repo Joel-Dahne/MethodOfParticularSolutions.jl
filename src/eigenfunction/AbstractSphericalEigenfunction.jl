@@ -154,6 +154,27 @@ function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{T, T},
 end
 
 """
+    sphericalcaparea(λ)
+Return the area of the spherical cap with fundamental eigenvalue λ.
+"""
+function sphericalcaparea(λ::arb)
+    ν::arb = -0.5 + sqrt(0.25 + λ)
+    μ::arb = λ.parent(0)
+
+    # Find first zero of
+    f = θ -> legendre_p_safe(ν, μ, cos(θ))
+
+    # PROVE: That this corresponds to the θ value for the spherical
+    # cap with fundamental eigenvalue λ.
+    roots = isolateroots(f, zero(λ), 0.5λ.parent(pi), evaltype = :taylor)
+    @assert !isempty(roots[1])
+    @assert roots[2][1] == 1
+    θ = setinterval(roots[1][1]...)
+
+    return 2λ.parent(π)*(1 - cos(θ))
+end
+
+"""
     norm2(u::AbstractSphericalEigenfunction,
           λ::arb,
           (a, b, c))
@@ -170,8 +191,8 @@ function norm2(u::AbstractSphericalEigenfunction,
                (a, b, c))
     # Check that the area is small enough
     area = sum(anglesfromvertices(a, b, c)) - u.domain.parent(π)
-    # FIXME: Use the correct maximum area here
-    maximumarea = 4*u.domain.parent(π)^2
+
+    maximumarea = sphericalcaparea(λ)
 
     if !(area < maximumarea)
         return u.domain.parent(0)
