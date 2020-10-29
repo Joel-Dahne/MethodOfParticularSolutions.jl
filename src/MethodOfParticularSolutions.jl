@@ -20,6 +20,8 @@ export AbstractDomain,
 
     LShape,
 
+    Triangle,
+
     AbstractEigenfunction,
     coefficients, set_eigenfunction!,
 
@@ -53,6 +55,7 @@ include("eigenfunction/eigenfunction_types.jl")
 include("domain/AbstractDomain.jl")
 include("domain/SphericalTriangle.jl")
 include("domain/LShape.jl")
+include("domain/Triangle.jl")
 
 # Include methods for eigenfunctions
 include("eigenfunction/AbstractEigenfunction.jl")

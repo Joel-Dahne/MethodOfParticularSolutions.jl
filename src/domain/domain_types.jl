@@ -35,3 +35,38 @@ end
 struct LShape <: AbstractPlanarDomain
     parent::ArbField
 end
+
+"""
+    Triangle(α, β[, parent::ArbField = RealField(64)])
+
+Create a (planar) triangle with two of the angles being `α` and `β`.
+The length of the side in between is defined to be one and the last
+angle is called `γ`.
+
+If the angles are of type `arb` then `α` and `β` represents the angles
+directly. If they are of type `fmpq` then they represent the angle as
+a rational multiple of `π`. The vertex with angle `α` is placed at the
+origin the vertex with angle `β` is taken to have `y = 0`.
+
+Vertex 1, 2 and 3 are opposite of angles α, β and γ respectively.
+"""
+struct Triangle{T <: Union{fmpq,arb}} <: AbstractPlanarDomain
+    α::T
+    β::T
+    parent::ArbField
+
+    function Triangle(α::fmpq, β::fmpq, parent::ArbField = RealField(64))
+        α > 0 || throw(DomainError(α, "angle must be positive"))
+        β > 0 || throw(DomainError(β, "angle must be positive"))
+        α + β < 1 || throw(ArgumentError("α + β must be less than 1"))
+        return new{fmpq}(α, β, parent)
+    end
+
+    function Triangle(α::arb, β::arb, parent::ArbField = parent(α))
+        α > 0 || throw(DomainError(α, "angle must be positive"))
+        β > 0 || throw(DomainError(β, "angle must be positive"))
+        !(α + β > parent(π)) || throw(ArgumentError("α + β must be less than π"))
+        α + β < parent(π) || @warn "α + β might not be less than π"
+        return new{arb}(α, β, parent)
+    end
+end
