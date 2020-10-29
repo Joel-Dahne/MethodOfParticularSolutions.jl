@@ -1,72 +1,78 @@
 """
+    boundaries(domain::AbstractDomain)
+
+Return an index set giving the boundaries of the domain.
+"""
+boundaries(domain::AbstractDomain)
+
+"""
     area(domain::AbstractDomain)
-> Compute the area of the domain.
+
+Return the area of the domain.
 """
-function area(domain::AbstractDomain)
-    throw(ErrorException("area not implemented for domain of type $(typeof(domain))"))
+area(domain::AbstractDomain)
+
+"""
+    boundary_parameterization(t, domain::AbstractDomain, i::Integer)
+
+Compute a parameterization of boundary number `i`.
+
+The parameterization goes from t = 0 to t = 1. The enumeration of
+the boundaries depends on the type of domain used.
+"""
+boundary_parameterization(t, domain::AbstractDomain, i::Integer)
+
+"""
+    boundary_points(domain::AbstractDomain, i::Integer, n::Integer)
+
+Return `n` points from boundary number `i`, together with information
+about which boundary they are from.
+
+The enumeration of the boundary depends on the type of domain used.
+"""
+boundary_points(domain::AbstractDomain, i::Integer, n::Integer)
+
+"""
+    boundary_points(domain::AbstractDomain, n::Integer)
+
+Return `n` points taken from all boundaries of the domain, together
+with information about which boundary they are from.
+"""
+function boundary_points(domain::AbstractDomain, n::Integer)
+    m = length(boundaries(domain))
+    res = [
+        boundary_points(domain, i, div(n, m) + ifelse(n % m >= i, 1, 0))
+        for i in boundaries(domain)
+    ]
+    return vcat(getindex.(res, 1)...), vcat(getindex.(res, 2)...)
 end
 
 """
-    boundary_parameterization(t,
-                              domain::AbstractDomain,
-                              i::Integer)
-> Compute a parameterization of boundary number `i`.
+    boundary_points(domain::AbstractDomain, u::AbstractEigenfunction, n::Integer)
 
-  The parameterization goes from t = 0 to t = 1. The enumeration of
-  the boundary depends on the type of domain used.
-"""
-function boundary_parameterization(t,
-                                   domain::AbstractDomain,
-                                   i::Integer)
-    throw(ErrorException("boundary_parameterization not implemented for domain of type $(typeof(domain))"))
-end
+Return n points from boundaries of the domain on which the
+eigenfunction is not identically zero, together with information about
+which boundary they are from.
 
-"""
-    boundary_points(domain::AbstractDomain,
-                    i::Integer,
-                    n::Integer)
-> Return n points from boundary number `i`, together with information
-  about which boundary they are from. The enumeration of the boundary
-  depends on the type of domain used.
-"""
-function boundary_points(domain::AbstractDomain,
-                         i::Integer,
-                         n::Integer)
-    throw(ErrorException("boundary_points not implemented for domain of type $(typeof(domain))"))
-end
-
-"""
-    boundary_points(domain::AbstractDomain,
-                    u::AbstractEigenfunction,
-                    n::Integer)
-> Return n points from boundaries of the domain on which the
-  eigenfunction is not identically zero, together with information
-  about which boundary they are from.
+The boundaries where the egienfunction is not identically equal to
+zero on is determined by `active_boundaries(u)`.
 """
 function boundary_points(domain::AbstractDomain,
                          u::AbstractEigenfunction,
                          n::Integer)
-    boundaries = active_boundaries(u)
-    active = findall(boundaries)
+    active = findall(active_boundaries(u))
     m = length(active)
-    bs = Vector(undef, m)
-    bis = Vector(undef, m)
-    for i in 1:m
-        bs[i], bis[i] = boundary_points(domain, active[i],
-                                        div(n, m) + ifelse(n % m >= i, 1, 0))
-    end
-    return vcat(bs...), vcat(bis...)
+    res = [
+        boundary_points(domain, i, div(n, m) + ifelse(n % m >= i, 1, 0))
+        for i in active
+    ]
+    return vcat(getindex.(res, 1)...), vcat(getindex.(res, 2)...)
 end
 
 """
-    interior_points(domain::AbstractDomain,
-                    n::Integer;
-                    rng = MersenneTwister(42))
-> Return n points taken uniformly at random from the interior of the
-  domain.
+    interior_points(domain::AbstractDomain, n::Integer; rng = MersenneTwister(42))
+
+Return n points taken uniformly at random from the interior of the
+domain.
 """
-function interior_points(domain::AbstractDomain,
-                         n::Integer;
-                         rng = MersenneTwister(42))
-    throw(ErrorException("interior_points not implemented for domain of type $(typeof(domain))"))
-end
+interior_points(domain::AbstractDomain, n::Integer; rng = MersenneTwister(42))

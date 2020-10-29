@@ -13,7 +13,7 @@ using TimerOutputs
 using Printf
 
 export AbstractDomain,
-    area, boundary_parameterization, boundary_points, interior_points,
+    boundaries, area, boundary_parameterization, boundary_points, interior_points,
 
     SphericalTriangle,
     angles, vertex, center, greatcircleplane, greatcircle,
