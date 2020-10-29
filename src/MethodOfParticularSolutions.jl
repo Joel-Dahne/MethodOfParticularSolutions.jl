@@ -11,6 +11,7 @@ using Optim
 
 using TimerOutputs
 using Printf
+using RecipesBase
 
 export AbstractDomain,
     boundaries, area, boundary_parameterization, boundary_points, interior_points,
@@ -56,6 +57,7 @@ include("domain/AbstractDomain.jl")
 include("domain/SphericalTriangle.jl")
 include("domain/LShape.jl")
 include("domain/Triangle.jl")
+include("domain/plotting.jl")
 
 # Include methods for eigenfunctions
 include("eigenfunction/AbstractEigenfunction.jl")
