@@ -1,3 +1,7 @@
+function Triangle{T}(domain::Triangle{T}, parent::ArbField) where {T <: Union{arb, fmpq}}
+    Triangle(domain.α, domain.β, parent)
+end
+
 function Base.getproperty(domain::Triangle{T}, name::Symbol) where {T}
     if name == :γ
         if T == fmpq
