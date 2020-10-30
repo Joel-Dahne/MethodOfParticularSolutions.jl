@@ -51,15 +51,15 @@ origin the vertex with angle `β` is taken to have `y = 0`.
 Vertex 1, 2 and 3 are opposite of angles α, β and γ respectively.
 """
 struct Triangle{T <: Union{fmpq,arb}} <: AbstractPlanarDomain
-    α::T
-    β::T
+    angles::NTuple{3,T}
     parent::ArbField
 
     function Triangle(α::fmpq, β::fmpq, parent::ArbField = RealField(64))
         α > 0 || throw(DomainError(α, "angle must be positive"))
         β > 0 || throw(DomainError(β, "angle must be positive"))
         α + β < 1 || throw(ArgumentError("α + β must be less than 1"))
-        return new{fmpq}(α, β, parent)
+        γ = 1 - α - β
+        return new{fmpq}((α, β, γ), parent)
     end
 
     function Triangle(α::arb, β::arb, parent::ArbField = parent(α))
@@ -67,6 +67,7 @@ struct Triangle{T <: Union{fmpq,arb}} <: AbstractPlanarDomain
         β > 0 || throw(DomainError(β, "angle must be positive"))
         !(α + β > parent(π)) || throw(ArgumentError("α + β must be less than π"))
         α + β < parent(π) || @warn "α + β might not be less than π"
-        return new{arb}(α, β, parent)
+        γ = parent(π) - α - β
+        return new{arb}((α, β, γ), parent)
     end
 end

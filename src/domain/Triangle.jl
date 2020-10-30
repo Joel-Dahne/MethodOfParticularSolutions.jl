@@ -1,26 +1,14 @@
 function Triangle{T}(domain::Triangle{T}, parent::ArbField) where {T <: Union{arb, fmpq}}
-    Triangle(domain.α, domain.β, parent)
-end
-
-function Base.getproperty(domain::Triangle{T}, name::Symbol) where {T}
-    if name == :γ
-        if T == fmpq
-            return 1 - domain.α - domain.β
-        else
-            return domain.parent(π) - domain.α - domain.β
-        end
-    else
-        return getfield(domain, name)
-    end
+    Triangle(domain.angles[1], domain.angles[2], parent)
 end
 
 function Base.show(io::IO, domain::Triangle{fmpq})
-    angles_string = ["$(numerator(a))π/$(denominator(a))" for a in (domain.α, domain.β, domain.γ)]
+    angles_string = ["$(numerator(a))π/$(denominator(a))" for a in domain.angles]
     print(io, "Triangle with $(domain.parent.prec) bits of precision and angles ($(angles_string[1]), $(angles_string[2]), $(angles_string[3]))")
 end
 
 function Base.show(io::IO, domain::Triangle{arb})
-    angles_string = ["$a" for a in (domain.α, domain.β, domain.γ)]
+    angles_string = ["$a" for a in domain.angles]
     print(io, "Triangle with $(domain.parent.prec) bits of precision and angles ($(angles_string[1]), $(angles_string[2]), $(angles_string[3]))")
 end
 
@@ -32,24 +20,16 @@ boundaries(::Triangle) = 1:3
 Return the angle for vertex `i` of the triangle.
 """
 function angle(domain::Triangle{fmpq}, i::Integer)
-    if i == 1
-        return domain.parent(π)*domain.α
-    elseif i == 2
-        return domain.parent(π)*domain.β
-    elseif i == 3
-        return domain.parent(π)*domain.γ
+    if i ∈ boundaries(domain)
+        return domain.parent(π)*domain.angles[i]
     else
         throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
     end
 end
 
 function angle(domain::Triangle{arb}, i::Integer)
-    if i == 1
-        return domain.α
-    elseif i == 2
-        return domain.β
-    elseif i == 3
-        return domain.γ
+    if i ∈ boundaries(domain)
+        return domain.angles[i]
     else
         throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
     end
@@ -61,24 +41,16 @@ end
 Return the angle for vertex `i` of the triangle divided by `π`.
 """
 function angledivπ(domain::Triangle{fmpq}, i::Integer)
-    if i == 1
-        return domain.α
-    elseif i == 2
-        return domain.β
-    elseif i == 3
-        return domain.γ
+    if i ∈ boundaries(domain)
+        return domain.angles[i]
     else
         throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
     end
 end
 
 function angledivπ(domain::Triangle{arb}, i::Integer)
-    if i == 1
-        return domain.α/domain.parent(π)
-    elseif i == 2
-        return domain.β/domain.parent(π)
-    elseif i == 3
-        return domain.γ/domain.parent(π)
+    if i ∈ boundaries(domain)
+        return domain.angles[i]/domain.parent(π)
     else
         throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
     end
@@ -113,8 +85,8 @@ function vertex(domain::Triangle{T}, i::Integer) where {T}
             x = sin(angle(domain, 2))/sin(angle(domain, 3))
             s, c = sincos(angle(domain, 1))
         else
-            x = sinpi(domain.β, domain.parent)/sinpi(domain.γ, domain.parent)
-            s, c = sincospi(domain.α, domain.parent)
+            x = sinpi(angledivπ(domain, 2), domain.parent)/sinpi(angledivπ(domain, 3), domain.parent)
+            s, c = sincospi(angledivπ(domain, 1), domain.parent)
         end
         return SVector(c*x, s*x)
     else
