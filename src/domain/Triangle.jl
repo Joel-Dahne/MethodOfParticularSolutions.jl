@@ -52,11 +52,47 @@ function angle(domain::Triangle{arb}, i::Integer)
 end
 
 """
+    angledivπ(domain::Triangle, i::Integer)
+
+Return the angle for vertex `i` of the triangle divided by `π`.
+"""
+function angledivπ(domain::Triangle{fmpq}, i::Integer)
+    if i == 1
+        return domain.α
+    elseif i == 2
+        return domain.β
+    elseif i == 3
+        return domain.γ
+    else
+        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
+    end
+end
+
+function angledivπ(domain::Triangle{arb}, i::Integer)
+    if i == 1
+        return domain.α/domain.parent(π)
+    elseif i == 2
+        return domain.β/domain.parent(π)
+    elseif i == 3
+        return domain.γ/domain.parent(π)
+    else
+        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
+    end
+end
+
+"""
     angles(domain::Triangle)
 
 Return the angles of the triangle.
 """
 angles(domain::Triangle) = tuple((angle(domain, i) for i in boundaries(domain))...)
+
+"""
+    anglesdivπ(domain::Triangle)
+
+Return the angles of the triangle divided by `π`.
+"""
+anglesdivπ(domain::Triangle) = tuple((angledivπ(domain, i) for i in boundaries(domain))...)
 
 """
     vertex(domain::Triangle, i::Integer)

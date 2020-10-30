@@ -35,3 +35,10 @@ mutable struct LShapeEigenfunction <: AbstractPlanarEigenfunction
     stride::Int
     coefficients::Vector{arb}
 end
+
+mutable struct VertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
+    domain::Triangle{T}
+    vertex::Int
+    stride::Int
+    coefficients::Vector{arb}
+end

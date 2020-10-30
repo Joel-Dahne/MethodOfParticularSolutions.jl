@@ -36,6 +36,8 @@ export AbstractDomain,
 
     LShapeEigenfunction,
 
+    VertexEigenfunction,
+
     sigma, sigma_coefficients,
 
     cartesian, spherical,
@@ -61,12 +63,14 @@ include("domain/plotting.jl")
 
 # Include methods for eigenfunctions
 include("eigenfunction/AbstractEigenfunction.jl")
+include("eigenfunction/AbstractPlanarEigenfunction.jl")
 include("eigenfunction/AbstractSphericalEigenfunction.jl")
 include("eigenfunction/SphericalVertexEigenfunction.jl")
 include("eigenfunction/SphericalInteriorEigenfunction.jl")
 include("eigenfunction/SphericalCombinedEigenfunction.jl")
 include("eigenfunction/KrewerasEigenfunction.jl")
 include("eigenfunction/LShapeEigenfunction.jl")
+include("eigenfunction/VertexEigenfunction.jl")
 
 include("sigma.jl")
 include("enclose.jl")

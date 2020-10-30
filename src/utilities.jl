@@ -1,3 +1,16 @@
+function cartesian_from_polar(r, θ)
+    s, c = sincos(θ)
+    x = r*c
+    y = r*s
+    return SVector(x, y)
+end
+
+function polar_from_cartesian(xy)
+    r = sqrt(xy[1]^2 + xy[2]^2)
+    θ = atan(xy[2], xy[1])
+    return r, θ
+end
+
 function cartesian(θ, ϕ)
     sθ, cθ = sincos(θ)
     sϕ, cϕ = sincos(ϕ)
