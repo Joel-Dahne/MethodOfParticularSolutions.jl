@@ -190,21 +190,21 @@ function norm2(u::AbstractSphericalEigenfunction,
                λ::arb,
                (a, b, c))
     # Check that the area is small enough
-    area = sum(anglesfromvertices(a, b, c)) - u.domain.parent(π)
+    area = sum(anglesfromvertices(a, b, c)) - λ.parent(π)
 
     maximumarea = sphericalcaparea(λ)
 
     if !(area < maximumarea)
-        return u.domain.parent(0)
+        return zero(λ)
     end
 
-    m = u.domain.parent(Inf)
+    m = λ.parent(Inf)
     for (v, w) in [(a, b), (b, c), (c, a)]
         f = t -> -u(normalize(v .+ t.*(w - v)), λ)^2
 
         M = -enclosemaximum(f,
-                            u.domain.parent(0),
-                            u.domain.parent(1),
+                            zero(λ),
+                            one(λ),
                             evaltype = :taylor,
                             n = div(length(coefficients(u)), 4),
                             atol = 1e-10,
@@ -222,13 +222,14 @@ function norm2(u::AbstractSphericalEigenfunction,
     if isfinite(res) && res > 0
         return res
     else
-        return u.domain.parent(0)
+        return zero(res)
     end
 end
 
-function norm(u::AbstractSphericalEigenfunction,
+function norm(domain::SphericalTriangle,
+              u::AbstractSphericalEigenfunction,
               λ::arb)
-    a, b, c = subtriangle(u.domain, ratio = 0.5)
+    a, b, c = subtriangle(domain, ratio = 0.5)
     triangles = partitiontriangle(a, b, c, iterations = 1)
 
     res = sum(norm2(u, λ, triangle) for triangle in triangles)

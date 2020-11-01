@@ -60,11 +60,12 @@ function (u::LShapeEigenfunction)((r, θ)::Tuple{T, T},
     u(r, θ, λ, boundary = boundary)
 end
 
-function norm(u::LShapeEigenfunction,
+function norm(domain::LShape,
+              u::LShapeEigenfunction,
               λ::arb)
-    θ_integral = 3//4*u.domain.parent(π)
+    θ_integral = 3//4*domain.parent(π)
 
-    CC = ComplexField(u.domain.parent.prec)
+    CC = ComplexField(domain.parent.prec)
     # The integrals goes from zero to the lower bound for θ. However
     # the function has a branch cut at zero and Arb has problem
     # handling this. We therefore integrate a small distance away from
@@ -72,9 +73,9 @@ function norm(u::LShapeEigenfunction,
     a = CC(1e-1)
     b = CC(1)
 
-    r_integral = u.domain.parent(0)
+    r_integral = domain.parent(0)
     for k in 1:min(4, length(u.coefficients))
-        ν::arb = u.domain.parent(2k//3)
+        ν::arb = domain.parent(2k//3)
         c2 = u.coefficients[k]^2
 
         f = r -> begin

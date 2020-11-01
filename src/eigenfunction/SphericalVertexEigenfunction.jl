@@ -126,11 +126,12 @@ function (u::SphericalVertexEigenfunction)(θ::T,
     legendre_p_safe(ν, μ, cos(θ))*sin(μ*ϕ)
 end
 
-function norm(u::SphericalVertexEigenfunction,
+function norm(domain::SphericalTriangle,
+              u::SphericalVertexEigenfunction,
               λ::arb)
-    ϕ_integral = -u.domain.parent(π)/(2*mu(u, 1))
+    ϕ_integral = -domain.parent(π)/(2*mu(u, 1))
 
-    CC = ComplexField(u.domain.parent.prec)
+    CC = ComplexField(domain.parent.prec)
     # The integrals goes from zero to the lower bound for θ. However
     # the function has a branch cut at zero and Arb has problem
     # handling this. We therefore integrate a small distance away from
@@ -139,13 +140,13 @@ function norm(u::SphericalVertexEigenfunction,
 
     # Create a new domain which has the vertex we are expanding from
     # on the north pole.
-    domain = SphericalTriangle(u.domain.angles[[u.vertex,
-                                                mod1(u.vertex + 1, 3),
-                                                mod1(u.vertex + 2, 3)]],
-                               u.domain.parent)
+    domain = SphericalTriangle(domain.angles[[u.vertex,
+                                              mod1(u.vertex + 1, 3),
+                                              mod1(u.vertex + 2, 3)]],
+                               domain.parent)
     b = CC(theta_bound(domain))
 
-    θ_integral = u.domain.parent(0)
+    θ_integral = domain.parent(0)
     for k in 1:min(4, length(u.coefficients))
         ν::arb = -0.5 + sqrt(0.25 + λ)
         μ::arb = mu(u, 1 + (k - 1)*u.stride)

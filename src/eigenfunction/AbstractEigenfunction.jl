@@ -60,10 +60,11 @@ function (u::AbstractEigenfunction)(point,
     throw(ErrorException("evaluation not implemented for eigenfunction of type $(typeof(u))"))
 end
 
-function norm(u::AbstractEigenfunction,
+function norm(domain::AbstractDomain,
+              u::AbstractEigenfunction,
               λ::arb;
               numpoints::Int = 1000)
     @error "using a non-rigorous implementation of norm for $(typeof(u))"
-    interior = interior_points(u.domain, numpoints)
-    sqrt(area(u.domain)*sum(abs(u(i, λ))^2 for i in interior)/length(interior))
+    interior = interior_points(domain, numpoints)
+    sqrt(area(domain)*sum(abs(u(i, λ))^2 for i in interior)/length(interior))
 end

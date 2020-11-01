@@ -75,9 +75,9 @@ function enclose_eigenvalue(domain::AbstractDomain,
     end
     @timeit_debug "norm" begin
         if norm_rigorous
-            n = norm(u, λ)
+            n = norm(domain, u, λ)
         else
-            n = norm(u, λ, numpoints = 4length(coefficients(u)))
+            n = norm(domain, u, λ, numpoints = 4length(coefficients(u)))
         end
     end
     ϵ = sqrt(area(domain))*m/n
