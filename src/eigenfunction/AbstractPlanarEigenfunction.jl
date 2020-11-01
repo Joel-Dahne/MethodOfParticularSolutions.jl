@@ -16,6 +16,8 @@ then identically equal to zero.
 
 See also: [`coordinate_transform`](@ref)
 """
+function (u::AbstractPlanarEigenfunction) end
+
 function (u::AbstractPlanarEigenfunction)(xy::AbstractVector{T},
                                           λ::arb;
                                           boundary = nothing,
