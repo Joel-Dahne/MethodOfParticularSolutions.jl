@@ -1,10 +1,11 @@
-function maximize(u::AbstractEigenfunction,
+function maximize(domain::AbstractDomain,
+                  u::AbstractEigenfunction,
                   λ::arb,
                   n::Integer;
                   store_trace = false,
                   show_progress = false)
     N = length(coefficients(u))
-    f = t -> u(boundary_parameterization(t, u.domain, n), λ, boundary = n)
+    f = t -> u(boundary_parameterization(t, domain, n), λ, boundary = n)
 
     if show_progress
         enclose_progress(state) = begin
@@ -17,8 +18,8 @@ function maximize(u::AbstractEigenfunction,
     end
 
     enclosemaximum(f,
-                   u.domain.parent(0),
-                   u.domain.parent(1),
+                   zero(λ),
+                   one(λ),
                    absmax = true,
                    evaltype = :taylor,
                    n = N,
@@ -29,16 +30,17 @@ function maximize(u::AbstractEigenfunction,
                    callback = enclose_progress)
 end
 
-function maximize(u::AbstractEigenfunction,
+function maximize(domain::AbstractDomain,
+                  u::AbstractEigenfunction,
                   λ::arb;
                   store_trace = false,
                   show_progress = false)
     boundaries = active_boundaries(u)
-    m = u.domain.parent(0)
+    m = zero(λ)
 
     traces = Dict()
     for boundary in findall(boundaries)
-        m2 = maximize(u, λ, boundary,
+        m2 = maximize(domain, u, λ, boundary,
                       store_trace = store_trace,
                       show_progress = show_progress)
         if store_trace
@@ -65,7 +67,7 @@ function enclose_eigenvalue(domain::AbstractDomain,
                             store_trace = false,
                             extended_trace = false,
                             show_progress = false)
-    @timeit_debug "maximize" m = maximize(u, λ,
+    @timeit_debug "maximize" m = maximize(domain, u, λ,
                                           store_trace = extended_trace,
                                           show_progress = show_progress)
     if extended_trace
