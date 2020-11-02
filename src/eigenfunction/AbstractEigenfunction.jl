@@ -37,14 +37,29 @@ function recompute!(u::AbstractEigenfunction)
 end
 
 """
-    active_boundaries(u::AbstractEigenfunction)
-> Return the boundaries which are active for the current
-  eigenfunction. The eigenfunction is guaranteed to be identically
-  equal to zero on the inactive boundaries.
+    active_boundaries(domain::AbstractDomain, u::AbstractEigenfunction)
+
+Return the boundaries on `domain` which are active for `u`. The
+eigenfunction is guaranteed to be identically equal to zero on the
+inactive boundaries.
+
+Most eigenfunctions are constructed for a specific domain, given by
+`u.doman`. In this case it checks if `domain === u.domain` (i.e. if
+they are the exact same object in Julia), if that is true then it uses
+information `u` has about it's domain to determine which boundaries
+are active. If `domain !== u.domain` the it just returns all
+boundaries of `domain`.
+
+Some eigenfunctions are not tied to a domain directly, in that case it
+will in general just return all boundaries of `domain`.
+
+One of the reason it works like this is that it's hard to determine of
+two domains are exactly the same since we generally work with ball
+arithmetic. It's also a workaround to have the old version which only
+relied on `u.domain` and the new version where `u` might not have a
+specified domain work together.
 """
-function active_boundaries(u::AbstractEigenfunction)
-    throw(ErrorException("active_boundaries not implemented for eigenfunction of type $(typeof(u))"))
-end
+active_boundaries(domain::AbstractDomain, u::AbstractEigenfunction) = boundaries(domain)
 
 """
     u(point, λ::arb, k::Integer; notransform::Bool = false)

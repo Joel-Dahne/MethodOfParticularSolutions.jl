@@ -34,8 +34,12 @@ function recompute!(u::SphericalCombinedEigenfunction)
     u
 end
 
-function active_boundaries(u::SphericalCombinedEigenfunction)
-    reduce((x, y) -> x .| y, active_boundaries.(u.us))
+function active_boundaries(domain::SphericalTriangle, u::SphericalCombinedEigenfunction)
+    if domain === u.domain
+        return union([active_boundaries(domain, v) for v in u.us]...)
+    else
+        return 1:3
+    end
 end
 
 """
@@ -53,7 +57,7 @@ end
 """
 function active_eigenfunctions(u::SphericalCombinedEigenfunction,
                                i::Integer)
-    indices = [j for j in 1:length(u.us) if active_boundaries(u.us[j])[i]]
+    indices = [j for j in 1:length(u.us) if i ∈ active_boundaries(u.us[j])]
 
     if isempty(indices)
         return nothing

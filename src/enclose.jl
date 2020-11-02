@@ -35,11 +35,11 @@ function maximize(domain::AbstractDomain,
                   λ::arb;
                   store_trace = false,
                   show_progress = false)
-    boundaries = active_boundaries(u)
+    boundaries = active_boundaries(domain, u)
     m = zero(λ)
 
     traces = Dict()
-    for boundary in findall(boundaries)
+    for boundary in boundaries
         m2 = maximize(domain, u, λ, boundary,
                       store_trace = store_trace,
                       show_progress = show_progress)

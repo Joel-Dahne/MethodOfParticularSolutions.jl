@@ -1,5 +1,5 @@
-function active_boundaries(u::AbstractSphericalEigenfunction)
-    (true, true, true)
+function active_boundaries(domain::SphericalTriangle, u::AbstractSphericalEigenfunction)
+    return 1:3
 end
 
 """

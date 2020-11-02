@@ -13,8 +13,12 @@ function Base.show(io::IO, u::SphericalVertexEigenfunction)
     end
 end
 
-function active_boundaries(u::SphericalVertexEigenfunction)
-    u.vertex .== (1, 2, 3)
+function active_boundaries(domain::SphericalTriangle, u::SphericalVertexEigenfunction)
+    if domain === u.domain
+        return u.vertex:u.vertex
+    else
+        return 1:3
+    end
 end
 
 """

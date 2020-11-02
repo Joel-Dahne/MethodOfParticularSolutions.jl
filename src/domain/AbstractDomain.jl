@@ -55,12 +55,12 @@ eigenfunction is not identically zero, together with information about
 which boundary they are from.
 
 The boundaries where the egienfunction is not identically equal to
-zero on is determined by `active_boundaries(u)`.
+zero on is determined by `active_boundaries(domain, u)`.
 """
 function boundary_points(domain::AbstractDomain,
                          u::AbstractEigenfunction,
                          n::Integer)
-    active = findall(active_boundaries(u))
+    active = active_boundaries(domain, u)
     m = length(active)
     res = [
         boundary_points(domain, i, div(n, m) + ifelse(n % m >= i, 1, 0))

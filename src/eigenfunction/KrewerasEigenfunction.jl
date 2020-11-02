@@ -13,8 +13,12 @@ function Base.show(io::IO, u::KrewerasEigenfunction)
     end
 end
 
-function active_boundaries(u::KrewerasEigenfunction)
-    (true, false, false)
+function active_boundaries(domain::SphericalTriangle, u::KrewerasEigenfunction)
+    if domain === u.domain
+        return 1:1
+    else
+        return 1:3
+    end
 end
 
 function (u::KrewerasEigenfunction)(xyz::AbstractVector{T},

@@ -11,8 +11,12 @@ function Base.show(io::IO, u::VertexEigenfunction)
     end
 end
 
-function active_boundaries(u::VertexEigenfunction)
-    u.vertex .== boundaries(u.domain)
+function active_boundaries(domain::Triangle, u::VertexEigenfunction)
+    if domain === u.domain
+        return u.vertex:u.vertex
+    else
+        return boundaries(domain)
+    end
 end
 
 """
