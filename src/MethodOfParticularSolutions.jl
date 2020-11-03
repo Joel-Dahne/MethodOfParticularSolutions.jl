@@ -38,6 +38,8 @@ export AbstractDomain,
 
     VertexEigenfunction,
 
+    StandaloneVertexEigenfunction,
+
     sigma, sigma_coefficients,
 
     cartesian, spherical,
@@ -71,6 +73,8 @@ include("eigenfunction/SphericalCombinedEigenfunction.jl")
 include("eigenfunction/KrewerasEigenfunction.jl")
 include("eigenfunction/LShapeEigenfunction.jl")
 include("eigenfunction/VertexEigenfunction.jl")
+include("eigenfunction/StandaloneVertexEigenfunction.jl")
+include("eigenfunction/plotting.jl")
 
 include("sigma.jl")
 include("enclose.jl")

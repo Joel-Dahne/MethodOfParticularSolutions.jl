@@ -42,3 +42,12 @@ mutable struct VertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigen
     stride::Int
     coefficients::Vector{arb}
 end
+
+struct StandaloneVertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
+    vertex::SVector{2,arb}
+    orientation::T
+    θ::T
+    stride::Int
+    coefficients::Vector{arb}
+    parent::ArbField
+end
