@@ -43,7 +43,7 @@ function StandaloneVertexEigenfunction(
 end
 
 function Base.show(io::IO, u::StandaloneVertexEigenfunction)
-    println(io, "Standalone Vertex eigenfunction")
+    println(io, "Standalone vertex eigenfunction")
     if !haskey(io, :compact) || !io[:compact]
         println(io, "vertex: $(u.vertex)")
         println(io, "orientation: $(u.orientation)")
@@ -62,8 +62,8 @@ end
 
 Return `k*θ` as an `arb`, the parameter used for the Bessel function.
 """
-nu(u::StandaloneVertexEigenfunction{fmpq}, k::Integer = 1) = u.parent(-k*inv(u.θ))
-nu(u::StandaloneVertexEigenfunction{arb}, k::Integer = 1) = u.parent(-k*u.parent(π)/u.θ)
+nu(u::StandaloneVertexEigenfunction{fmpq}, k::Integer = 1) = u.parent(k*inv(u.θ))
+nu(u::StandaloneVertexEigenfunction{arb}, k::Integer = 1) = u.parent(k*u.parent(π)/u.θ)
 
 """
         coordinate_transformation(u::StandaloneVertexEigenfunction, xy::AbstractVector)
@@ -105,12 +105,7 @@ function (u::StandaloneVertexEigenfunction)(xy::AbstractVector{T},
     if !notransform
         xy = coordinate_transformation(u, xy)
     end
-
-    k = 1 + (k - 1)*u.stride
-
-    ν = nu(u, k)
-    r, θ = polar_from_cartesian(xy)
-    return bessel_j(ν, sqrt(λ)*r)*sin(ν*θ)
+    return u(polar_from_cartesian(xy)..., λ, k, boundary = boundary, notransform = true)
 end
 
 function (u::StandaloneVertexEigenfunction)(r::T,

@@ -25,7 +25,7 @@ end
 Return `k*ν₀` as an `arb`, the parameter used for the Bessel function.
 """
 function nu(u::VertexEigenfunction, k::Integer = 1)
-    u.domain.parent(-k*inv(angledivπ(u.domain, u.vertex)))
+    u.domain.parent(k*inv(angledivπ(u.domain, u.vertex)))
 end
 
 """
