@@ -51,3 +51,10 @@ struct StandaloneVertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEig
     coefficients::Vector{arb}
     parent::ArbField
 end
+
+struct StandaloneInteriorEigenfunction <: AbstractPlanarEigenfunction
+    vertex::SVector{2,arb}
+    stride::Int
+    coefficients::Vector{arb}
+    parent::ArbField
+end
