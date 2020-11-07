@@ -58,3 +58,10 @@ struct StandaloneInteriorEigenfunction <: AbstractPlanarEigenfunction
     coefficients::Vector{arb}
     parent::ArbField
 end
+
+mutable struct CombinedEigenfunction <: AbstractPlanarEigenfunction
+    domain::AbstractPlanarDomain
+    us::Vector{<:AbstractPlanarEigenfunction}
+    boundary_to_us::OrderedDict{Int,BitSet}
+    orders::Vector{Int}
+end

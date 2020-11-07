@@ -8,6 +8,7 @@ using CoordinateTransformations
 using LinearAlgebra
 using GenericSVD
 using Optim
+using OrderedCollections
 
 using TimerOutputs
 using Printf
@@ -41,6 +42,8 @@ export AbstractDomain,
     StandaloneVertexEigenfunction,
 
     StandaloneInteriorEigenfunction,
+
+    CombinedEigenfunction,
 
     sigma, sigma_coefficients,
 
@@ -77,6 +80,7 @@ include("eigenfunction/LShapeEigenfunction.jl")
 include("eigenfunction/VertexEigenfunction.jl")
 include("eigenfunction/StandaloneVertexEigenfunction.jl")
 include("eigenfunction/StandaloneInteriorEigenfunction.jl")
+include("eigenfunction/CombinedEigenfunction.jl")
 include("eigenfunction/plotting.jl")
 
 include("sigma.jl")
