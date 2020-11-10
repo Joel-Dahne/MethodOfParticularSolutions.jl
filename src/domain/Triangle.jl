@@ -110,6 +110,15 @@ Return the centroid of the triangle.
 """
 center(domain::Triangle) = sum(vertices(domain))/3
 
+function Base.in(xy, domain::Triangle)
+    x, y = xy
+    return (
+        y >= 0 # Above the bottom edge
+        && atan(y, x) <= angle(domain, 1) # To the right of the left edge
+        && domain.parent(π) - atan(y, x - 1) <= angle(domain, 2) # To the left of the right edge
+    )
+end
+
 function boundary_parameterization(t, domain::Triangle, i::Integer)
     i ∈ boundaries(domain) || throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
     v = vertex(domain, mod1(i + 1, 3))

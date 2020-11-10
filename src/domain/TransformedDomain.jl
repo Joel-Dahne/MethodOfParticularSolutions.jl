@@ -32,6 +32,14 @@ function Base.getproperty(domain::TransformedDomain{T}, name::Symbol) where {T}
         end
         M = SMatrix{2, 2}(c, s, -s, c)
         return xy -> domain.scaling.*M*xy + domain.translation
+    elseif name == :invmap
+        if T == arb
+            s, c = sincos(-domain.rotation)
+        elseif T == fmpq
+            s, c = sincospi(-domain.rotation, domain.parent)
+        end
+        M = SMatrix{2, 2}(c, s, -s, c)
+        return xy -> M*(xy - domain.translation)./domain.scaling
     else
         return getfield(domain, name)
     end
@@ -39,17 +47,19 @@ end
 
 boundaries(domain::TransformedDomain) = boundaries(domain.original)
 
-#angle(domain::TransformedDomain, i::Integer) = angle(domain.original, i)
-#angledivπ(domain::TransformedDomain, i::Integer) = angledivπ(domain.original, i)
-#angles(domain::TransformedDomain) = angles(domain.original)
-#angledivπ(domain::TransformedDomain) = angledivπ(domain.original)
+angle(domain::TransformedDomain, i::Integer) = angle(domain.original, i)
+angledivπ(domain::TransformedDomain, i::Integer) = angledivπ(domain.original, i)
+angles(domain::TransformedDomain) = angles(domain.original)
+angledivπ(domain::TransformedDomain) = angledivπ(domain.original)
 
-#vertex(domain::TransformedDomain, i::Integer) = domain.map(vertex(domain.original, i))
-#vertices(domain::TransformedDomain) = domain.map.(vertices(domain.original))
+vertex(domain::TransformedDomain, i::Integer) = domain.map(vertex(domain.original, i))
+vertices(domain::TransformedDomain) = domain.map.(vertices(domain.original))
 
 center(domain::TransformedDomain) = domain.map(center(domain.original))
 
 area(domain::TransformedDomain) = domain.scaling*area(domain.original)
+
+Base.in(xy, domain::TransformedDomain) = domain.invmap(xy) ∈ domain.original
 
 boundary_parameterization(t, domain::TransformedDomain, i::Integer) =
     domain.map(boundary_parameterization(t, domain.original, i))

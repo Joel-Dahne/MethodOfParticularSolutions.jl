@@ -19,10 +19,12 @@ function StandaloneVertexEigenfunction(
     domain::Triangle{T},
     i::Integer;
     stride::Integer = 1,
+    outside = false,
 ) where {T <: Union{arb,fmpq}}
     i ∈ boundaries(domain) || throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
 
     θ = domain.angles[i]
+
     if i == 1
         orientation = zero(θ)
     elseif i == 2
@@ -32,10 +34,15 @@ function StandaloneVertexEigenfunction(
             domain.angles[2] - θ
     end
 
+    if outside
+        orientation += θ
+        θ = ifelse(T == arb, 2domain.parent(π), 2) - θ
+    end
+
     return StandaloneVertexEigenfunction(
         vertex(domain, i),
         orientation,
-        domain.angles[i],
+        θ,
         stride,
         arb[],
         domain.parent,
@@ -46,8 +53,9 @@ function StandaloneVertexEigenfunction(
     domain::TransformedDomain,
     i::Integer;
     stride::Integer = 1,
+    outside = false,
 )
-    u = StandaloneVertexEigenfunction(domain.original, i, stride = stride)
+    u = StandaloneVertexEigenfunction(domain.original, i, stride = stride, outside = outside)
     # FIXME: This only works if u.θ::arb or if u.θ and
     # domain.orientation both are fmpq.
     u = StandaloneVertexEigenfunction(

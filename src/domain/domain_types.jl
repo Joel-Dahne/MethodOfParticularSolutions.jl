@@ -73,7 +73,7 @@ struct Triangle{T <: Union{fmpq,arb}} <: AbstractPlanarDomain
 end
 
 """
-    TransformedDomain{T<:AbstractPlanarDomain}(domain::T)
+    TransformedDomain{T<:AbstractPlanarDomain}(domain::T, rotation, scaling, translation)
 
 Represents a transformation of `domain` corresponding of a rotation,
 a uniform scaling and a translation (in that order).
