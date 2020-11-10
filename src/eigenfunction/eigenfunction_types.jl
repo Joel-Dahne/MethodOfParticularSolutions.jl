@@ -4,6 +4,10 @@ abstract type AbstractSphericalEigenfunction <: AbstractEigenfunction end
 
 abstract type AbstractPlanarEigenfunction <: AbstractEigenfunction end
 
+###
+### Spherical eigenfunctions
+###
+
 mutable struct SphericalVertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractSphericalEigenfunction
     domain::SphericalTriangle{T}
     vertex::Int
@@ -30,15 +34,12 @@ mutable struct KrewerasEigenfunction{T <: Union{fmpq, arb}} <: AbstractSpherical
     coefficients::Vector{arb}
 end
 
+###
+### Planar eigenfunctions
+###
+
 mutable struct LShapeEigenfunction <: AbstractPlanarEigenfunction
     domain::LShape
-    stride::Int
-    coefficients::Vector{arb}
-end
-
-mutable struct VertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
-    domain::Triangle{T}
-    vertex::Int
     stride::Int
     coefficients::Vector{arb}
 end
@@ -57,6 +58,12 @@ struct StandaloneInteriorEigenfunction <: AbstractPlanarEigenfunction
     stride::Int
     coefficients::Vector{arb}
     parent::ArbField
+end
+
+mutable struct VertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
+    domain::Triangle{T}
+    vertex::Int
+    u::StandaloneVertexEigenfunction{T}
 end
 
 mutable struct CombinedEigenfunction <: AbstractPlanarEigenfunction

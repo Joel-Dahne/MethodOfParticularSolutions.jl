@@ -27,9 +27,10 @@ function (u::AbstractPlanarEigenfunction)(xy::AbstractVector{T},
         xy = coordinate_transformation(u, xy)
     end
 
+    coeffs = coefficients(u)
     res = zero(λ)
-    for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(xy, λ, k, boundary = boundary, notransform = true)
+    for k in 1:length(coeffs)
+        res += coeffs[k]*u(xy, λ, k, boundary = boundary, notransform = true)
         if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
             return res
         end
@@ -48,9 +49,10 @@ function (u::AbstractPlanarEigenfunction)(r::T,
         r, θ = coordinate_transformation(u, r, θ)
     end
 
+    coeffs = coefficients(u)
     res = zero(λ)
-    for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(r, θ, λ, k, boundary = boundary, notransform = true)
+    for k in 1:length(coeffs)
+        res += coeffs[k]*u(r, θ, λ, k, boundary = boundary, notransform = true)
         if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
             return res
         end

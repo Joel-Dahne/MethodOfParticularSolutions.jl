@@ -66,13 +66,13 @@ nu(u::StandaloneVertexEigenfunction{fmpq}, k::Integer = 1) = u.parent(k*inv(u.θ
 nu(u::StandaloneVertexEigenfunction{arb}, k::Integer = 1) = u.parent(k*u.parent(π)/u.θ)
 
 """
-        coordinate_transformation(u::StandaloneVertexEigenfunction, xy::AbstractVector)
+    coordinate_transformation(u::StandaloneVertexEigenfunction, xy::AbstractVector)
 
-    Takes a 2-element vector `xy` representing a point in the plane in
-    Cartesian coordinates and makes a (affine) change of coordinates so
-    that `u.vertex` is put at the origin and rotated `u.orientation`
-    clockwise.
-    """
+Takes a 2-element vector `xy` representing a point in the plane in
+Cartesian coordinates and makes a (affine) change of coordinates so
+that `u.vertex` is put at the origin and rotated `u.orientation`
+clockwise.
+"""
 function coordinate_transformation(u::StandaloneVertexEigenfunction{fmpq}, xy::AbstractVector)
     s, c = sincospi(-u.orientation, u.parent)
     M = SMatrix{2, 2}(c, s, -s, c)
@@ -86,12 +86,12 @@ function coordinate_transformation(u::StandaloneVertexEigenfunction{arb}, xy::Ab
 end
 
 """
-        coordinate_transformation(u::StandaloneVertexEigenfunction, r, θ)
+    coordinate_transformation(u::StandaloneVertexEigenfunction, r, θ)
 
-    Takes a point `r, θ` in polar coordinates (affine) change of
-    coordinates so the vertex `u` originates from is put at the origin
-    with the right edge on the x-axis.
-    """
+Takes a point `r, θ` in polar coordinates (affine) change of
+coordinates so the vertex `u` originates from is put at the origin
+with the right edge on the x-axis.
+"""
 function coordinate_transformation(u::StandaloneVertexEigenfunction, r, θ)
     return polar_from_cartesian(coordinate_transformation(u, cartesian_from_polar(r, θ)))
 end

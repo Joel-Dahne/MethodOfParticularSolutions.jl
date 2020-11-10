@@ -1,15 +1,22 @@
 function VertexEigenfunction(domain::Triangle, vertex::Integer; stride::Integer = 1)
-    vertex ∈ boundaries(domain) || throw(ArgumentError("attempt to get vertex $vertex from a $(typeof(domain))"))
-    return VertexEigenfunction(domain, vertex, stride, arb[])
+    return VertexEigenfunction(
+        domain,
+        vertex,
+        StandaloneVertexEigenfunction(domain, vertex, stride = stride),
+    )
 end
 
 function Base.show(io::IO, u::VertexEigenfunction)
     println(io, "Vertex eigenfunction from vertex $(u.vertex)")
     if !haskey(io, :compact) || !io[:compact]
         println(io, "domain: $(u.domain)")
-        print(io, "number of set coefficients: $(length(u.coefficients))")
+        print(io, "number of set coefficients: $(length(coefficients(u)))")
     end
 end
+
+coefficients(u::VertexEigenfunction) = u.u.coefficients
+set_eigenfunction!(u::VertexEigenfunction, coefficients::Vector) =
+    set_eigenfunction!(u.u, coefficients)
 
 function active_boundaries(domain::Triangle, u::VertexEigenfunction)
     if domain === u.domain
@@ -19,47 +26,11 @@ function active_boundaries(domain::Triangle, u::VertexEigenfunction)
     end
 end
 
-"""
-    nu(u::VertexEigenfunction, k::Integer)
+coordinate_transformation(u::VertexEigenfunction, xy::AbstractVector) =
+    coordinate_transformation(u.u, xy)
 
-Return `k*ν₀` as an `arb`, the parameter used for the Bessel function.
-"""
-function nu(u::VertexEigenfunction, k::Integer = 1)
-    u.domain.parent(k*inv(angledivπ(u.domain, u.vertex)))
-end
-
-"""
-    coordinate_transformation(u::VertexEigenfunction, xy::AbstractVector)
-
-Takes a 2-element vector `xy` representing a point in the plane in
-Cartesian coordinates and makes a (affine) change of coordinates so
-the vertex `u` originates from is put at the origin with the right
-edge on the x-axis.
-"""
-function coordinate_transformation(u::VertexEigenfunction, xy::AbstractVector)
-    if u.vertex == 1
-        return xy
-    end
-    if u.vertex == 2
-        θ = angle(u.domain, 2) - u.domain.parent(π)
-    elseif u.vertex == 3
-        θ = angle(u.domain, 2) + angle(u.domain, 3) - 2u.domain.parent(π)
-    end
-    s, c = sincos(θ)
-    M = SMatrix{2, 2}(c, s, -s, c)
-    return M*(xy .- vertex(u.domain, u.vertex))
-end
-
-"""
-    coordinate_transformation(u::VertexEigenfunction, r, θ)
-
-Takes a point `r, θ` in polar coordinates (affine) change of
-coordinates so the vertex `u` originates from is put at the origin
-with the right edge on the x-axis.
-"""
-function coordinate_transformation(u::VertexEigenfunction, r, θ)
-    return polar_from_cartesian(coordinate_transformation(u, cartesian_from_polar(r, θ)))
-end
+coordinate_transformation(u::VertexEigenfunction, r, θ) =
+    coordinate_transformation(u.u, r, θ)
 
 function (u::VertexEigenfunction)(xy::AbstractVector{T},
                                   λ::arb,
@@ -67,15 +38,7 @@ function (u::VertexEigenfunction)(xy::AbstractVector{T},
                                   boundary = nothing,
                                   notransform::Bool = false,
                                   ) where {T <: Union{arb, arb_series}}
-    if !notransform
-        xy = coordinate_transformation(u, xy)
-    end
-
-    k = 1 + (k - 1)*u.stride
-
-    ν = nu(u, k)
-    r, θ = polar_from_cartesian(xy)
-    return bessel_j(ν, sqrt(λ)*r)*sin(ν*θ)
+    return u.u(xy, λ, k, boundary = boundary, notransform = notransform)
 end
 
 function (u::VertexEigenfunction)(r::T,
@@ -85,12 +48,5 @@ function (u::VertexEigenfunction)(r::T,
                                   boundary = nothing,
                                   notransform::Bool = false,
                                   ) where {T <: Union{arb, arb_series}}
-    if !notransform
-        r, θ = coordinate_transformation(u, r, θ)
-    end
-
-    k = 1 + (k - 1)*u.stride
-
-    ν = nu(u, k)
-    return bessel_j(ν, sqrt(λ)*r)*sin(ν*θ)
+    return u.u(r, θ, λ, k, boundary = boundary, notransform = notransform)
 end
