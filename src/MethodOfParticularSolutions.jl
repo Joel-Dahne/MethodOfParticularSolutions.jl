@@ -24,6 +24,8 @@ export AbstractDomain,
 
     Triangle,
 
+    TransformedDomain,
+
     AbstractEigenfunction,
     coefficients, set_eigenfunction!,
 
@@ -66,6 +68,7 @@ include("domain/AbstractDomain.jl")
 include("domain/SphericalTriangle.jl")
 include("domain/LShape.jl")
 include("domain/Triangle.jl")
+include("domain/TransformedDomain.jl")
 include("domain/plotting.jl")
 
 # Include methods for eigenfunctions

@@ -71,3 +71,16 @@ struct Triangle{T <: Union{fmpq,arb}} <: AbstractPlanarDomain
         return new{arb}((α, β, γ), parent)
     end
 end
+
+"""
+    TransformedDomain{T<:AbstractPlanarDomain}(domain::T)
+
+Represents a transformation of `domain` corresponding of a rotation,
+a uniform scaling and a translation (in that order).
+"""
+struct TransformedDomain{T<:Union{fmpq,arb},S<:AbstractPlanarDomain} <: AbstractPlanarDomain
+    original::S
+    rotation::T
+    scaling::arb
+    translation::SVector{2,arb}
+end

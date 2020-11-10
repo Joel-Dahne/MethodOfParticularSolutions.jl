@@ -42,6 +42,26 @@ function StandaloneVertexEigenfunction(
     )
 end
 
+function StandaloneVertexEigenfunction(
+    domain::TransformedDomain,
+    i::Integer;
+    stride::Integer = 1,
+)
+    u = StandaloneVertexEigenfunction(domain.original, i, stride = stride)
+    # FIXME: This only works if u.θ::arb or if u.θ and
+    # domain.orientation both are fmpq.
+    u = StandaloneVertexEigenfunction(
+        domain.map(u.vertex),
+        u.orientation + domain.rotation,
+        u.θ,
+        stride,
+        u.coefficients,
+        domain.parent
+    )
+
+    return u
+end
+
 function Base.show(io::IO, u::StandaloneVertexEigenfunction)
     println(io, "Standalone vertex eigenfunction")
     if !haskey(io, :compact) || !io[:compact]
