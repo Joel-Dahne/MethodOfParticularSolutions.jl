@@ -1,13 +1,67 @@
 function CombinedEigenfunction(
     domain::AbstractPlanarDomain,
     us::Vector{<:AbstractPlanarEigenfunction},
-    orders::Vector{Int} = ones(Int, length(us)),
+    orders::Vector{Int} = ones(Int, length(us));
+    us_to_boundary = [active_boundaries(domain, u) for u in us]
 )
-    actbnd = [active_boundaries(domain, u) for u in us]
     boundary_to_us = OrderedDict(
-        i => BitSet(findall(B -> i ∈ B, actbnd))
+        i => BitSet(findall(B -> i ∈ B, us_to_boundary))
         for i in boundaries(domain)
     )
+
+    return CombinedEigenfunction(
+        domain,
+        us,
+        boundary_to_us,
+        orders,
+    )
+end
+
+function CombinedEigenfunction(
+    domain::IntersectedDomain,
+    orders::Vector{Int} = ones(Int, length(boundaries(domain))),
+)
+    boundary_to_us = OrderedDict(i => BitSet() for i in boundaries(domain))
+    us = AbstractPlanarEigenfunction[]
+
+    for i in exterior_boundaries(domain)
+        # TODO: Handle other types
+        @assert typeof(domain.exterior) <: Triangle ||
+            typeof(domain.exterior) <: TransformedDomain{<:Triangle}
+
+        v = StandaloneVertexEigenfunction(domain.exterior, i)
+        push!(us, v)
+        idx = length(us)
+        push!(boundary_to_us[i], idx)
+        for j in interior_boundaries(domain)
+            push!(boundary_to_us[j], idx)
+        end
+    end
+
+    for i in interior_boundaries(domain)
+        _, ip = get_domain_and_boundary(domain, i)
+        # TODO: Handle other types
+        @assert typeof(domain.exterior) <: Triangle ||
+            typeof(domain.exterior) <: TransformedDomain{<:Triangle}
+
+        v = StandaloneVertexEigenfunction(domain.interior, ip, outside = true)
+        push!(us, v)
+
+        idx = length(us)
+        push!(boundary_to_us[i], length(us))
+        for j in exterior_boundaries(domain)
+            push!(boundary_to_us[j], idx)
+        end
+    end
+
+    # TODO: Add interior eigenfunction
+    v = StandaloneInteriorEigenfunction(domain)
+    push!(us, v)
+    idx = length(us)
+    for j in boundaries(domain)
+        push!(boundary_to_us[j], idx)
+    end
+
     return CombinedEigenfunction(
         domain,
         us,
