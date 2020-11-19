@@ -73,6 +73,22 @@ struct Triangle{T <: Union{fmpq,arb}} <: AbstractPlanarDomain
 end
 
 """
+    Polygon(angles, vertices)
+
+Create a (planar) polygon with the given angles. To simplify the
+implementation we also require that the location. of the vertices are
+given.
+
+The boundaries are enumerated by which vertex they are next to, in
+positive order.
+"""
+struct Polygon{T <: Union{fmpq,arb}} <: AbstractPlanarDomain
+    angles::Vector{fmpq}
+    vertices::Vector{SVector{2,arb}}
+    parent::ArbField
+end
+
+"""
     TransformedDomain{T<:AbstractPlanarDomain}(domain::T, rotation, scaling, translation)
 
 Represents a transformation of `domain` corresponding of a rotation,
@@ -83,4 +99,18 @@ struct TransformedDomain{T<:Union{fmpq,arb},S<:AbstractPlanarDomain} <: Abstract
     rotation::T
     scaling::arb
     translation::SVector{2,arb}
+end
+
+"""
+    IntersectedDomain{T,S}(exterior::T, interior::S)
+
+Represents a domain given by removing from `exterior` the domain
+`interior`. It's assumed that `interior` is contained in `exterior`.
+
+The boundaries are enumerated in a way such that first comes the
+exterior domains boundaries and then comes the interior domains.
+"""
+struct IntersectedDomain{T<:AbstractPlanarDomain,S<:AbstractPlanarDomain} <: AbstractPlanarDomain
+    exterior::T
+    interior::S
 end
