@@ -100,5 +100,6 @@ include("trace.jl")
 
 include("examples/triangles.jl")
 include("examples/denominators.jl")
+include("examples/domains.jl")
 
 end # module
