@@ -147,6 +147,14 @@ function (u::StandaloneVertexEigenfunction)(r::T,
         r, θ = coordinate_transformation(u, r, θ)
     end
 
+    # TODO: We have to choose a branch to work on. This does depend on
+    # the domain but for now we only implement the one with θ on the
+    # interval [0, 2π). Nemo doesn't implement mod2pi so we just do a
+    # partial solution of adding 2π if it's below 0.
+    if (T == arb && isnegative(θ)) || (T == arb_series && isnegative(θ[0]))
+        θ += 2parent(θ)(π)
+    end
+
     k = 1 + (k - 1)*u.stride
 
     ν = nu(u, k)
