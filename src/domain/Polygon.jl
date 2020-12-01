@@ -83,7 +83,8 @@ function boundary_points(domain::Polygon, i::Integer, n::Integer)
 
     points = Vector{SVector{2, arb}}(undef, n)
     for j in 1:n
-        t = domain.parent(j//(n + 1))
+        #t = domain.parent(j//(n + 1)) # Linear
+        t = (cospi(domain.parent((2j - 1)//2n)) + 1)/2 # Chebyshev
         points[j] = v .+ t.*(w - v)
     end
 
