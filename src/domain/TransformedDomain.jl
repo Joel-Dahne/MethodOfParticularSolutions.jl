@@ -1,3 +1,8 @@
+function TransformedDomain{T,S}(domain::TransformedDomain{T,S}, parent::ArbField) where {T,S}
+    # TODO: Might need to recompute values here
+    return TransformedDomain(S(domain.original, parent), domain.rotation, domain.scaling, domain.translation)
+end
+
 function TransformedDomain(domain, rotation::T, scaling, translation) where {T}
     if T == fmpq || T <: Rational
         rotation = fmpq(rotation)

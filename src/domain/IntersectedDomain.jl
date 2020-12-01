@@ -1,3 +1,10 @@
+function IntersectedDomain{T,S}(
+    domain::IntersectedDomain{T,S},
+    parent::ArbField) where {T<:AbstractPlanarDomain,S<:AbstractPlanarDomain}
+    return IntersectedDomain(T(domain.exterior, parent), S(domain.interior, parent))
+end
+
+
 function Base.show(io::IO, domain::IntersectedDomain)
     println(io, "Intersected domain")
     print(io, "Exterior: $(domain.exterior)")
@@ -41,9 +48,21 @@ function get_domain_and_boundary(domain::IntersectedDomain, i::Integer)
     throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
 end
 
+function vertex(domain::IntersectedDomain, i::Integer)
+    d, j = get_domain_and_boundary(domain, i)
+    return vertex(d, j)
+end
+
+vertices(domain::IntersectedDomain) = [
+    vertices(domain.exterior)...,
+    vertices(domain.interior)...
+]
+
 center(domain::IntersectedDomain) = center(domain.exterior)
 
 area(domain::IntersectedDomain) = area(domain.exterior) - area(domain.interior)
+
+Base.in(xy, domain::IntersectedDomain) = xy ∈ domain.exterior && !(xy ∈ domain.interior)
 
 boundary_parameterization(t, domain::IntersectedDomain, i::Integer) =
     boundary_parameterization(t, get_domain_and_boundary(domain, i)...)
