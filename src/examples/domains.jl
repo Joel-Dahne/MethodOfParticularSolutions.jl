@@ -59,3 +59,74 @@ function example_domain_ngon(n, parent = RealField(precision(BigFloat)))
 
     return domain, u
 end
+
+function example_domain_triangle_in_triangle(parent = RealField(precision(BigFloat)))
+    domain1 = Triangle(fmpq(1//3), fmpq(1//3), parent)
+    domain2 = TransformedDomain(
+        Triangle(fmpq(1//3), fmpq(1//3), parent),
+        fmpq(0),
+        parent(0.25),
+        SVector(parent(0.375), parent(0.375))
+    )
+
+    domain = IntersectedDomain(domain1, domain2)
+
+    us = vcat(
+        [StandaloneLightningEigenfunction(domain1, i) for i in 1:3],
+        [StandaloneLightningEigenfunction(domain2, i, outside = true, l = parent(0.15)) for i in 1:3],
+        [StandaloneInteriorEigenfunction([parent(0.5), parent(0.375/2)])]
+    )
+
+    u = CombinedEigenfunction(
+        domain,
+        us,
+        [1, 1, 1, 1, 1, 1, 1],
+        us_to_boundary = [
+            1:6,
+            1:6,
+            1:6,
+            1:6,
+            1:6,
+            1:6,
+            1:6,
+        ]
+    )
+
+    return domain, u
+end
+
+function example_domain_ngon_in_ngon(n1, n2, parent = RealField(precision(BigFloat)))
+    θ1 = fmpq((n1 - 2)//n1)
+    angles1 = fill(θ1, n1)
+    vertices1 = [(cos(θ), sin(θ)) for θ in (2parent(π)/n1).*(0:n1-1)]
+    domain1 = Polygon(angles1, vertices1, parent)
+
+    θ2 = fmpq((n2 - 2)//n2)
+    angles2 = fill(θ2, n2)
+    vertices2 = [(cos(θ), sin(θ)) for θ in (2parent(π)/n2).*(0:n2-1)]
+    domain2 = TransformedDomain(
+        Polygon(angles2, vertices2, parent),
+        fmpq(0),
+        parent(0.5),
+        SVector(parent(0), parent(0)),
+    )
+
+    domain = IntersectedDomain(domain1, domain2)
+
+    us = vcat(
+        [StandaloneLightningEigenfunction(domain1, i) for i in boundaries(domain1)],
+        [
+            StandaloneLightningEigenfunction(domain2, i, outside = true, l = parent(0.1))
+            for i in boundaries(domain2)
+        ],
+        [StandaloneInteriorEigenfunction(domain)]
+    )
+
+    u = CombinedEigenfunction(
+        domain,
+        us,
+        [1, 1, 1, 1, 1, 1, 1],
+    )
+
+    return domain, u
+end
