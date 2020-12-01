@@ -11,6 +11,11 @@ function mps(domain::AbstractDomain,
              show_progress = false,
              optim_show_trace = false,
              maximize_show_trace = false)
+    # Some types of eigenfunctions (e.g.
+    # StandaloneLightningEigenfunction) needs that the number of terms
+    # used is determined from the beginning.
+    set_eigenfunction!(eigenfunction, zeros(N))
+
     # Compute minimum of σ(λ)
     σ = λ -> sigma(λ, domain, eigenfunction, N,
                    num_boundary = num_boundary,

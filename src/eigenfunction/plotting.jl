@@ -35,6 +35,36 @@ function eigenfunction_plotdata(u::StandaloneInteriorEigenfunction)
     return vertex, arc
 end
 
+function eigenfunction_plotdata(u::StandaloneLightningEigenfunction{T}) where {T}
+    v = u.vertex
+    orientation = ifelse(T == arb, u.orientation, u.parent(u.orientation)*u.parent(π))
+    θ = ifelse(T == arb, u.θ, u.parent(u.θ)*u.parent(π))
+
+    vertex = (Float64[u.vertex[1]], Float64[u.vertex[2]])
+    edges = begin
+        s1, c1 = sincos(orientation)
+        v1 = v + 0.1*SVector(c1, s1)
+        s2, c2 = sincos(orientation + θ)
+        v2 = v + 0.1*SVector(c2, s2)
+        (Float64[v1[1], u.vertex[1], v2[1]], Float64[v1[2], u.vertex[2], v2[2]])
+    end
+    arc = begin
+        res = [
+            v + 0.1*SVector(cos(orientation + t*θ), sin(orientation + t*θ))
+            for t in range(0, 1, length = 20)
+        ]
+        (Float64.(getindex.(res, 1)), Float64.(getindex.(res, 2)))
+    end
+
+    charges = begin
+        n = div(length(coefficients(u)) - 1, 3) + 1
+        cs = [charge(u, i, n, true) for i in 1:n]
+        (Float64.(getindex.(cs, 1)), Float64.(getindex.(cs, 2)))
+    end
+
+    return vertex, edges, arc, charges
+end
+
 @recipe function f(u::StandaloneVertexEigenfunction)
     seriestype := [:path :path :scatter]
     linewidth --> [2 3 3]
@@ -75,6 +105,32 @@ end
     y = hcat(
         arc[2],
         [vertex[2]; fill(NaN, length(arc[2]) - length(vertex[2]))],
+    )
+
+    return (x, y)
+end
+
+@recipe function f(u::StandaloneLightningEigenfunction)
+    seriestype := [:path :path :scatter :scatter]
+    linewidth --> [2 3 3]
+    markersize --> [5 5 5 2]
+    label --> ["" "" "u" ""]
+    seriescolor --> [:blue :blue :red :green]
+    linestyle --> [:dot :solid :solid :solid]
+
+    vertex, edges, arc, charges = eigenfunction_plotdata(u)
+
+    x = hcat(
+        arc[1],
+        [edges[1]; fill(NaN, length(arc[1]) - length(edges[1]))],
+        [vertex[1]; fill(NaN, length(arc[1]) - length(vertex[1]))],
+        [charges[1]; fill(NaN, length(arc[1]) - length(charges[1]))],
+    )
+    y = hcat(
+        arc[2],
+        [edges[2]; fill(NaN, length(arc[2]) - length(edges[2]))],
+        [vertex[2]; fill(NaN, length(arc[2]) - length(vertex[2]))],
+        [charges[2]; fill(NaN, length(arc[2]) - length(charges[2]))],
     )
 
     return (x, y)
@@ -131,19 +187,36 @@ end
     end
 
     pts = SVector.(domain.parent.(xs'), domain.parent.(ys));
-    res = Float64.(abs.(u.(pts, domain.parent(λ))))
+    res = similar(pts, Float64)
+    let λ = domain.parent(λ)
+        for i in eachindex(pts)
+            if pts[i] ∈ domain
+                res[i] = abs(u(pts[i], λ))
+            else
+                res[i] = 0
+            end
+        end
+    end
+    #res = Float64.(abs.(u.(pts, domain.parent(λ))))
+
     @series begin
+        xlims := extrema(xs)
+        ylims := extrema(ys)
         seriestype := :heatmap
         Float64.(xs), Float64.(ys), res
     end
 
     @series begin
+        xlims := extrema(xs)
+        ylims := extrema(ys)
         label := ""
         domain, 100, 0
     end
 
     for v in u.us
         @series begin
+            xlims := extrema(xs)
+            ylims := extrema(ys)
             label := ""
             v
         end

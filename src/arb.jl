@@ -33,6 +33,14 @@ function bessel_j(ν::arb, z::arb)
     return res
 end
 
+function bessel_y(ν::arb, z::arb)
+    res = parent(z)()
+    ccall((:arb_hypgeom_bessel_y, Nemo.libarb), Nothing,
+          (Ref{arb}, Ref{arb}, Ref{arb}, Clong),
+          res, ν, z, parent(z).prec)
+    return res
+end
+
 """
     getinterval(x::arb)
 > Return an interval [a,b] containing the ball x.

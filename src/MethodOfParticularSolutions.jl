@@ -49,6 +49,8 @@ export AbstractDomain,
 
     StandaloneInteriorEigenfunction,
 
+    StandaloneLightningEigenfunction,
+
     CombinedEigenfunction,
 
     sigma, sigma_coefficients,
@@ -89,6 +91,7 @@ include("eigenfunction/LShapeEigenfunction.jl")
 include("eigenfunction/VertexEigenfunction.jl")
 include("eigenfunction/StandaloneVertexEigenfunction.jl")
 include("eigenfunction/StandaloneInteriorEigenfunction.jl")
+include("eigenfunction/StandaloneLightningEigenfunction.jl")
 include("eigenfunction/CombinedEigenfunction.jl")
 include("eigenfunction/plotting.jl")
 

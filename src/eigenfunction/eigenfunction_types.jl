@@ -60,6 +60,17 @@ struct StandaloneInteriorEigenfunction <: AbstractPlanarEigenfunction
     parent::ArbField
 end
 
+struct StandaloneLightningEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
+    vertex::SVector{2,arb}
+    orientation::T
+    θ::T
+    l::arb
+    σ::arb
+    stride::Int
+    coefficients::Vector{arb}
+    parent::ArbField
+end
+
 mutable struct VertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
     domain::Triangle{T}
     vertex::Int

@@ -69,6 +69,78 @@ function bessel_j(ν::arb, z::arb_series, n = length(z))
 end
 
 """
+    bessel_y(ν::arb, z::arb_series[, n = length(z)])
+
+Compute the Taylor series of the Bessel function.
+
+It's computed using a recursive formula for the Taylor coefficients of
+the Bessel functions and then composing it with `z`. Note that since
+both `bessel_j` and `bessel_y` satisfy the same differential equation
+the recursive formula is the same.
+"""
+function bessel_y(ν::arb, z::arb_series, n = length(z))
+    res = arb_series(parent(z.poly)(), n)
+
+    if n > 0
+        x = z[0]
+        a0 = bessel_y(ν, x)
+        res[0] = a0
+
+        if !isfinite(a0)
+            return arb_series(parent(z.poly)(fill(NaN, n)), n)
+        end
+
+        if n > 1
+            a1 = 1//2*(bessel_y(ν - 1, x) - bessel_y(ν + 1, x))
+            res[1] = a1
+
+            if !isfinite(a0)
+                return arb_series(parent(z.poly)(fill(NaN, n)), n)
+            end
+
+            if n > 2
+                a2 = 1//8*(bessel_y(ν - 2, x) + bessel_y(ν + 2, x) - 2a0)
+                res[2] = a2
+
+
+                if !isfinite(a0)
+                    return arb_series(parent(z.poly)(fill(NaN, n)), n)
+                end
+
+                if n > 3
+                    a3 = 1//48*(bessel_y(ν - 3, x) - bessel_y(ν + 3, x) - 6a1)
+                    res[3] = a3
+
+
+                    if !isfinite(a0)
+                        return arb_series(parent(z.poly)(fill(NaN, n)), n)
+                    end
+
+                    if n > 4
+                        x2 = x^2
+                        ν2 = ν^2
+                        for i in 4:n-1
+                            k = i - 4
+                            ai = -(res[k]
+                                   + 2x*res[k + 1]
+                                   + (k^2 + 4k + 4 - ν2 + x2)*res[k + 2]
+                                   + (2k^2 + 11k + 15)*x*res[k + 3]
+                                   )/(x2*(k^2 + 7k + 12))
+                            res[i] = ai
+                        end
+                    end
+                end
+            end
+        end
+    end
+    # Compose the Taylor series for the Bessel function with that of z
+    z_tmp = arb_series(deepcopy(z.poly))
+    z_tmp[0] = base_ring(parent(z.poly))(0)
+
+    return Nemo.compose(res, z_tmp, n)
+end
+
+"""
     legendre_p(ν::arb_series, μ::arb, z::arb[, n = length(ν)])
 
 > Compute the Taylor series of the Legendre function with respect to
