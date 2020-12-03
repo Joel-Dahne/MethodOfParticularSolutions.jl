@@ -143,17 +143,6 @@ function coordinate_transformation(u::StandaloneLightningEigenfunction{arb}, xy:
 end
 
 """
-    coordinate_transformation(u::StandaloneLightningEigenfunction, r, θ)
-
-Takes a point `r, θ` in polar coordinates (affine) change of
-coordinates so the vertex `u` originates from is put at the origin
-with the right edge on the x-axis.
-"""
-function coordinate_transformation(u::StandaloneLightningEigenfunction, r, θ)
-    return polar_from_cartesian(coordinate_transformation(u, cartesian_from_polar(r, θ)))
-end
-
-"""
     chargedistance(u::StandaloneLightningEigenfunction, i::Integer, n::Integer)
 
 Compute the distance from the vertex for the `i`th charge point
@@ -196,13 +185,14 @@ function charge(
     end
 end
 
-function (u::StandaloneLightningEigenfunction)(xy::AbstractVector{T},
-                                               λ::arb,
-                                               k::Integer;
-                                               boundary = nothing,
-                                               notransform::Bool = false,
-                                               n = div(length(coefficients(u)) - 1, 3) + 1, # Total number of charge points
-                                               ) where {T <: Union{arb, arb_series}}
+function (u::StandaloneLightningEigenfunction)(
+    xy::AbstractVector{T},
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+    n = div(length(coefficients(u)) - 1, 3) + 1, # Total number of charge points
+) where {T <: Union{arb, arb_series}}
     if !notransform
         xy = coordinate_transformation(u, xy)
     end
@@ -211,23 +201,10 @@ function (u::StandaloneLightningEigenfunction)(xy::AbstractVector{T},
     # point
     xy = xy - charge(u, div(k - 1, 3) + 1, n)
 
-    return u(polar_from_cartesian(xy)..., λ, k, boundary = boundary, notransform = true)
-end
-
-function (u::StandaloneLightningEigenfunction)(r::T,
-                                               θ::T,
-                                               λ::arb,
-                                               k::Integer;
-                                               boundary = nothing,
-                                               notransform::Bool = false,
-                                               ) where {T <: Union{arb, arb_series}}
-    if !notransform
-        r, θ = coordinate_transformation(u, r, θ)
-    end
-
-    # TODO: Handle change of coordinate corresponding to charge point.
-
     k = 1 + (k - 1)*u.stride
+
+    r = sqrt(xy[1]^2 + xy[2]^2)
+    θ = atan(xy[2], xy[1])
 
     if mod1(k, 3) == 1
         return bessel_y(zero(λ), r*sqrt(λ))

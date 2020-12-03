@@ -38,42 +38,23 @@ function coordinate_transformation(u::StandaloneInteriorEigenfunction, xy::Abstr
     return xy .- u.vertex
 end
 
-"""
-    coordinate_transformation(u::StandaloneInteriorEigenfunction, r, θ)
-
-Takes a point `r, θ` in polar coordinates and makes a (affine) change
-of coordinates so that `u.vertex` is put at the origin.
-"""
-function coordinate_transformation(u::StandaloneInteriorEigenfunction, r, θ)
-    return polar_from_cartesian(coordinate_transformation(u, cartesian_from_polar(r, θ)))
-end
-
-function (u::StandaloneInteriorEigenfunction)(xy::AbstractVector{T},
-                                            λ::arb,
-                                            k::Integer;
-                                            boundary = nothing,
-                                            notransform::Bool = false,
-                                            ) where {T <: Union{arb, arb_series}}
+function (u::StandaloneInteriorEigenfunction)(
+    xy::AbstractVector{T},
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T <: Union{arb, arb_series}}
     if !notransform
         xy = coordinate_transformation(u, xy)
-    end
-    return u(polar_from_cartesian(xy)..., λ, k, boundary = boundary, notransform = true)
-end
-
-function (u::StandaloneInteriorEigenfunction)(r::T,
-                                            θ::T,
-                                            λ::arb,
-                                            k::Integer;
-                                            boundary = nothing,
-                                            notransform::Bool = false,
-                                            ) where {T <: Union{arb, arb_series}}
-    if !notransform
-        r, θ = coordinate_transformation(u, r, θ)
     end
 
     k = 1 + (k - 1)*u.stride
 
+    r = sqrt(xy[1]^2 + xy[2]^2)
+    θ = atan(xy[2], xy[1])
     ν = u.parent(div(k, 2))
+
     if k == 1
         return bessel_j(ν, sqrt(λ)*r)
     elseif k % 2 == 0
@@ -81,6 +62,8 @@ function (u::StandaloneInteriorEigenfunction)(r::T,
     else
         return bessel_j(ν, sqrt(λ)*r)*cos(ν*θ)
     end
+
+    return u(polar_from_cartesian(xy)..., λ, k, boundary = boundary, notransform = true)
 end
 
 # TODO: Figure out how to handle this

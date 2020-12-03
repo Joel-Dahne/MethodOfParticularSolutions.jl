@@ -1,10 +1,7 @@
 """
     u(xy::AbstractVector{T}, λ::arb, k::Int; boundary = nothing, notransform::Bool = false)
-    u(r::T, θ::T, λ::arb, k::Int; boundary = nothing, notransform::Bool = false)
     u(xy::AbstractVector{T}, λ::arb, ks::UnitRange{Int}; boundary = nothing, notransform::Bool = false)
-    u(r::T, θ::T, λ::arb, ks::UnitRange{Int}; boundary = nothing, notransform::Bool = false)
     u(xy::AbstractVector{T}, λ::arb; boundary = nothing, notransform::Bool = false)
-    u(r::T, θ::T, λ::arb; boundary = nothing, notransform::Bool = false)
 
 Evaluate the eigenfunction.
 
@@ -44,25 +41,6 @@ function (u::AbstractPlanarEigenfunction)(xy::AbstractVector{T},
     return res
 end
 
-function (u::AbstractPlanarEigenfunction)(r::T,
-                                          θ::T,
-                                          λ::arb,
-                                          ks::UnitRange{Int};
-                                          boundary = nothing,
-                                          notransform::Bool = false
-                                          ) where {T <: Union{arb, arb_series}}
-    if !notransform
-        r, θ = coordinate_transformation(u, r, θ)
-    end
-
-    res = similar(ks, T)
-    for i in eachindex(ks)
-        res[i] = u(r, θ, λ, ks[i], boundary = boundary, notransform = true)
-    end
-
-    return res
-end
-
 function (u::AbstractPlanarEigenfunction)(xy::AbstractVector{T},
                                           λ::arb;
                                           boundary = nothing,
@@ -76,28 +54,6 @@ function (u::AbstractPlanarEigenfunction)(xy::AbstractVector{T},
     res = zero(λ)
     for k in 1:length(coeffs)
         res += coeffs[k]*u(xy, λ, k, boundary = boundary, notransform = true)
-        if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
-            return res
-        end
-    end
-
-    return res
-end
-
-function (u::AbstractPlanarEigenfunction)(r::T,
-                                          θ::T,
-                                          λ::arb;
-                                          boundary = nothing,
-                                          notransform::Bool = false
-                                          ) where {T <: Union{arb, arb_series}}
-    if !notransform
-        r, θ = coordinate_transformation(u, r, θ)
-    end
-
-    coeffs = coefficients(u)
-    res = zero(λ)
-    for k in 1:length(coeffs)
-        res += coeffs[k]*u(r, θ, λ, k, boundary = boundary, notransform = true)
         if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
             return res
         end

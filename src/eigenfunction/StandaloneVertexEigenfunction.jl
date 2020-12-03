@@ -113,39 +113,19 @@ function coordinate_transformation(u::StandaloneVertexEigenfunction{arb}, xy::Ab
     return M*(xy .- u.vertex)
 end
 
-"""
-    coordinate_transformation(u::StandaloneVertexEigenfunction, r, θ)
-
-Takes a point `r, θ` in polar coordinates (affine) change of
-coordinates so the vertex `u` originates from is put at the origin
-with the right edge on the x-axis.
-"""
-function coordinate_transformation(u::StandaloneVertexEigenfunction, r, θ)
-    return polar_from_cartesian(coordinate_transformation(u, cartesian_from_polar(r, θ)))
-end
-
-function (u::StandaloneVertexEigenfunction)(xy::AbstractVector{T},
-                                            λ::arb,
-                                            k::Integer;
-                                            boundary = nothing,
-                                            notransform::Bool = false,
-                                            ) where {T <: Union{arb, arb_series}}
+function (u::StandaloneVertexEigenfunction)(
+    xy::AbstractVector{T},
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T <: Union{arb, arb_series}}
     if !notransform
         xy = coordinate_transformation(u, xy)
     end
-    return u(polar_from_cartesian(xy)..., λ, k, boundary = boundary, notransform = true)
-end
 
-function (u::StandaloneVertexEigenfunction)(r::T,
-                                            θ::T,
-                                            λ::arb,
-                                            k::Integer;
-                                            boundary = nothing,
-                                            notransform::Bool = false,
-                                            ) where {T <: Union{arb, arb_series}}
-    if !notransform
-        r, θ = coordinate_transformation(u, r, θ)
-    end
+    r = sqrt(xy[1]^2 + xy[2]^2)
+    θ = atan(xy[2], xy[1])
 
     # TODO: We have to choose a branch to work on. This does depend on
     # the domain but for now we only implement the one with θ on the

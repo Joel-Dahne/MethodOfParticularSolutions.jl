@@ -29,9 +29,6 @@ end
 coordinate_transformation(u::VertexEigenfunction, xy::AbstractVector) =
     coordinate_transformation(u.u, xy)
 
-coordinate_transformation(u::VertexEigenfunction, r, θ) =
-    coordinate_transformation(u.u, r, θ)
-
 function (u::VertexEigenfunction)(xy::AbstractVector{T},
                                   λ::arb,
                                   k::Integer;
@@ -39,14 +36,4 @@ function (u::VertexEigenfunction)(xy::AbstractVector{T},
                                   notransform::Bool = false,
                                   ) where {T <: Union{arb, arb_series}}
     return u.u(xy, λ, k, boundary = boundary, notransform = notransform)
-end
-
-function (u::VertexEigenfunction)(r::T,
-                                  θ::T,
-                                  λ::arb,
-                                  k::Integer;
-                                  boundary = nothing,
-                                  notransform::Bool = false,
-                                  ) where {T <: Union{arb, arb_series}}
-    return u.u(r, θ, λ, k, boundary = boundary, notransform = notransform)
 end

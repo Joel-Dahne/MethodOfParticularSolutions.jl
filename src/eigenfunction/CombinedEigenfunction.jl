@@ -188,25 +188,6 @@ function (u::CombinedEigenfunction)(xy::AbstractVector{T},
     return u.us[i](xy, λ, j, boundary = boundary, notransform = notransform)
 end
 
-function (u::CombinedEigenfunction)(r::T,
-                                    θ::T,
-                                    λ::arb,
-                                    k::Integer;
-                                    boundary = nothing,
-                                    notransform::Bool = false
-                                    ) where {T <: Union{arb, arb_series}}
-    i, j = basis_function(u, k)
-    if !isnothing(boundary) && !(i ∈ u.boundary_to_us[boundary])
-        if T == arb
-            return u.domain.parent(0)
-        else
-            return 0*xy[1]
-        end
-    end
-
-    return u.us[i](r, θ, λ, j, boundary = boundary, notransform = notransform)
-end
-
 function (u::CombinedEigenfunction)(xy::AbstractVector{T},
                                     λ::arb,
                                     ks::UnitRange{Int};
@@ -237,50 +218,8 @@ function (u::CombinedEigenfunction)(xy::AbstractVector{T},
         end
     end
 
-    res = similar(ks, T)
     # TODO: This can be done more efficiently
-    for i in eachindex(ks)
-        j, l = basis_function(u, ks[i])
-        res[i] = res_per_index[j][l]
-    end
-
-    return res
-end
-
-function (u::CombinedEigenfunction)(r::T,
-                                    θ::T,
-                                    λ::arb,
-                                    ks::UnitRange{Int};
-                                    boundary = nothing,
-                                    notransform::Bool = false
-                                    ) where {T <: Union{arb, arb_series}}
-    if isnothing(boundary)
-        indices = eachindex(u.us)
-    else
-        indices = u.boundary_to_us[boundary]
-    end
-
-    ks_per_index = basis_function(u, ks)
-
-    res_per_index = similar(u.us, Vector{T})
-    for i in eachindex(u.us)
-        if i in indices
-            res_per_index[i] = u.us[i](
-                r,
-                θ,
-                λ,
-                ks_per_index[i],
-                boundary = boundary,
-                notransform = notransform,
-            )
-        else
-            z = T == arb ? zero(λ) : 0*xy[1]
-            res_per_index[i] = fill(z, length(ks_per_index[i]))
-        end
-    end
-
     res = similar(ks, T)
-    # TODO: This can be done more efficiently
     for i in eachindex(ks)
         j, l = basis_function(u, ks[i])
         res[i] = res_per_index[j][l]
@@ -294,40 +233,15 @@ function (u::CombinedEigenfunction)(xy::AbstractVector{T},
                                     boundary = nothing,
                                     notransform::Bool = false
                                     ) where {T <: Union{arb, arb_series}}
-    res = u.domain.parent(0)
-
     if isnothing(boundary)
         indices = eachindex(u.us)
     else
         indices = u.boundary_to_us[boundary]
     end
 
+    res = u.domain.parent(0)
     for i in indices
         res += u.us[i](xy, λ, boundary = boundary, notransform = notransform)
-        if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
-            return res
-        end
-    end
-
-    return res
-end
-
-function (u::CombinedEigenfunction)(r::T,
-                                    θ::T,
-                                    λ::arb;
-                                    boundary = nothing,
-                                    notransform::Bool = false
-                                    ) where {T <: Union{arb, arb_series}}
-    res = u.domain.parent(0)
-
-    if isnothing(boundary)
-        indices = eachindex(u.us)
-    else
-        indices = u.boundary_to_us[boundary]
-    end
-
-    for i in indices
-        res += u.us[i](r, θ, λ, boundary = boundary, notransform = notransform)
         if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
             return res
         end
