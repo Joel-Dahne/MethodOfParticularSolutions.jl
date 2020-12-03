@@ -82,6 +82,53 @@ function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{T, T},
     u(θ, ϕ, λ, k, boundary = boundary, notransform = notransform)
 end
 
+function (u::AbstractSphericalEigenfunction)(xyz::AbstractVector{T},
+                                             λ::arb,
+                                             ks::UnitRange{Int};
+                                             boundary = nothing,
+                                             notransform::Bool = false
+                                             ) where {T <: Union{arb, arb_series}}
+    if !notransform
+        xyz = coordinate_transformation(u, xyz)
+    end
+
+    res = similar(ks, T)
+    for i in eachindex(ks)
+        res[i] = u(xyz, λ, ks[i], boundary = boundary, notransform = true)
+    end
+
+    return res
+end
+
+function (u::AbstractSphericalEigenfunction)(θ::T,
+                                             ϕ::T,
+                                             λ::arb,
+                                             ks::UnitRange{Int};
+                                             boundary = nothing,
+                                             notransform::Bool = false
+                                             ) where {T <: Union{arb, arb_series}}
+    if !notransform
+        θ, ϕ = coordinate_transformation(u, θ, ϕ)
+    end
+
+    res = similar(ks, T)
+    for i in eachindex(ks)
+        res[i] = u(θ, ϕ, λ, ks[i], boundary = boundary, notransform = true)
+    end
+
+    return res
+end
+
+function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{T, T},
+                                                           NamedTuple{(:θ, :ϕ),Tuple{T, T}}},
+                                             λ::arb,
+                                             ks::UnitRange{Int};
+                                             boundary = nothing,
+                                             notransform::Bool = false
+                                             ) where {T <: Union{arb, arb_series}}
+    u(θ, ϕ, λ, ks, boundary = boundary, notransform = notransform)
+end
+
 """
     u(xyz::AbstractVector{T}, λ::arb; boundary = nothing, notransform::Bool = false)
     u(θ::T, ϕ::T, λ::arb; boundary = nothing, notransform::Bool = false)

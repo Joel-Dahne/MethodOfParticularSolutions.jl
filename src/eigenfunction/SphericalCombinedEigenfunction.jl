@@ -97,6 +97,28 @@ function basis_function(u::SphericalCombinedEigenfunction,
     i, u.orders[i]*j + k
 end
 
+"""
+    basis_function(u::SphericalCombinedEigenfunction, ks::UnitRange{Int})
+
+Return a vector with elements of type `UnitRange{Int}` where element
+`i` is the range of indices that should be used for the respective
+eigenfunctions, i.e. the eigenfunction `u.us[i]` should take the range
+given by the `i`th element in this vector.
+"""
+function basis_function(u::SphericalCombinedEigenfunction, ks::UnitRange{Int})
+    ks.start == 1 || throw(ArgumentError("ks must start with 1, got ks = $ks"))
+    ks.stop == 0 && return fill(1:0, length(u.us))
+
+    A = [0; cumsum(u.orders)]
+    fullcycles = div(ks.stop, A[end])
+    R = ks.stop%A[end]
+    remaining = [max(min(u.orders[i], R - A[i]), 0) for i in eachindex(u.us)]
+    return [
+        1:(fullcycles*u.orders[i] + remaining[i])
+        for i in eachindex(u.us)
+    ]
+end
+
 function coefficients(u::SphericalCombinedEigenfunction)
     coeffs = [coefficients(v) for v in u.us]
     N = sum(length, coeffs)
@@ -130,6 +152,66 @@ function (u::SphericalCombinedEigenfunction)(θ::T,
                                              ) where {T <: Union{arb, arb_series}}
     i, j = basis_function(u, k)
     u.us[i](θ, ϕ, λ, j, boundary = boundary, notransform = notransform)
+end
+
+function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
+                                             λ::arb,
+                                             ks::UnitRange{Int};
+                                             boundary = nothing,
+                                             notransform::Bool = false
+                                             )  where {T <: Union{arb, arb_series}}
+    ks_per_index = basis_function(u, ks)
+
+    res_per_index = similar(u.us, Vector{T})
+    for i in eachindex(u.us)
+        res_per_index[i] = u.us[i](
+            xyz,
+            λ,
+            ks_per_index[i],
+            boundary = boundary,
+            notransform = notransform,
+        )
+    end
+
+    res = similar(ks, T)
+    # TODO: This can be done more efficiently
+    for i in eachindex(ks)
+        j, l = basis_function(u, ks[i])
+        res[i] = res_per_index[j][l]
+    end
+
+    return res
+end
+
+function (u::SphericalCombinedEigenfunction)(θ::T,
+                                             ϕ::T,
+                                             λ::arb,
+                                             ks::UnitRange{Int};
+                                             boundary = nothing,
+                                             notransform::Bool = false
+                                             ) where {T <: Union{arb, arb_series}}
+    ks_per_index = basis_function(u, ks)
+
+    res_per_index = similar(u.us, Vector{T})
+    for i in eachindex(u.us)
+        res_per_index[i] = u.us[i](
+            θ,
+            ϕ,
+            λ,
+            ks_per_index[i],
+            boundary = boundary,
+            notransform = notransform,
+        )
+    end
+
+    res = similar(ks, T)
+    # TODO: This can be done more efficiently
+    for i in eachindex(ks)
+        j, l = basis_function(u, ks[i])
+        res[i] = res_per_index[j][l]
+    end
+
+    return res
 end
 
 function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},

@@ -133,6 +133,28 @@ function basis_function(u::CombinedEigenfunction, k::Integer)
     return i, u.orders[i]*j + k
 end
 
+"""
+    basis_function(u::CombinedEigenfunction, ks::UnitRange{Int})
+
+Return a vector with elements of type `UnitRange{Int}` where element
+`i` is the range of indices that should be used for the respective
+eigenfunctions, i.e. the eigenfunction `u.us[i]` should take the range
+given by the `i`th element in this vector.
+"""
+function basis_function(u::CombinedEigenfunction, ks::UnitRange{Int})
+    ks.start == 1 || throw(ArgumentError("ks must start with 1, got ks = $ks"))
+    ks.stop == 0 && return fill(1:0, length(u.us))
+
+    A = [0; cumsum(u.orders)]
+    fullcycles = div(ks.stop, A[end])
+    R = ks.stop%A[end]
+    remaining = [max(min(u.orders[i], R - A[i]), 0) for i in eachindex(u.us)]
+    return [
+        1:(fullcycles*u.orders[i] + remaining[i])
+        for i in eachindex(u.us)
+    ]
+end
+
 function coefficients(u::CombinedEigenfunction)
     coeffs = [coefficients(v) for v in u.us]
     N = sum(length, coeffs)
@@ -183,6 +205,88 @@ function (u::CombinedEigenfunction)(r::T,
     end
 
     return u.us[i](r, θ, λ, j, boundary = boundary, notransform = notransform)
+end
+
+function (u::CombinedEigenfunction)(xy::AbstractVector{T},
+                                    λ::arb,
+                                    ks::UnitRange{Int};
+                                    boundary = nothing,
+                                    notransform::Bool = false
+                                    ) where {T <: Union{arb, arb_series}}
+    if isnothing(boundary)
+        indices = eachindex(u.us)
+    else
+        indices = u.boundary_to_us[boundary]
+    end
+
+    ks_per_index = basis_function(u, ks)
+
+    res_per_index = similar(u.us, Vector{T})
+    for i in eachindex(u.us)
+        if i in indices
+            res_per_index[i] = u.us[i](
+                xy,
+                λ,
+                ks_per_index[i],
+                boundary = boundary,
+                notransform = notransform,
+            )
+        else
+            z = T == arb ? zero(λ) : 0*xy[1]
+            res_per_index[i] = fill(z, length(ks_per_index[i]))
+        end
+    end
+
+    res = similar(ks, T)
+    # TODO: This can be done more efficiently
+    for i in eachindex(ks)
+        j, l = basis_function(u, ks[i])
+        res[i] = res_per_index[j][l]
+    end
+
+    return res
+end
+
+function (u::CombinedEigenfunction)(r::T,
+                                    θ::T,
+                                    λ::arb,
+                                    ks::UnitRange{Int};
+                                    boundary = nothing,
+                                    notransform::Bool = false
+                                    ) where {T <: Union{arb, arb_series}}
+    if isnothing(boundary)
+        indices = eachindex(u.us)
+    else
+        indices = u.boundary_to_us[boundary]
+    end
+
+    ks_per_index = basis_function(u, ks)
+
+    res_per_index = similar(u.us, Vector{T})
+    for i in eachindex(u.us)
+        if i in indices
+            res_per_index[i] = u.us[i](
+                r,
+                θ,
+                λ,
+                ks_per_index[i],
+                boundary = boundary,
+                notransform = notransform,
+            )
+        else
+            z = T == arb ? zero(λ) : 0*xy[1]
+            res_per_index[i] = fill(z, length(ks_per_index[i]))
+        end
+    end
+
+    res = similar(ks, T)
+    # TODO: This can be done more efficiently
+    for i in eachindex(ks)
+        j, l = basis_function(u, ks[i])
+        res[i] = res_per_index[j][l]
+    end
+
+    return res
 end
 
 function (u::CombinedEigenfunction)(xy::AbstractVector{T},

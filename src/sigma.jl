@@ -35,14 +35,10 @@ function sigma_matrix(
         # TODO: Allow evaluation on ranges of indices, to be able to
         # reuse computations similar to several basis functions.
         for i in 1:num_boundary
-            for k in 1:N
-                A[i, k] = u(boundary[i], λ, k, boundary = boundary_index[i])
-            end
+            A[i, :] = u(boundary[i], λ, 1:N, boundary = boundary_index[i])
         end
         for i in 1:num_interior
-            for k in 1:N
-                A[num_boundary + i, k] = u(interior[i], λ, k)
-            end
+            A[num_boundary + i, :] = u(interior[i], λ, 1:N)
         end
     end
 

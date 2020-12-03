@@ -36,6 +36,28 @@ end
 
 function (u::LShapeEigenfunction)(r::T,
                                   θ::T,
+                                  λ::arb,
+                                  ks::UnitRange{Int};
+                                  boundary = nothing
+                                  ) where {T <: Union{arb, arb_series}}
+    res = similar(ks, T)
+    for i in eachindex(ks)
+        res[i] = u(r, θ, λ, ks[i], boundary = boundary)
+    end
+
+    return res
+end
+
+function (u::LShapeEigenfunction)((r, θ)::Tuple{T, T},
+                                  λ::arb,
+                                  ks::UnitRange{Int};
+                                  boundary = nothing
+                                  ) where {T <: Union{arb, arb_series}}
+    u(r, θ, λ, ks, boundary = boundary)
+end
+
+function (u::LShapeEigenfunction)(r::T,
+                                  θ::T,
                                   λ::arb;
                                   boundary = nothing
                                   ) where {T <: Union{arb, arb_series}}
