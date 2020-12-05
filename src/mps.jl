@@ -4,7 +4,7 @@ function mps(domain::AbstractDomain,
              N::Integer = 8;
              num_boundary = 2N,
              num_interior = 2N,
-             optim_prec::Int = prec(domain.parent),
+             optim_prec::Int = precision(domain.parent),
              norm_rigorous = true,
              store_trace = false,
              extended_trace = false,
@@ -86,7 +86,7 @@ function mps(domain::AbstractDomain,
         else
             λ, n, m = λ
         end
-        state = MPSState(N, prec(domain.parent), optim_prec,
+        state = MPSState(N, precision(domain.parent), optim_prec,
                          n, m, domain.parent(λ_minimizer), λ, metadata)
         return λ, state
     else
@@ -205,7 +205,7 @@ function iteratemps(domain::AbstractDomain,
                                      + optim_prec_adaptive_extra)
                 else
                     optim_prec = min(optim_prec,
-                                     prec(domain.parent) - extra_prec)
+                                     precision(domain.parent) - extra_prec)
                 end
             end
 
