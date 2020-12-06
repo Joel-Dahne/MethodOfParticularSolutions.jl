@@ -66,7 +66,6 @@ struct StandaloneLightningEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanar
     θ::T
     l::arb
     σ::arb
-    stride::Int
     coefficients::Vector{arb}
     parent::ArbField
 end

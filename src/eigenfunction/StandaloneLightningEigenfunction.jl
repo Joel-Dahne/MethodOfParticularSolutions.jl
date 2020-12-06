@@ -2,7 +2,6 @@ function StandaloneLightningEigenfunction(
     vertex::SVector{2,arb},
     orientation::T,
     θ::T,
-    stride::Integer = 1,
     parent::ArbField = parent(vertex[1]);
     l::arb = parent(1),
     σ::arb = parent(2.5),
@@ -13,7 +12,6 @@ function StandaloneLightningEigenfunction(
         θ,
         l,
         σ,
-        stride,
         arb[],
         parent,
     )
@@ -22,7 +20,6 @@ end
 function StandaloneLightningEigenfunction(
     domain::Triangle{T},
     i::Integer;
-    stride::Integer = 1,
     outside = false,
     l::arb = domain.parent(1),
     σ::arb = domain.parent(2.5),
@@ -47,7 +44,6 @@ function StandaloneLightningEigenfunction(
         vertex(domain, i),
         orientation,
         θ,
-        stride,
         domain.parent;
         l,
         σ
@@ -57,7 +53,6 @@ end
 function StandaloneLightningEigenfunction(
     domain::Polygon{T},
     i::Integer;
-    stride::Integer = 1,
     outside = false,
     l::arb = domain.parent(1),
     σ::arb = domain.parent(2.5),
@@ -74,7 +69,6 @@ function StandaloneLightningEigenfunction(
         vertex(domain, i),
         orientation,
         θ,
-        stride,
         domain.parent;
         l,
         σ
@@ -84,12 +78,11 @@ end
 function StandaloneLightningEigenfunction(
     domain::TransformedDomain,
     i::Integer;
-    stride::Integer = 1,
     outside = false,
     l::arb = domain.parent(1),
     σ::arb = domain.parent(2.5),
 )
-    u = StandaloneLightningEigenfunction(domain.original, i; stride, outside, l, σ)
+    u = StandaloneLightningEigenfunction(domain.original, i; outside, l, σ)
     # FIXME: This only works if u.θ::arb or if u.θ and
     # domain.orientation both are fmpq.
     u = StandaloneLightningEigenfunction(
@@ -98,7 +91,6 @@ function StandaloneLightningEigenfunction(
         u.θ,
         u.l,
         u.σ,
-        stride,
         u.coefficients,
         domain.parent
     )
@@ -201,8 +193,6 @@ function (u::StandaloneLightningEigenfunction)(
     # point
     xy = xy - charge(u, div(k - 1, 3) + 1, n)
 
-    k = 1 + (k - 1)*u.stride
-
     r = sqrt(xy[1]^2 + xy[2]^2)
     θ = atan(xy[2], xy[1])
 
@@ -213,6 +203,80 @@ function (u::StandaloneLightningEigenfunction)(
     else
         return bessel_y(one(λ), r*sqrt(λ))*cos(θ)
     end
+end
+
+function (u::StandaloneLightningEigenfunction)(
+    xy::AbstractVector{T},
+    λ::arb,
+    ks::UnitRange{Int};
+    boundary = nothing,
+    notransform::Bool = false,
+    n = div(length(coefficients(u)) - 1, 3) + 1, # Total number of charge points
+) where {T <: Union{arb, arb_series}}
+    if !notransform
+        xy = coordinate_transformation(u, xy)
+    end
+
+    res = similar(ks, T)
+    i = 1
+    charge_indices = (div(ks.start-1, 3)+1):(div(ks.stop-1, 3)+1)
+    for charge_index in charge_indices
+        # Perform the change of coordinates corresponding to the charge
+        # point
+        xy_local = xy - charge(u, charge_index, n)
+        r, θ = polar_from_cartesian(xy_local)
+
+        rsqrtλ = r*sqrt(λ)
+        b = bessel_y(one(λ), rsqrtλ)
+        s, c = sincos(θ)
+
+        if charge_index == charge_indices.start == charge_indices.stop
+            # Special case when first and last charge are the same
+            if mod1(ks.start, 3) == 1
+                res[i] = bessel_y(zero(λ), rsqrtλ)
+                i += 1
+            end
+            if mod1(ks.start, 3) <= 2 && mod1(ks.stop, 3) >= 2
+                res[i] = b*s
+                i += 1
+            end
+            if mod1(ks.stop, 3) == 3
+                res[i] = b*c
+                i += 1
+            end
+        elseif charge_index == charge_indices.start
+            # Might not want all terms from the first charge
+            if mod1(ks.start, 3) == 1
+                res[i] = bessel_y(zero(λ), rsqrtλ)
+                i += 1
+            end
+            if mod1(ks.start, 3) <= 2
+                res[i] = b*s
+                i += 1
+            end
+            res[i] = b*c
+            i += 1
+        elseif charge_index == charge_indices.stop
+            # Might not want all terms from the last charge
+            res[i] = bessel_y(zero(λ), rsqrtλ)
+            i += 1
+            if mod1(ks.stop, 3) >= 2
+                res[i] = b*s
+                i += 1
+            end
+            if mod1(ks.stop, 3) >= 3
+                res[i] = b*c
+                i += 1
+            end
+        else
+            res[i] = bessel_y(zero(λ), rsqrtλ)
+            res[i + 1] = b*s
+            res[i + 2] = b*c
+            i += 3
+        end
+    end
+
+    return res
 end
 
 # TODO: Figure out how to handle this
