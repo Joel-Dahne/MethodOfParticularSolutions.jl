@@ -70,12 +70,6 @@ struct StandaloneLightningEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanar
     parent::ArbField
 end
 
-mutable struct VertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
-    domain::Triangle{T}
-    vertex::Int
-    u::StandaloneVertexEigenfunction{T}
-end
-
 mutable struct CombinedEigenfunction <: AbstractPlanarEigenfunction
     domain::AbstractPlanarDomain
     us::Vector{<:AbstractPlanarEigenfunction}

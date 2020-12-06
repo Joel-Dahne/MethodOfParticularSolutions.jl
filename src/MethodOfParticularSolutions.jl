@@ -43,8 +43,6 @@ export AbstractDomain,
 
     LShapeEigenfunction,
 
-    VertexEigenfunction,
-
     StandaloneVertexEigenfunction,
 
     StandaloneInteriorEigenfunction,
@@ -88,7 +86,6 @@ include("eigenfunction/SphericalInteriorEigenfunction.jl")
 include("eigenfunction/SphericalCombinedEigenfunction.jl")
 include("eigenfunction/KrewerasEigenfunction.jl")
 include("eigenfunction/LShapeEigenfunction.jl")
-include("eigenfunction/VertexEigenfunction.jl")
 include("eigenfunction/StandaloneVertexEigenfunction.jl")
 include("eigenfunction/StandaloneInteriorEigenfunction.jl")
 include("eigenfunction/StandaloneLightningEigenfunction.jl")
