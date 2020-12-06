@@ -1,7 +1,5 @@
-function LShapeEigenfunction(domain::LShape;
-                             stride::Int = 1)
+LShapeEigenfunction(domain::LShape; stride::Int = 1) =
     LShapeEigenfunction(domain, stride, arb[])
-end
 
 function Base.show(io::IO, u::LShapeEigenfunction)
     println(io, "Eigenfunction for the L-shaped domain")
@@ -11,79 +9,38 @@ function Base.show(io::IO, u::LShapeEigenfunction)
     end
 end
 
-active_boundaries(domain::LShape, u::LShapeEigenfunction) = 1:4
+active_boundaries(::LShape, ::LShapeEigenfunction) = 1:4
 
-function (u::LShapeEigenfunction)(r::T,
-                                  θ::T,
-                                  λ::arb,
-                                  k::Integer;
-                                  boundary = nothing
-                                  ) where {T <: Union{arb, arb_series}}
-    k = 1 + (k - 1)*u.stride
-
-    ν = u.domain.parent(2k//3)
-
-    bessel_j(ν, sqrt(λ)*r)*sin(ν*θ)
-end
-
-function (u::LShapeEigenfunction)((r, θ)::Tuple{T, T},
-                                  λ::arb,
-                                  k::Integer;
-                                  boundary = nothing
-                                  ) where {T <: Union{arb, arb_series}}
-    u(r, θ, λ, k, boundary = boundary)
-end
-
-function (u::LShapeEigenfunction)(r::T,
-                                  θ::T,
-                                  λ::arb,
-                                  ks::UnitRange{Int};
-                                  boundary = nothing
-                                  ) where {T <: Union{arb, arb_series}}
+function (u::LShapeEigenfunction)(
+    (r, θ)::Tuple{T,T},
+    λ::arb,
+    ks::UnitRange{Int};
+    boundary = nothing,
+) where {T<:Union{arb,arb_series}}
+    rsqrtλ = r * sqrt(λ)
     res = similar(ks, T)
     for i in eachindex(ks)
-        res[i] = u(r, θ, λ, ks[i], boundary = boundary)
+        k = 1 + (ks[i] - 1) * u.stride
+
+        ν = u.domain.parent(2k // 3)
+
+        res[i] = bessel_j(ν, rsqrtλ) * sin(ν * θ)
     end
 
     return res
 end
 
-function (u::LShapeEigenfunction)((r, θ)::Tuple{T, T},
-                                  λ::arb,
-                                  ks::UnitRange{Int};
-                                  boundary = nothing
-                                  ) where {T <: Union{arb, arb_series}}
-    u(r, θ, λ, ks, boundary = boundary)
+function (u::LShapeEigenfunction)(
+    (r, θ)::Tuple{T,T},
+    λ::arb;
+    boundary = nothing,
+) where {T<:Union{arb,arb_series}}
+    coeffs = coefficients(u)
+    return sum(coeffs .* u((r, θ), λ, 1:length(coeffs), boundary = boundary))
 end
 
-function (u::LShapeEigenfunction)(r::T,
-                                  θ::T,
-                                  λ::arb;
-                                  boundary = nothing
-                                  ) where {T <: Union{arb, arb_series}}
-    res = u.domain.parent(0)
-
-    for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(r, θ, λ, k, boundary = boundary)
-        if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
-            return res
-        end
-    end
-
-    res
-end
-
-function (u::LShapeEigenfunction)((r, θ)::Tuple{T, T},
-                                  λ::arb;
-                                  boundary = nothing
-                                  ) where {T <: Union{arb, arb_series}}
-    u(r, θ, λ, boundary = boundary)
-end
-
-function norm(domain::LShape,
-              u::LShapeEigenfunction,
-              λ::arb)
-    θ_integral = 3//4*domain.parent(π)
+function norm(domain::LShape, u::LShapeEigenfunction, λ::arb)
+    θ_integral = 3 // 4 * domain.parent(π)
 
     CC = ComplexField(domain.parent.prec)
     # The integrals goes from zero to the lower bound for θ. However
@@ -94,8 +51,8 @@ function norm(domain::LShape,
     b = CC(1)
 
     r_integral = domain.parent(0)
-    for k in 1:min(4, length(u.coefficients))
-        ν::arb = domain.parent(2k//3)
+    for k = 1:min(4, length(u.coefficients))
+        ν::arb = domain.parent(2k // 3)
         c2 = u.coefficients[k]^2
 
         f = r -> begin
@@ -104,11 +61,11 @@ function norm(domain::LShape,
                 return CC(NaN)
             end
 
-            CC(c2*r*bessel_j(ν, sqrt(λ)*r)^2)
+            CC(c2 * r * bessel_j(ν, sqrt(λ) * r)^2)
         end
         y = Nemo.integrate(CC, f, a, b)
         r_integral += real(y)
     end
 
-    sqrt(θ_integral*r_integral)
+    return sqrt(θ_integral * r_integral)
 end
