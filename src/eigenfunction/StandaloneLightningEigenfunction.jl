@@ -122,14 +122,15 @@ Cartesian coordinates and makes a (affine) change of coordinates so
 that `u.vertex` is put at the origin and rotated `u.orientation + u.θ/2`
 clockwise.
 """
-function coordinate_transformation(u::StandaloneLightningEigenfunction{fmpq}, xy::AbstractVector)
-    s, c = sincospi(-u.orientation - u.θ//2, u.parent)
-    M = SMatrix{2, 2}(c, s, -s, c)
-    return M*(xy .- u.vertex)
-end
-
-function coordinate_transformation(u::StandaloneLightningEigenfunction{arb}, xy::AbstractVector)
-    s, c = sincos(-u.orientation - u.θ/2)
+function coordinate_transformation(
+    u::StandaloneLightningEigenfunction{T},
+    xy::AbstractVector,
+) where {T <: Union{fmpq,arb}}
+    if T == fmpq
+        s, c = sincospi(-u.orientation - u.θ//2, u.parent)
+    elseif T == arb
+        s, c = sincos(-u.orientation - u.θ/2)
+    end
     M = SMatrix{2, 2}(c, s, -s, c)
     return M*(xy .- u.vertex)
 end
@@ -180,38 +181,10 @@ end
 function (u::StandaloneLightningEigenfunction)(
     xy::AbstractVector{T},
     λ::arb,
-    k::Integer;
-    boundary = nothing,
-    notransform::Bool = false,
-    n = div(length(coefficients(u)) - 1, 3) + 1, # Total number of charge points
-) where {T <: Union{arb, arb_series}}
-    if !notransform
-        xy = coordinate_transformation(u, xy)
-    end
-
-    # Perform the change of coordinates corresponding to the charge
-    # point
-    xy = xy - charge(u, div(k - 1, 3) + 1, n)
-
-    r = sqrt(xy[1]^2 + xy[2]^2)
-    θ = atan(xy[2], xy[1])
-
-    if mod1(k, 3) == 1
-        return bessel_y(zero(λ), r*sqrt(λ))
-    elseif mod1(k, 3) == 2
-        return bessel_y(one(λ), r*sqrt(λ))*sin(θ)
-    else
-        return bessel_y(one(λ), r*sqrt(λ))*cos(θ)
-    end
-end
-
-function (u::StandaloneLightningEigenfunction)(
-    xy::AbstractVector{T},
-    λ::arb,
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
-    n = div(length(coefficients(u)) - 1, 3) + 1, # Total number of charge points
+    n = div(length(ks) - 1, 3) + 1, # Total number of charge points
 ) where {T <: Union{arb, arb_series}}
     if !notransform
         xy = coordinate_transformation(u, xy)

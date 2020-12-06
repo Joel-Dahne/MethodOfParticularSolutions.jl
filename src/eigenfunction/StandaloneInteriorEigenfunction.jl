@@ -41,32 +41,6 @@ end
 function (u::StandaloneInteriorEigenfunction)(
     xy::AbstractVector{T},
     λ::arb,
-    k::Integer;
-    boundary = nothing,
-    notransform::Bool = false,
-) where {T <: Union{arb, arb_series}}
-    if !notransform
-        xy = coordinate_transformation(u, xy)
-    end
-
-    k = 1 + (k - 1)*u.stride
-
-    r = sqrt(xy[1]^2 + xy[2]^2)
-    θ = atan(xy[2], xy[1])
-    ν = u.parent(div(k, 2))
-
-    if k == 1
-        return bessel_j(ν, sqrt(λ)*r)
-    elseif k % 2 == 0
-        return bessel_j(ν, sqrt(λ)*r)*sin(ν*θ)
-    else
-        return bessel_j(ν, sqrt(λ)*r)*cos(ν*θ)
-    end
-end
-
-function (u::StandaloneInteriorEigenfunction)(
-    xy::AbstractVector{T},
-    λ::arb,
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,

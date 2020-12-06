@@ -23,41 +23,24 @@ See also: [`coordinate_transform`](@ref)
 """
 function (u::AbstractPlanarEigenfunction) end
 
-function (u::AbstractPlanarEigenfunction)(xy::AbstractVector{T},
-                                          λ::arb,
-                                          ks::UnitRange{Int};
-                                          boundary = nothing,
-                                          notransform::Bool = false
-                                          ) where {T <: Union{arb, arb_series}}
-    if !notransform
-        xy = coordinate_transformation(u, xy)
-    end
+(u::AbstractPlanarEigenfunction)(
+    xy::AbstractVector{T},
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T <: Union{arb,arb_series}} =
+    u(xy, λ, k:k, boundary = boundary, notransform = notransform)
 
-    res = similar(ks, T)
-    for i in eachindex(ks)
-        res[i] = u(xy, λ, ks[i], boundary = boundary, notransform = true)
-    end
-
-    return res
-end
-
-function (u::AbstractPlanarEigenfunction)(xy::AbstractVector{T},
-                                          λ::arb;
-                                          boundary = nothing,
-                                          notransform::Bool = false
-                                          ) where {T <: Union{arb, arb_series}}
-    if !notransform
-        xy = coordinate_transformation(u, xy)
-    end
-
+function (u::AbstractPlanarEigenfunction)(
+    xy::AbstractVector{T},
+    λ::arb;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T <: Union{arb,arb_series}}
+    # TODO: This computes all terms even if some terms become NaN very
+    # early on. Could potentially be optimized.
     coeffs = coefficients(u)
-    res = zero(λ)
-    for k in 1:length(coeffs)
-        res += coeffs[k]*u(xy, λ, k, boundary = boundary, notransform = true)
-        if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
-            return res
-        end
-    end
-
-    return res
+    isempty(coeffs) && return zero(λ)
+    return sum(coeffs .* u(xy, λ, 1:length(coeffs), boundary = boundary))
 end

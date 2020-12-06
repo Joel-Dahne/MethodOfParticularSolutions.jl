@@ -38,12 +38,6 @@ end
 ### Planar eigenfunctions
 ###
 
-mutable struct LShapeEigenfunction <: AbstractPlanarEigenfunction
-    domain::LShape
-    stride::Int
-    coefficients::Vector{arb}
-end
-
 struct StandaloneVertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
     vertex::SVector{2,arb}
     orientation::T
@@ -75,4 +69,10 @@ mutable struct CombinedEigenfunction <: AbstractPlanarEigenfunction
     us::Vector{<:AbstractPlanarEigenfunction}
     boundary_to_us::OrderedDict{Int,BitSet}
     orders::Vector{Int}
+end
+
+mutable struct LShapeEigenfunction <: AbstractPlanarEigenfunction
+    domain::LShape
+    stride::Int
+    coefficients::Vector{arb}
 end

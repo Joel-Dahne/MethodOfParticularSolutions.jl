@@ -101,44 +101,17 @@ Cartesian coordinates and makes a (affine) change of coordinates so
 that `u.vertex` is put at the origin and rotated `u.orientation`
 clockwise.
 """
-function coordinate_transformation(u::StandaloneVertexEigenfunction{fmpq}, xy::AbstractVector)
-    s, c = sincospi(-u.orientation, u.parent)
+function coordinate_transformation(
+    u::StandaloneVertexEigenfunction{T},
+    xy::AbstractVector,
+) where {T <: Union{arb,fmpq}}
+    if T == fmpq
+        s, c = sincospi(-u.orientation, u.parent)
+    elseif T == arb
+        s, c = sincos(-u.orientation)
+    end
     M = SMatrix{2, 2}(c, s, -s, c)
     return M*(xy .- u.vertex)
-end
-
-function coordinate_transformation(u::StandaloneVertexEigenfunction{arb}, xy::AbstractVector)
-    s, c = sincos(-u.orientation)
-    M = SMatrix{2, 2}(c, s, -s, c)
-    return M*(xy .- u.vertex)
-end
-
-function (u::StandaloneVertexEigenfunction)(
-    xy::AbstractVector{T},
-    λ::arb,
-    k::Integer;
-    boundary = nothing,
-    notransform::Bool = false,
-) where {T <: Union{arb, arb_series}}
-    if !notransform
-        xy = coordinate_transformation(u, xy)
-    end
-
-    r = sqrt(xy[1]^2 + xy[2]^2)
-    θ = atan(xy[2], xy[1])
-
-    # TODO: We have to choose a branch to work on. This does depend on
-    # the domain but for now we only implement the one with θ on the
-    # interval [0, 2π). Nemo doesn't implement mod2pi so we just do a
-    # partial solution of adding 2π if it's below 0.
-    if (T == arb && isnegative(θ)) || (T == arb_series && isnegative(θ[0]))
-        θ += 2parent(θ)(π)
-    end
-
-    k = 1 + (k - 1)*u.stride
-
-    ν = nu(u, k)
-    return bessel_j(ν, sqrt(λ)*r)*sin(ν*θ)
 end
 
 function (u::StandaloneVertexEigenfunction)(
