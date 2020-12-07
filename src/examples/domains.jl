@@ -37,25 +37,34 @@ function example_domain_H(parent = RealField(precision(BigFloat)))
     return domain, u
 end
 
-function example_domain_ngon(n, parent = RealField(precision(BigFloat)))
+function example_domain_ngon(
+    n,
+    parent = RealField(precision(BigFloat));
+    lightningversion = false,
+)
     θ = fmpq((n - 2)//n)
     angles = fill(θ, n)
     vertices = [(cos(θ), sin(θ)) for θ in (2parent(π)/n).*(0:n-1)]
     domain = Polygon(angles, vertices, parent)
 
-    us = [
-        StandaloneVertexEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
-        for i in boundaries(domain)
-    ]
-
-    u = CombinedEigenfunction(
-        domain,
-        us,
-        us_to_boundary = [
-            setdiff(boundaries(domain), (i, mod1(i - 1, length(boundaries(domain)))))
+    if !lightningversion
+        us = [
+            StandaloneVertexEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
             for i in boundaries(domain)
         ]
-    )
+        us_to_boundary = [
+            setdiff(boundaries(domain), (i, mod1(i - 1, length(boundaries(domain)))))
+            for i in eachindex(us)
+        ]
+    else
+        us = [[
+            StandaloneLightningEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
+            for i in boundaries(domain)
+        ]; StandaloneInteriorEigenfunction(domain, n)]
+        us_to_boundary = fill(boundaries(domain), length(us))
+    end
+
+    u = CombinedEigenfunction(domain, us, us_to_boundary = us_to_boundary)
 
     return domain, u
 end
@@ -159,8 +168,8 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
 
     domain = IntersectedDomain(exterior, interiors)
 
-    # These should all have the same coefficients and be symmetric (so
-    # we should skip the sin ones?)
+    # TODO: These should all have the same coefficients and be
+    # symmetric (so we should skip the sin ones?)
     us1 = [
         StandaloneLightningEigenfunction(
             vertex(exterior, i),
@@ -170,21 +179,21 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
         for i in boundaries(exterior)
     ]
 
-    # These should all have the same coefficients (and be symmetric?)
+    # TODO: These should all have the same coefficients (and be symmetric?)
     us2 = [
         StandaloneLightningEigenfunction(d, 1, l = parent(0.15), outside = true)
         for d in interiors
     ]
 
-    # These should all have the same coefficients
+    # TODO: These should all have the same coefficients
     us3 = [
         StandaloneLightningEigenfunction(d, i, l = parent(0.15), outside = true)
         for d in interiors, i in 2:3
     ][:]
 
-    # This should have a six-fold symmetry
+    # TODO: Check that the 6 is correct
     us4 = [
-        StandaloneInteriorEigenfunction(domain)
+        StandaloneInteriorEigenfunction(domain, 6)
     ]
 
     u = CombinedEigenfunction(
