@@ -130,3 +130,67 @@ function example_domain_ngon_in_ngon(n1, n2, parent = RealField(precision(BigFlo
 
     return domain, u
 end
+
+function example_domain_goal(parent = RealField(precision(BigFloat)))
+    # The main domain is a hexagon
+    n = 6
+    θ = fmpq((n - 2)//n)
+    angles = fill(θ, n)
+    vertices = [(cospi(θ, parent), sinpi(θ, parent)) for θ in fmpq(2//n).*(0:n-1)]
+    exterior = Polygon(angles, vertices, parent)
+
+    # We remove six triangles
+    domain_triangle = TransformedDomain(
+        Triangle(fmpq(1//3), fmpq(1//3), parent),
+        fmpq(0),
+        parent(1//4),
+        SVector(cospi(fmpq(1//6), parent), sinpi(fmpq(1//6), parent))/4,
+    )
+
+    interiors = [
+        TransformedDomain(
+            Triangle(fmpq(1//3), fmpq(1//3), parent),
+            fmpq(i//3),
+            parent(0.25),
+            SVector(cospi(fmpq(i//3 + 1//6), parent), sinpi(fmpq(i//3 + 1//6), parent))/4
+        )
+        for i in 0:5
+    ]
+
+    domain = IntersectedDomain(exterior, interiors)
+
+    # These should all have the same coefficients and be symmetric (so
+    # we should skip the sin ones?)
+    us1 = [
+        StandaloneLightningEigenfunction(
+            vertex(exterior, i),
+            fmpq(mod(Rational(1 - θ//2 + (i - 1)*(1 - θ)), 2)),
+            θ,
+        )
+        for i in boundaries(exterior)
+    ]
+
+    # These should all have the same coefficients (and be symmetric?)
+    us2 = [
+        StandaloneLightningEigenfunction(d, 1, l = parent(0.15), outside = true)
+        for d in interiors
+    ]
+
+    # These should all have the same coefficients
+    us3 = [
+        StandaloneLightningEigenfunction(d, i, l = parent(0.15), outside = true)
+        for d in interiors, i in 2:3
+    ][:]
+
+    # This should have a six-fold symmetry
+    us4 = [
+        StandaloneInteriorEigenfunction(domain)
+    ]
+
+    u = CombinedEigenfunction(
+        domain,
+        vcat(us1, us2, us3, us4),
+    )
+
+    return domain, u
+end
