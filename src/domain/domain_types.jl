@@ -102,15 +102,23 @@ struct TransformedDomain{T<:Union{fmpq,arb},S<:AbstractPlanarDomain} <: Abstract
 end
 
 """
-    IntersectedDomain{T,S}(exterior::T, interior::S)
+    IntersectedDomain{T}(exterior::T, interiors::Vector{AbstractPlanarDomain})
 
-Represents a domain given by removing from `exterior` the domain
-`interior`. It's assumed that `interior` is contained in `exterior`.
+Represents a domain given by removing from `exterior` the domains in
+`interiors`. It's assumed that all domains in `interiors` are
+contained in `exterior` and that they are pairwise disjoint.
 
 The boundaries are enumerated in a way such that first comes the
 exterior domains boundaries and then comes the interior domains.
 """
-struct IntersectedDomain{T<:AbstractPlanarDomain,S<:AbstractPlanarDomain} <: AbstractPlanarDomain
+struct IntersectedDomain{T<:AbstractPlanarDomain} <: AbstractPlanarDomain
     exterior::T
-    interior::S
+    interiors::Vector{AbstractPlanarDomain}
+
+    function IntersectedDomain(
+        exterior::T,
+        interiors::Vector{<:AbstractPlanarDomain},
+    ) where {T <: AbstractPlanarDomain}
+        domain = new{T}(exterior, convert(Vector{AbstractPlanarDomain}, interiors))
+    end
 end

@@ -1,14 +1,23 @@
-function IntersectedDomain{T,S}(
-    domain::IntersectedDomain{T,S},
-    parent::ArbField) where {T<:AbstractPlanarDomain,S<:AbstractPlanarDomain}
-    return IntersectedDomain(T(domain.exterior, parent), S(domain.interior, parent))
+function IntersectedDomain{T}(
+    domain::IntersectedDomain{T},
+    parent::ArbField,
+) where {T<:AbstractPlanarDomain}
+    return IntersectedDomain(
+        T(domain.exterior, parent),
+        [typeof(d)(d, parent) for d in domain.interiors],
+    )
 end
 
+IntersectedDomain(exterior::AbstractPlanarDomain, interior::AbstractPlanarDomain) =
+    IntersectedDomain(exterior, [interior])
 
 function Base.show(io::IO, domain::IntersectedDomain)
     println(io, "Intersected domain")
-    print(io, "Exterior: $(domain.exterior)")
-    print(io, "Interior: $(domain.interior)")
+    println(io, "Exterior: $(domain.exterior)")
+    println(io, "Interiors:")
+    for d in domain.interiors
+        println(d)
+    end
 end
 
 function Base.getproperty(domain::IntersectedDomain, name::Symbol)
@@ -24,15 +33,12 @@ exterior_boundaries(domain::IntersectedDomain) = boundaries(domain.exterior)
 
 function interior_boundaries(domain::IntersectedDomain)
     boundaries_exterior = boundaries(domain.exterior)
-    boundaries_interior = boundaries(domain.interior)
-    return boundaries_interior .+ maximum(boundaries_exterior)
+    boundaries_interior = boundaries.(domain.interiors)
+    return (1:sum(length.(boundaries_interior))) .+ maximum(boundaries_exterior)
 end
 
-function boundaries(domain::IntersectedDomain)
-    boundaries_exterior = boundaries(domain.exterior)
-    boundaries_interior = boundaries(domain.interior)
-    return union(boundaries_exterior, boundaries_interior .+ maximum(boundaries_exterior))
-end
+boundaries(domain::IntersectedDomain) =
+    1:(length(exterior_boundaries(domain)) + length(interior_boundaries(domain)))
 
 function get_domain_and_boundary(domain::IntersectedDomain, i::Integer)
     boundaries_exterior = boundaries(domain.exterior)
@@ -40,12 +46,16 @@ function get_domain_and_boundary(domain::IntersectedDomain, i::Integer)
         return domain.exterior, i
     end
 
-    boundaries_interior = boundaries(domain.interior)
-    if i - maximum(boundaries_exterior) ∈ boundaries_interior
-        return domain.interior, i - maximum(boundaries_exterior)
+    i_local = i - maximum(boundaries_exterior)
+    for d in domain.interiors
+        bs = boundaries(d)
+        if i_local ∈ bs
+            return (d, i_local)
+        end
+        i_local -= maximum(bs)
     end
 
-    throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
+    throw(ArgumentError("attempt to get boundary $i from a $(typeof(domain))"))
 end
 
 function vertex(domain::IntersectedDomain, i::Integer)
@@ -55,14 +65,15 @@ end
 
 vertices(domain::IntersectedDomain) = [
     vertices(domain.exterior)...,
-    vertices(domain.interior)...
+    [vertices.(domain.interiors)...]...,
 ]
 
 center(domain::IntersectedDomain) = center(domain.exterior)
 
-area(domain::IntersectedDomain) = area(domain.exterior) - area(domain.interior)
+area(domain::IntersectedDomain) = area(domain.exterior) - sum(area.(domain.interiors))
 
-Base.in(xy, domain::IntersectedDomain) = xy ∈ domain.exterior && !(xy ∈ domain.interior)
+Base.in(xy, domain::IntersectedDomain) =
+    xy ∈ domain.exterior && !any(d -> xy ∈ d, domain.interiors)
 
 boundary_parameterization(t, domain::IntersectedDomain, i::Integer) =
     boundary_parameterization(t, get_domain_and_boundary(domain, i)...)
@@ -80,7 +91,7 @@ function interior_points(domain::IntersectedDomain, n::Integer; rng = MersenneTw
     while gotten < n
         new_points = Iterators.take(
             filter(
-                xy -> !(xy ∈ domain.interior),
+                xy -> !any(d -> xy ∈ d, domain.interiors),
                 interior_points(domain.exterior, 2(n - gotten), rng = rng),
             ),
             n - gotten
