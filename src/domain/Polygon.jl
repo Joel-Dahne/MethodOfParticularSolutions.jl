@@ -50,7 +50,7 @@ function Base.in(xy, domain::Polygon)
         vi = vs[i]
         vip1 = vs[mod1(i + 1, length(vs))]
         if vi[2] <= xy[2]
-            if vip1[2] > xy[2]
+            if !(vip1[2] <= xy[2])
                 if isleft(vi, vip1, xy) > 0
                     wn += 1
                 end
