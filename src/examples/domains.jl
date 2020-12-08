@@ -60,7 +60,7 @@ function example_domain_ngon(
         us = [[
             StandaloneLightningEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
             for i in boundaries(domain)
-        ]; StandaloneInteriorEigenfunction(domain, n)]
+        ]; StandaloneInteriorEigenfunction(domain)]
         us_to_boundary = fill(boundaries(domain), length(us))
     end
 
@@ -179,21 +179,21 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
         for i in boundaries(exterior)
     ]
 
-    # TODO: These should all have the same coefficients (and be symmetric?)
+    # TODO: Are there any symmetries here?
     us2 = [
         StandaloneLightningEigenfunction(d, 1, l = parent(0.15), outside = true)
         for d in interiors
     ]
 
-    # TODO: These should all have the same coefficients
+    # TODO: Are there any symmetries here?
     us3 = [
         StandaloneLightningEigenfunction(d, i, l = parent(0.15), outside = true)
         for d in interiors, i in 2:3
     ][:]
 
-    # TODO: Check that the 6 is correct
+    # TODO: Are there any symmetries here?
     us4 = [
-        StandaloneInteriorEigenfunction(domain, 6)
+        StandaloneInteriorEigenfunction(domain)
     ]
 
     u = CombinedEigenfunction(
