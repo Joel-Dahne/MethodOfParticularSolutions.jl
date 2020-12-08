@@ -67,11 +67,11 @@ end
 
 @recipe function f(u::StandaloneVertexEigenfunction)
     seriestype := [:path :path :scatter]
-    linewidth --> [2 3 3]
-    markersize --> 5
-    label --> ["" "u"]
-    seriescolor --> [:blue :blue :red]
-    linestyle --> [:dot :solid :solid]
+    linewidth := [2 3 3]
+    markersize := 5
+    label --> ["" "u" ""]
+    seriescolor := [:blue :blue :red]
+    linestyle := [:dot :solid :solid]
 
     vertex, edges, arc = eigenfunction_plotdata(u)
 
@@ -91,13 +91,13 @@ end
 
 @recipe function f(u::StandaloneInteriorEigenfunction)
     seriestype := [:path :scatter]
-    linewidth --> [2 3]
-    markersize --> 5
+    linewidth := [2 3]
+    markersize := 5
     label --> ["" "u"]
-    seriescolor --> [:blue :red]
-    linestyle --> [:dot :solid]
+    seriescolor := [:blue :red]
+    linestyle := [:dot :solid]
     vertex, arc = eigenfunction_plotdata(u)
-
+    println(vertex)
     x = hcat(
         arc[1],
         [vertex[1]; fill(NaN, length(arc[1]) - length(vertex[1]))],
@@ -111,12 +111,12 @@ end
 end
 
 @recipe function f(u::StandaloneLightningEigenfunction)
-    seriestype := [:path :path :scatter :scatter]
-    linewidth --> [2 3 3]
-    markersize --> [5 5 5 2]
+    seriestype --> [:path :path :scatter :scatter]
+    linewidth := [2 3 3 2]
+    markersize := [5 5 5 2]
     label --> ["" "" "u" ""]
-    seriescolor --> [:blue :blue :red :green]
-    linestyle --> [:dot :solid :solid :solid]
+    seriescolor := [:blue :blue :red :green]
+    linestyle := [:dot :solid :solid :solid]
 
     vertex, edges, arc, charges = eigenfunction_plotdata(u)
 
@@ -144,13 +144,6 @@ end
     end
     u = h.args[1]
 
-    # For some reason this makes it work... I don't understand plot
-    # recipes...
-    @series begin
-        label := ""
-        u.us[1]
-    end
-
     for v in u.us
         @series begin
             label := ""
@@ -164,18 +157,28 @@ end
 @userplot EigenfunctionHeatmap
 
 @recipe function f(h::EigenfunctionHeatmap)
-    if !(length(h.args) == 3  || length(h.args) == 5) ||
+    if !(length(h.args) == 3  || length(h.args) >= 5) ||
         !(typeof(h.args[1]) <: AbstractDomain) ||
         !(typeof(h.args[2]) <: AbstractEigenfunction) ||
         !(typeof(h.args[3]) <: Union{Real,arb})
-        error("EigenfunctionHeatmap should be given an eigenfunction, a domain and x, y. Got: $(typeof(h.args))")
+        error("EigenfunctionHeatmap should be given a domain, an eigenfunction and x, y. Got: $(typeof(h.args))")
     end
-    if length(h.args) == 5
-        domain, u, λ, xs, ys = h.args
+    if length(h.args) >= 5
+        domain, u, λ, xs, ys = h.args[1:5]
     else
-        domain, u, λ = h.args
+        domain, u, λ = h.args[1:3]
         xs = 50
         ys = 50
+    end
+    if length(h.args) >= 6
+        include_exterior = h.args[6]
+    else
+        include_exterior = false
+    end
+    if length(h.args) >= 7
+        absolute_value = h.args[7]
+    else
+        absolute_value = false
     end
 
     vs = vertices(domain)
@@ -189,19 +192,19 @@ end
     pts = SVector.(domain.parent.(xs'), domain.parent.(ys));
     res = similar(pts, Float64)
     let λ = domain.parent(λ)
-        for i in eachindex(pts)
-            if pts[i] ∈ domain
-                res[i] = abs(u(pts[i], λ))
+        @Threads.threads for i in eachindex(pts)
+            if include_exterior || pts[i] ∈ domain
+                res[i] = ifelse(absolute_value, abs, identity)(u(pts[i], λ))
             else
                 res[i] = 0
             end
         end
     end
-    #res = Float64.(abs.(u.(pts, domain.parent(λ))))
 
     @series begin
         xlims := extrema(xs)
         ylims := extrema(ys)
+        seriescolor --> :balance
         seriestype := :heatmap
         Float64.(xs), Float64.(ys), res
     end
@@ -211,15 +214,6 @@ end
         ylims := extrema(ys)
         label := ""
         domain, 100, 0
-    end
-
-    for v in u.us
-        @series begin
-            xlims := extrema(xs)
-            ylims := extrema(ys)
-            label := ""
-            v
-        end
     end
 
     return nothing
