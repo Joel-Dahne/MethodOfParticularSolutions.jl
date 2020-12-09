@@ -63,10 +63,8 @@ function vertex(domain::IntersectedDomain, i::Integer)
     return vertex(d, j)
 end
 
-vertices(domain::IntersectedDomain) = [
-    vertices(domain.exterior)...,
-    [vertices.(domain.interiors)...]...,
-]
+vertices(domain::IntersectedDomain) =
+    vcat(vertices(domain.exterior), collect.(vertices.(domain.interiors))...)
 
 center(domain::IntersectedDomain) = center(domain.exterior)
 
