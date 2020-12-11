@@ -72,7 +72,6 @@ end
 
 function Base.show(io::IO, u::CombinedEigenfunction)
     println(io, "Combined eigenfunction on $(u.domain)")
-    println(io, "eigenfunctions:")
     recur_io = IOContext(io, :compact => true)
     for v in u.us
         print(io, "- ")
