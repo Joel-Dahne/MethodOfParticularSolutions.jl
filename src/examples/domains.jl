@@ -40,14 +40,15 @@ end
 function example_domain_ngon(
     n,
     parent = RealField(precision(BigFloat));
-    lightningversion = false,
+    lightning = false,
+    linked = false,
 )
     θ = fmpq((n - 2)//n)
     angles = fill(θ, n)
     vertices = [(cos(θ), sin(θ)) for θ in (2parent(π)/n).*(0:n-1)]
     domain = Polygon(angles, vertices, parent)
 
-    if !lightningversion
+    if !lightning
         us = [
             StandaloneVertexEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
             for i in boundaries(domain)
@@ -57,10 +58,23 @@ function example_domain_ngon(
             for i in eachindex(us)
         ]
     else
-        us = [[
-            StandaloneLightningEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
-            for i in boundaries(domain)
-        ]; StandaloneInteriorEigenfunction(domain)]
+        if linked
+            us = [
+                LinkedEigenfunction(
+                    [
+                        StandaloneLightningEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
+                        for i in boundaries(domain)
+                    ],
+                    [1, 1, 1, 1],
+                ),
+                StandaloneInteriorEigenfunction(domain),
+            ]
+        else
+            us = [[
+                StandaloneLightningEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
+                for i in boundaries(domain)
+            ]; StandaloneInteriorEigenfunction(domain)]
+        end
         us_to_boundary = fill(boundaries(domain), length(us))
     end
 
