@@ -64,6 +64,28 @@ struct StandaloneLightningEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanar
     parent::ArbField
 end
 
+# TODO: Currently this can't handle the case when some eigenfunctions
+# are identically equal to zero on some parts of the boundary. As long
+# as we are working with lightning and interior eigenfunctions this is
+# fine, but it means it's not very useful for vertex eigenfunctions.
+struct LinkedEigenfunction{T<:AbstractPlanarEigenfunction} <: AbstractPlanarEigenfunction
+    us::Vector{T}
+    extra_coefficients::Vector{arb}
+
+    function LinkedEigenfunction(
+        us::Vector{T},
+        extra_coefficients::Vector = ones(length(us)),
+    ) where {T <: AbstractPlanarEigenfunction}
+        isempty(us) && throw(ArgumentError("us must not be empty"))
+        length(us) == length(extra_coefficients) ||
+            throw(ArgumentError("us and extra_coefficients must have the same size"))
+
+        extra_coefficients = first(us).parent.(extra_coefficients)
+
+        return new{T}(us, extra_coefficients)
+    end
+end
+
 mutable struct CombinedEigenfunction <: AbstractPlanarEigenfunction
     domain::AbstractPlanarDomain
     us::Vector{<:AbstractPlanarEigenfunction}
