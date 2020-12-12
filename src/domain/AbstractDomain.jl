@@ -63,8 +63,8 @@ function boundary_points(domain::AbstractDomain,
     active = active_boundaries(domain, u)
     m = length(active)
     res = [
-        boundary_points(domain, i, div(n, m) + ifelse(n % m >= i, 1, 0))
-        for i in active
+        boundary_points(domain, active[i], div(n, m) + ifelse(n % m >= i, 1, 0))
+        for i in eachindex(active)
     ]
     return vcat(getindex.(res, 1)...), vcat(getindex.(res, 2)...)
 end
