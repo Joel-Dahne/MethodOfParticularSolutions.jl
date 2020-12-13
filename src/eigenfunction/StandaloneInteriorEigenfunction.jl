@@ -50,20 +50,19 @@ function (u::StandaloneInteriorEigenfunction)(
     end
 
     r, θ = polar_from_cartesian(xy)
-
-    νs = [div(1 + (k - 1)*u.stride, 2) for k in ks]
+    νs = u.stride*(div(ks.start, 2):div(ks.stop, 2))
     bessel_js = let sqrtλr = sqrt(λ)*r
-        Dict(ν => bessel_j(u.parent(ν), sqrtλr) for ν in unique(νs))
+        Dict(ν => bessel_j(u.parent(ν), sqrtλr) for ν in νs)
     end
 
     res = similar(ks, T)
     for i in eachindex(ks)
-        k = 1 + (ks[i] - 1)*u.stride
-        ν = νs[i]
+        k = ks[i]
+        ν = u.stride*div(k, 2)
 
         if k == 1
             res[i] = bessel_js[ν]
-        elseif k % 2 == 0
+        elseif iseven(k)
             res[i] = bessel_js[ν]*sin(ν*θ)
         else
             res[i] = bessel_js[ν]*cos(ν*θ)

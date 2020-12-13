@@ -47,6 +47,17 @@ struct StandaloneVertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEig
     parent::ArbField
 end
 
+""""
+    StandaloneInteriorEigenfunction(vertex, stride = 1)
+
+An eigenfunction consisting of the functions `bessel_j(ν,
+r*√λ)*sin(ν*θ)` and `bessel_j(ν, ν*√λ)*cos(j*θ)` for `ν` = 0, 1, 2,
+... Here `r` and `θ` are polar coordinates around `vertex`.
+
+The values of `ν` that are used are 0, `stride`, `2stride`,
+`3stride`,...
+
+"""
 struct StandaloneInteriorEigenfunction <: AbstractPlanarEigenfunction
     vertex::SVector{2,arb}
     stride::Int
