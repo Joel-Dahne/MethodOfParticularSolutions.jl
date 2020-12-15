@@ -174,14 +174,6 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
     vertices = [(cospi(θ, parent), sinpi(θ, parent)) for θ in fmpq(2//n).*(0:n-1)]
     exterior = Polygon(angles, vertices, parent)
 
-    # We remove six triangles
-    domain_triangle = TransformedDomain(
-        Triangle(fmpq(1//3), fmpq(1//3), parent),
-        fmpq(0),
-        parent(1//4),
-        SVector(cospi(fmpq(1//6), parent), sinpi(fmpq(1//6), parent))/4,
-    )
-
     interiors = [
         TransformedDomain(
             Triangle(fmpq(1//3), fmpq(1//3), parent),
@@ -194,37 +186,42 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
 
     domain = IntersectedDomain(exterior, interiors)
 
-    # TODO: These should all have the same coefficients and be
-    # symmetric (so we should skip the sin ones?)
-    us1 = [
-        StandaloneLightningEigenfunction(
-            vertex(exterior, i),
-            fmpq(mod(Rational(1 - θ//2 + (i - 1)*(1 - θ)), 2)),
-            θ,
-        )
-        for i in boundaries(exterior)
+    u1 = LinkedEigenfunction(
+        [
+            StandaloneLightningEigenfunction(
+                vertex(exterior, i),
+                fmpq(mod(Rational(1 - θ//2 + (i - 1)*(1 - θ)), 2)),
+                θ,
+            )
+            for i in boundaries(exterior)
+        ]
+    )
+
+    u2 = LinkedEigenfunction(
+        [
+            StandaloneLightningEigenfunction(d, 1, l = parent(0.15), outside = true)
+            for d in interiors
+        ]
+    )
+
+    u3 = LinkedEigenfunction(
+        [
+            StandaloneLightningEigenfunction(d, i, l = parent(0.15), outside = true)
+            for d in interiors, i in 2:3
+        ][:]
+    )
+
+    u4 = [
+        StandaloneInteriorEigenfunction(domain, 6)
     ]
 
-    # TODO: Are there any symmetries here?
-    us2 = [
-        StandaloneLightningEigenfunction(d, 1, l = parent(0.15), outside = true)
-        for d in interiors
-    ]
-
-    # TODO: Are there any symmetries here?
-    us3 = [
-        StandaloneLightningEigenfunction(d, i, l = parent(0.15), outside = true)
-        for d in interiors, i in 2:3
-    ][:]
-
-    # TODO: Are there any symmetries here?
-    us4 = [
-        StandaloneInteriorEigenfunction(domain)
-    ]
+    us = [u1, u2, u3, u4]
+    us_to_boundary = fill(BitSet([1, 7, 8, 9]), 4)
 
     u = CombinedEigenfunction(
         domain,
-        vcat(us1, us2, us3, us4),
+        us,
+        us_to_boundary = us_to_boundary,
     )
 
     return domain, u
