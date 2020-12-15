@@ -89,30 +89,42 @@ function example_domain_triangle_in_triangle(parent = RealField(precision(BigFlo
         Triangle(fmpq(1//3), fmpq(1//3), parent),
         fmpq(0),
         parent(0.25),
-        SVector(parent(0.375), parent(0.375))
+        SVector(cospi(fmpq(1//6), parent), sinpi(fmpq(1//6), parent))/4
     )
 
     domain = IntersectedDomain(domain1, domain2)
 
-    us = vcat(
-        [StandaloneLightningEigenfunction(domain1, i) for i in 1:3],
-        [StandaloneLightningEigenfunction(domain2, i, outside = true, l = parent(0.15)) for i in 1:3],
-        [StandaloneInteriorEigenfunction([parent(0.5), parent(0.375/2)])]
+    u1 = StandaloneLightningEigenfunction(domain1, 1)
+
+    u2 = LinkedEigenfunction(
+        [
+            StandaloneLightningEigenfunction(domain1, i)
+            for i in 2:3
+        ]
     )
+
+    u3 = StandaloneLightningEigenfunction(domain2, 1, l = parent(0.15), outside = true)
+
+    u4 = LinkedEigenfunction(
+        [
+            StandaloneLightningEigenfunction(domain2, i, l = parent(0.15), outside = true)
+            for i in 2:3
+        ]
+    )
+
+    u5 = StandaloneInteriorEigenfunction(domain)
+
+
+    us = [u1, u2, u3, u4, u5]
+    #us = vcat([u1], u2.us, [u3], u4.us, [u5])
+    orders = [1, 1, 1, 1, 1]
+    us_to_boundary = [1:6, 1:6, 1:6, 1:6, 1:6]
 
     u = CombinedEigenfunction(
         domain,
         us,
-        [1, 1, 1, 1, 1, 1, 1],
-        us_to_boundary = [
-            1:6,
-            1:6,
-            1:6,
-            1:6,
-            1:6,
-            1:6,
-            1:6,
-        ]
+        orders,
+        us_to_boundary = us_to_boundary,
     )
 
     return domain, u
