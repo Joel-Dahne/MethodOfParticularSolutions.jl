@@ -118,7 +118,7 @@ function example_domain_triangle_in_triangle(parent = RealField(precision(BigFlo
     us = [u1, u2, u3, u4, u5]
     #us = vcat([u1], u2.us, [u3], u4.us, [u5])
     orders = [1, 1, 1, 1, 1]
-    us_to_boundary = [1:6, 1:6, 1:6, 1:6, 1:6]
+    us_to_boundary = fill(1:6, length(us))
 
     u = CombinedEigenfunction(
         domain,
@@ -166,6 +166,29 @@ function example_domain_ngon_in_ngon(n1, n2, parent = RealField(precision(BigFlo
     return domain, u
 end
 
+"""
+    example_domain_goal(parent = RealField(precision(BigFloat)))
+
+Return the domain given by a hexagon with 6 triangles cut out as well
+as a corresponding eigenfunction.
+
+Computing the first few eigenvalues in Matlab using a finite element
+method gives
+```
+47.1851
+49.2548
+49.2668
+54.8239
+54.8292
+59.6856
+61.8997
+78.3523
+87.4298
+87.4398
+```
+though it's likely not accurate to more than 1 or 2 digits.
+
+"""
 function example_domain_goal(parent = RealField(precision(BigFloat)))
     # The main domain is a hexagon
     n = 6
@@ -179,13 +202,14 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
             Triangle(fmpq(1//3), fmpq(1//3), parent),
             fmpq(i//3),
             parent(0.25),
-            SVector(cospi(fmpq(i//3 + 1//6), parent), sinpi(fmpq(i//3 + 1//6), parent))/4
+            SVector(cospi(fmpq(i//3 + 1//6), parent), sinpi(fmpq(i//3 + 1//6), parent))/4,
         )
         for i in 0:5
     ]
 
     domain = IntersectedDomain(exterior, interiors)
 
+    # Expansions from the vertices of the hexagon
     u1 = LinkedEigenfunction(
         [
             StandaloneLightningEigenfunction(
@@ -197,6 +221,7 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
         ]
     )
 
+    # Expansions from the outer tip of the triangles
     u2 = LinkedEigenfunction(
         [
             StandaloneLightningEigenfunction(d, 1, l = parent(0.15), outside = true)
@@ -204,6 +229,7 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
         ]
     )
 
+    # Expansions from the inner tips of the triangles
     u3 = LinkedEigenfunction(
         [
             StandaloneLightningEigenfunction(d, i, l = parent(0.15), outside = true)
@@ -211,12 +237,11 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
         ][:]
     )
 
-    u4 = [
-        StandaloneInteriorEigenfunction(domain, 6)
-    ]
+    # Expansion from the center
+    u4 = StandaloneInteriorEigenfunction(domain, 6)
 
     us = [u1, u2, u3, u4]
-    us_to_boundary = fill(BitSet([1, 7, 8, 9]), 4)
+    us_to_boundary = fill(BitSet([1, 7, 8, 9]), length(us))
 
     u = CombinedEigenfunction(
         domain,
