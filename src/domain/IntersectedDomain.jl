@@ -76,8 +76,8 @@ Base.in(xy, domain::IntersectedDomain) =
 boundary_parameterization(t, domain::IntersectedDomain, i::Integer) =
     boundary_parameterization(t, get_domain_and_boundary(domain, i)...)
 
-boundary_points(domain::IntersectedDomain, i::Integer, n::Integer) =
-    boundary_points(get_domain_and_boundary(domain, i)..., n)
+boundary_points(domain::IntersectedDomain, i::Integer, n::Integer; distribution = :chebyshev) =
+    (boundary_points(get_domain_and_boundary(domain, i)..., n; distribution)[1], fill(i, n))
 
 # TODO: Exclude points landing in the interior domain
 function interior_points(domain::IntersectedDomain, n::Integer; rng = MersenneTwister(42))

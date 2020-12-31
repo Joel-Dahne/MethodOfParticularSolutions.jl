@@ -42,7 +42,9 @@ end
 
 function boundary_points(domain::LShape,
                          u::AbstractEigenfunction,
-                         n::Integer)
+                         n::Integer;
+                         distribution = :linear,
+                         )
     points = Vector{Tuple{arb, arb}}(undef, n)
 
     for i in 1:n

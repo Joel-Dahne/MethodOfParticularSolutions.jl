@@ -158,6 +158,7 @@ end
     boundary_points(domain::SphericalTriangle,
                     i::Integer,
                     n::Integer;
+                    distribution = :linear,
                     half::Bool = true)
 > Return n points on the boundary opposite of vertex number i.
 
@@ -167,6 +168,7 @@ end
 function boundary_points(domain::SphericalTriangle,
                          i::Integer,
                          n::Integer;
+                         distribution = :linear,
                          half::Bool = false)
     i >= 1 && i <= 3 || throw(ErrorException("attempt to use vertex number $i from a spherical triangle"))
     points = Vector{SVector{3, arb}}(undef, n)

@@ -126,16 +126,47 @@ function boundary_parameterization(t, domain::Triangle, i::Integer)
     return v .+ t.*(w - v)
 end
 
-function boundary_points(domain::Triangle, i::Integer, n::Integer)
+function boundary_points(domain::Triangle, i::Integer, n::Integer; distribution = :chebyshev)
     i ∈ boundaries(domain) || throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
 
     v = vertex(domain, mod1(i + 1, 3))
     w = vertex(domain, mod1(i + 2, 3))
 
+    if distribution == :linear
+        f = j -> domain.parent(j//(n + 1))
+    elseif distribution == :chebyshev
+        f = j -> (cospi(domain.parent((2j - 1)//2n)) + 1)/2
+    elseif distribution == :exponential
+        m = (n + 1)//2
+        f = j -> begin
+            d = exp(-domain.parent(m - j))
+            if j < m
+                return d/2
+            elseif j > m
+                return 1 - inv(d)/2
+            else
+                return domain.parent(0.5)
+            end
+        end
+    elseif distribution == :root_exponential
+        m = (n + 1)//2
+        f = j -> begin
+            d = exp(-domain.parent(m - j)/sqrt(domain.parent(n)))
+            if j < m
+                return d/2
+            elseif j > m
+                return 1 - inv(d)/2
+            else
+                return domain.parent(0.5)
+            end
+        end
+    else
+        throw(ArgumentError("no distribution named $distribution"))
+    end
+
     points = Vector{SVector{2, arb}}(undef, n)
     for j in 1:n
-        #t = domain.parent(j//(n + 1)) # Linear
-        t = (cospi(domain.parent((2j - 1)//2n)) + 1)/2 # Chebyshev
+        t = f(j)
         points[j] = v .+ t.*(w - v)
     end
 

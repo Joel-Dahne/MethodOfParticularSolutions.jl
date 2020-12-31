@@ -69,8 +69,13 @@ Base.in(xy, domain::TransformedDomain) = domain.invmap(xy) ∈ domain.original
 boundary_parameterization(t, domain::TransformedDomain, i::Integer) =
     domain.map(boundary_parameterization(t, domain.original, i))
 
-function boundary_points(domain::TransformedDomain, i::Integer, n::Integer)
-    pts, idx = boundary_points(domain.original, i, n)
+function boundary_points(
+    domain::TransformedDomain,
+    i::Integer,
+    n::Integer;
+    distribution = :chebyshev,
+)
+    pts, idx = boundary_points(domain.original, i, n; distribution)
     return domain.map.(pts), idx
 end
 

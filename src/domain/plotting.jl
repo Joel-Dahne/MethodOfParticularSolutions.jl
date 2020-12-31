@@ -3,7 +3,7 @@
     markersize --> 2
     label --> ["Boundary" "Interior"]
 
-    boundary = boundary_points(domain, nb)[1]
+    boundary = boundary_points(domain, nb, distribution = :linear)[1]
     interior = interior_points(domain, ni)
 
     x = Float64.(hcat(
