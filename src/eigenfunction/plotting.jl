@@ -156,29 +156,27 @@ end
 
 @userplot EigenfunctionHeatmap
 
-@recipe function f(h::EigenfunctionHeatmap)
-    if !(length(h.args) == 3  || length(h.args) >= 5) ||
+@recipe function f(
+    h::EigenfunctionHeatmap;
+    absolute_value = false,
+    twosided = !absolute_value,
+    include_exterior = false,
+)
+    if !(length(h.args) == 3  || length(h.args) == 5) ||
         !(typeof(h.args[1]) <: AbstractDomain) ||
         !(typeof(h.args[2]) <: AbstractEigenfunction) ||
         !(typeof(h.args[3]) <: Union{Real,arb})
-        error("EigenfunctionHeatmap should be given a domain, an eigenfunction and x, y. Got: $(typeof(h.args))")
+        throw(ArgumentError(
+            "EigenfunctionHeatmap should be given a domain, an eigenfunction, an eigenvalue " *
+            "and x, y. Got: $(typeof(h.args))"
+        ))
     end
-    if length(h.args) >= 5
+    if length(h.args) == 5
         domain, u, λ, xs, ys = h.args[1:5]
-    else
+    elseif length(h.args) == 3
         domain, u, λ = h.args[1:3]
         xs = 50
         ys = 50
-    end
-    if length(h.args) >= 6
-        include_exterior = h.args[6]
-    else
-        include_exterior = false
-    end
-    if length(h.args) >= 7
-        absolute_value = h.args[7]
-    else
-        absolute_value = false
     end
 
     vs = vertices(domain)
@@ -201,18 +199,28 @@ end
         end
     end
 
-    @series begin
-        xlims := extrema(xs)
-        ylims := extrema(ys)
-        seriescolor --> :balance
-        seriestype := :heatmap
-        Float64.(xs), Float64.(ys), res
+    xlims := extrema(xs)
+    ylims := extrema(ys)
+    label := ""
+    aspect_ratio --> :equal
+
+    if twosided
+        # Make the color bar symmetric around 0
+        m = maximum(abs, res)
+        clims --> (-m, m)
     end
 
     @series begin
-        xlims := extrema(xs)
-        ylims := extrema(ys)
-        label := ""
+        seriestype := :heatmap
+        if twosided
+            seriescolor --> :balance
+        else
+            seriescolor --> :matter
+        end
+        xs, ys, res
+    end
+
+    @series begin
         domain, 100, 0
     end
 
