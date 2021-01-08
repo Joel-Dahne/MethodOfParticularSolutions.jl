@@ -97,3 +97,46 @@ function enclose_eigenvalue(domain::AbstractDomain,
        return enclosure
     end
 end
+
+function enclose_eigenvalue_approx(
+    domain::AbstractDomain,
+    u::AbstractEigenfunction,
+    λ::arb;
+    max_numpoints = 16length(coefficients(u)),
+    norm_numpoints = 8length(coefficients(u)),
+    store_trace = false,
+    extended_trace = false,
+)
+    ## Approximate maximum on boundary
+    # Points to evaluate u on
+    pts, bds = boundary_points(domain, u, max_numpoints, distribution = :chebyshev);
+    values = similar(pts, arb)
+    @Threads.threads for i in eachindex(pts)
+        values[i] = u(pts[i], λ, boundary = bds[i])
+    end
+    m = zero(λ)
+    for v in values
+        m = max(m, abs(v))
+    end
+
+    ## Approximate norm
+    n = norm(domain, u, λ, numpoints = norm_numpoints)
+
+    ## Compute enclosure
+    ϵ = sqrt(area(domain))*m/n
+    lower = λ/(1 + getinterval(ϵ)[2])
+    upper = λ/(1 - getinterval(ϵ)[2])
+    if lower <= upper
+        enclosure = setinterval(lower, upper)
+    else
+        enclosure = ball(λ, domain.parent(Inf))
+    end
+
+    if extended_trace
+        return enclosure, n, m, values, bds
+    elseif store_trace
+        return enclosure, n, m
+    else
+        return enclosure
+    end
+end
