@@ -83,7 +83,7 @@ The boundaries are enumerated by which vertex they are next to, in
 positive order.
 """
 struct Polygon{T <: Union{fmpq,arb}} <: AbstractPlanarDomain
-    angles::Vector{fmpq}
+    angles::Vector{T}
     vertices::Vector{SVector{2,arb}}
     parent::ArbField
 end
