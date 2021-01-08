@@ -83,11 +83,19 @@ function StandaloneLightningEigenfunction(
     σ::arb = domain.parent(2.5),
 )
     u = StandaloneLightningEigenfunction(domain.original, i; outside, l, σ)
-    # FIXME: This only works if u.θ::arb or if u.θ and
-    # domain.orientation both are fmpq.
+    if typeof(u.orientation) == typeof(domain.rotation)
+        orientation = u.orientation + domain.rotation
+    else
+        if u.orientation isa fmpq
+            orientation = domain.parent(π)*u.orientation + domain.rotation
+        else
+            orientation = u.orientation + domain.parent(π)*domain.rotation
+        end
+    end
+
     u = StandaloneLightningEigenfunction(
         domain.map(u.vertex),
-        u.orientation + domain.rotation,
+        orientation,
         u.θ,
         u.l,
         u.σ,
