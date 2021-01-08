@@ -35,8 +35,16 @@ anglesdivπ(domain::Polygon) = [angledivπ(domain, i) for i in boundaries(domain
 vertex(domain::Polygon, i::Integer) = domain.vertices[i]
 vertices(domain::Polygon) = domain.vertices
 
-# TODO: Fix this
-area(domain::Polygon) = 1
+function area(domain::Polygon)
+    # https://en.wikipedia.org/wiki/Polygon#Area
+    A = domain.parent(0)
+    vs = vertices(domain)
+    for i in eachindex(vs)
+        A += vs[i][1]*vs[mod1(i + 1, length(vs))][2] - vs[mod1(i + 1, length(vs))][1]*vs[i][2]
+    end
+
+    return abs(A)/2
+end
 center(domain::Polygon) = sum(vertices(domain))/length(boundaries(domain))
 
 # TODO: Add this
