@@ -71,6 +71,7 @@ struct StandaloneLightningEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanar
     θ::T
     l::arb
     σ::arb
+    even::Bool
     coefficients::Vector{arb}
     parent::ArbField
 end

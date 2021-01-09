@@ -5,6 +5,7 @@ function StandaloneLightningEigenfunction(
     parent::ArbField = parent(vertex[1]);
     l::arb = parent(1),
     σ::arb = parent(2.5),
+    even::Bool = false,
 ) where {T <: Union{arb,fmpq}}
     return StandaloneLightningEigenfunction(
         vertex,
@@ -12,6 +13,7 @@ function StandaloneLightningEigenfunction(
         θ,
         l,
         σ,
+        even,
         arb[],
         parent,
     )
@@ -23,6 +25,7 @@ function StandaloneLightningEigenfunction(
     outside = false,
     l::arb = domain.parent(1),
     σ::arb = domain.parent(2.5),
+    even::Bool = false,
 ) where {T <: Union{arb,fmpq}}
     θ = domain.angles[i]
 
@@ -50,19 +53,29 @@ function StandaloneLightningEigenfunction(
     )
 end
 
+# TODO: Currently the orientation is computed from the placement of
+# the vertices and will therefore always be an arb and never and fmpq.
+# The value for θ is also converted to an arb for that reason.
 function StandaloneLightningEigenfunction(
     domain::Polygon{T},
     i::Integer;
     outside = false,
     l::arb = domain.parent(1),
     σ::arb = domain.parent(2.5),
+    even::Bool = false,
 ) where {T <: Union{arb,fmpq}}
-    θ = domain.angles[i]
+    θ = angle(domain, i)
 
-    orientation = (i - 1)*ifelse(T == arb, domain.parent(π), 1) - θ
+    v = vertex(domain, mod1(i + 1, length(vertices(domain)))) - vertex(domain, i)
+    orientation = atan(v[2], v[1])
+
+    if contains_zero(v[2])
+        @warn "orientation could not be computed accurately, orientation = $orientation"
+    end
 
     if outside
-        throw(ErrorException("Not implemented"))
+        orientation += θ
+        θ = 2domain.parent(π) - θ
     end
 
     return StandaloneLightningEigenfunction(
@@ -81,8 +94,9 @@ function StandaloneLightningEigenfunction(
     outside = false,
     l::arb = domain.parent(1),
     σ::arb = domain.parent(2.5),
+    even::Bool = false,
 )
-    u = StandaloneLightningEigenfunction(domain.original, i; outside, l, σ)
+    u = StandaloneLightningEigenfunction(domain.original, i; outside, l, σ, even)
     if typeof(u.orientation) == typeof(domain.rotation)
         orientation = u.orientation + domain.rotation
     else
@@ -99,6 +113,7 @@ function StandaloneLightningEigenfunction(
         u.θ,
         u.l,
         u.σ,
+        u.even,
         u.coefficients,
         domain.parent
     )
@@ -107,7 +122,10 @@ function StandaloneLightningEigenfunction(
 end
 
 function Base.show(io::IO, u::StandaloneLightningEigenfunction)
-    println(io, "Standalone lightning eigenfunction")
+    println(
+        io,
+        "Standalone lightning eigenfunction" * ifelse(u.even, " - even", ""),
+    )
     if !haskey(io, :compact) || !io[:compact]
         println(io, "vertex: $(u.vertex)")
         println(io, "orientation: $(u.orientation)")
@@ -200,7 +218,11 @@ function (u::StandaloneLightningEigenfunction)(
 
     res = similar(ks, T)
     i = 1
-    charge_indices = (div(ks.start-1, 3)+1):(div(ks.stop-1, 3)+1)
+    if u.even
+        charge_indices = (div(ks.start-1, 2)+1):(div(ks.stop-1, 2)+1)
+    else
+        charge_indices = (div(ks.start-1, 3)+1):(div(ks.stop-1, 3)+1)
+    end
     for charge_index in charge_indices
         # Perform the change of coordinates corresponding to the charge
         # point
@@ -211,49 +233,83 @@ function (u::StandaloneLightningEigenfunction)(
         b = bessel_y(one(λ), rsqrtλ)
         s, c = sincos(θ)
 
-        if charge_index == charge_indices.start == charge_indices.stop
-            # Special case when first and last charge are the same
-            if mod1(ks.start, 3) == 1
-                res[i] = bessel_y(zero(λ), rsqrtλ)
-                i += 1
-            end
-            if mod1(ks.start, 3) <= 2 && mod1(ks.stop, 3) >= 2
-                res[i] = b*s
-                i += 1
-            end
-            if mod1(ks.stop, 3) == 3
+        if u.even
+            if charge_index == charge_indices.start == charge_indices.stop
+                # Special case when first and last charge are the same
+                if mod1(ks.start, 2) == 1
+                    res[i] = bessel_y(zero(λ), rsqrtλ)
+                    i += 1
+                end
+                if mod1(ks.stop, 2) == 2
+                    res[i] = b*c
+                    i += 1
+                end
+            elseif charge_index == charge_indices.start
+                # Might not want all terms from the first charge
+                if mod1(ks.start, 2) == 1
+                    res[i] = bessel_y(zero(λ), rsqrtλ)
+                    i += 1
+                end
                 res[i] = b*c
                 i += 1
-            end
-        elseif charge_index == charge_indices.start
-            # Might not want all terms from the first charge
-            if mod1(ks.start, 3) == 1
+            elseif charge_index == charge_indices.stop
+                # Might not want all terms from the last charge
                 res[i] = bessel_y(zero(λ), rsqrtλ)
                 i += 1
-            end
-            if mod1(ks.start, 3) <= 2
-                res[i] = b*s
-                i += 1
-            end
-            res[i] = b*c
-            i += 1
-        elseif charge_index == charge_indices.stop
-            # Might not want all terms from the last charge
-            res[i] = bessel_y(zero(λ), rsqrtλ)
-            i += 1
-            if mod1(ks.stop, 3) >= 2
-                res[i] = b*s
-                i += 1
-            end
-            if mod1(ks.stop, 3) >= 3
-                res[i] = b*c
-                i += 1
+                if mod1(ks.stop, 2) == 2
+                    res[i] = b*c
+                    i += 1
+                end
+            else
+                res[i] = bessel_y(zero(λ), rsqrtλ)
+                res[i + 1] = b*c
+                i += 2
             end
         else
-            res[i] = bessel_y(zero(λ), rsqrtλ)
-            res[i + 1] = b*s
-            res[i + 2] = b*c
-            i += 3
+            if charge_index == charge_indices.start == charge_indices.stop
+                # Special case when first and last charge are the same
+                if mod1(ks.start, 3) == 1
+                    res[i] = bessel_y(zero(λ), rsqrtλ)
+                    i += 1
+                end
+                if mod1(ks.start, 3) <= 2 && mod1(ks.stop, 3) >= 2
+                    res[i] = b*s
+                    i += 1
+                end
+                if mod1(ks.stop, 3) == 3
+                    res[i] = b*c
+                    i += 1
+                end
+            elseif charge_index == charge_indices.start
+                # Might not want all terms from the first charge
+                if mod1(ks.start, 3) == 1
+                    res[i] = bessel_y(zero(λ), rsqrtλ)
+                    i += 1
+                end
+                if mod1(ks.start, 3) <= 2
+                    res[i] = b*s
+                    i += 1
+                end
+                res[i] = b*c
+                i += 1
+            elseif charge_index == charge_indices.stop
+                # Might not want all terms from the last charge
+                res[i] = bessel_y(zero(λ), rsqrtλ)
+                i += 1
+                if mod1(ks.stop, 3) >= 2
+                    res[i] = b*s
+                    i += 1
+                end
+                if mod1(ks.stop, 3) >= 3
+                    res[i] = b*c
+                    i += 1
+                end
+            else
+                res[i] = bessel_y(zero(λ), rsqrtλ)
+                res[i + 1] = b*s
+                res[i + 2] = b*c
+                i += 3
+            end
         end
     end
 
