@@ -65,17 +65,20 @@ function example_domain_ngon(
                         StandaloneLightningEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
                         for i in boundaries(domain)
                     ],
-                    [1, 1, 1, 1],
+                    ones(n),
                 ),
-                StandaloneInteriorEigenfunction(domain),
+                StandaloneInteriorEigenfunction(domain, n),
             ]
+
+            us_to_boundary = fill(BitSet([1]), length(us))
         else
             us = [[
                 StandaloneLightningEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
                 for i in boundaries(domain)
             ]; StandaloneInteriorEigenfunction(domain)]
+
+            us_to_boundary = fill(boundaries(domain), length(us))
         end
-        us_to_boundary = fill(boundaries(domain), length(us))
     end
 
     u = CombinedEigenfunction(domain, us, us_to_boundary = us_to_boundary)
