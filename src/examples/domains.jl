@@ -254,3 +254,141 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
 
     return domain, u
 end
+
+"""
+    example_domain_goal_v2(parent = RealField(precision(BigFloat)))
+
+Return the domain given by a hexagon with 6 polygon cut out as well
+as a corresponding eigenfunction.
+
+Computing the first few eigenvalues in Matlab using a finite element
+method gives
+```
+26.3259
+56.8914
+56.9041
+56.9041
+```
+
+"""
+function example_domain_goal_v2(
+    parent = RealField(precision(BigFloat));
+    even = false,
+    a = 0.18,
+    b = 0.1,
+    c = 0.2,
+)
+    # The main domain is a hexagon
+    n = 6
+    θ = fmpq((n - 2)//n)
+    angles = fill(θ, n)
+    vertices = [(cospi(θ, parent), sinpi(θ, parent)) for θ in fmpq(2//n).*(0:n-1)]
+    exterior = Polygon(angles, vertices, parent)
+
+    points = [
+        SVector(parent(1), parent(0)),
+        SVector(parent(1), parent(0)),
+        SVector(cospi(fmpq(1//3), parent), sinpi(fmpq(1//3), parent)),
+        SVector(cospi(fmpq(1//3), parent), sinpi(fmpq(1//3), parent)),
+    ]
+
+    points[1] *= a + b
+    points[2] *= a
+    points[3] *= a
+    points[4] *= a + b
+
+    points[2] += 2*sinpi(fmpq(1//3), parent)*b.*SVector(cospi(fmpq(1//6), parent), sinpi(fmpq(1//6), parent))
+    points[3] += 2*sinpi(fmpq(1//3), parent)*b.*SVector(cospi(fmpq(1//6), parent), sinpi(fmpq(1//6), parent))
+
+    # Compute angles for interior polygons given the vertices
+    #interior_angles = [
+    #    let a = LinearAlgebra.norm(points[mod1(i - 1, length(points))] - points[mod1(i + 1, length(points))]),
+    #    b = LinearAlgebra.norm(points[mod1(i + 1, length(points))] - points[i]),
+    #    c = LinearAlgebra.norm(points[mod1(i - 1, length(points))] - points[i])
+    #    acos((b^2 + c^2 - a^2)/(2b*c))
+    #    end
+    #    for i in eachindex(points)
+    #]
+    interior_angles = [1//3, 2//3, 2//3, 1//3]
+
+    interiors = [
+        TransformedDomain(
+            Polygon(interior_angles, points, parent),
+            fmpq(i//3),
+            parent(1),
+            c.*SVector(cospi(fmpq(i//3 + 1//6), parent), sinpi(fmpq(i//3 + 1//6), parent)),
+        )
+        for i in 0:5
+    ]
+
+    domain = IntersectedDomain(exterior, interiors)
+
+    # Expansions from the vertices of the hexagon
+    u1 = LinkedEigenfunction(
+        [
+            StandaloneLightningEigenfunction(
+                vertex(exterior, i),
+                fmpq(mod(Rational(1 - θ//2 + (i - 1)*(1 - θ)), 2)),
+                θ,
+                even = even,
+            )
+            for i in boundaries(exterior)
+        ]
+    )
+
+    # Expansions from the outer part of the interior polygons
+    u2 = LinkedEigenfunction(
+        [
+            #StandaloneLightningEigenfunction(
+            #    d,
+            #    i,
+            #    outside = true,
+            #    l = parent(0.01),
+            #)
+            StandaloneLightningEigenfunction(
+                vertex(d, i),
+                ifelse(i == 2, fmpq(4//3), fmpq(5//3)) + fmpq(d.rotation),
+                2 - d.original.angles[i],
+                l = parent(0.08),
+                even = even,
+            )
+            for d in interiors, i in [2, 3]
+        ][:]
+    )
+
+    # Expansions from the inner part of the interior polygons
+    u3 = LinkedEigenfunction(
+        [
+            #StandaloneLightningEigenfunction(
+            #    d,
+            #    i,
+            #    outside = true,
+            #    l = parent(0.02),
+            #)
+            StandaloneLightningEigenfunction(
+                vertex(d, i),
+                ifelse(i == 1, fmpq(2//3), fmpq(0)) + fmpq(d.rotation),
+                2 - d.original.angles[i],
+                l = parent(0.1),
+                even = even,
+            )
+            for d in interiors, i in [1, 4]
+        ][:]
+    )
+
+    # Expansion from the center
+    u4 = StandaloneInteriorEigenfunction(domain, 6, even = even)
+
+    us = [u1, u2, u3, u4]
+    #us = [u1.us..., u2.us..., u3.us..., u4]
+    us_to_boundary = fill(BitSet([1, 7, 8, 10]), length(us))
+
+    u = CombinedEigenfunction(
+        domain,
+        us,
+        ifelse(even, [2, 2, 2, 1], [3, 3, 3, 2]),
+        us_to_boundary = us_to_boundary,
+    )
+
+    return domain, u
+end
