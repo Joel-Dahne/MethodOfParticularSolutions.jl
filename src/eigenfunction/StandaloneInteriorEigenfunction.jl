@@ -1,21 +1,29 @@
 function StandaloneInteriorEigenfunction(
     vertex::AbstractVector{arb},
     stride::Integer = 1,
-    parent::ArbField = parent(first(vertex)),
+    parent::ArbField = parent(first(vertex));
+    even = false,
 )
     return StandaloneInteriorEigenfunction(
         vertex,
         stride,
+        even,
         arb[],
         parent,
     )
 end
 
-StandaloneInteriorEigenfunction(domain::AbstractPlanarDomain, stride::Integer = 1) =
-    StandaloneInteriorEigenfunction(center(domain), stride, arb[], domain.parent)
+StandaloneInteriorEigenfunction(
+    domain::AbstractPlanarDomain,
+    stride::Integer = 1;
+    even = false,
+) = StandaloneInteriorEigenfunction(center(domain), stride, domain.parent; even)
 
 function Base.show(io::IO, u::StandaloneInteriorEigenfunction)
-    println(io, "Standalone interior eigenfunction")
+    println(
+        io,
+        "Standalone interior eigenfunction" * ifelse(u.even, " - even", ""),
+    )
     if !haskey(io, :compact) || !io[:compact]
         println(io, "vertex: $(u.vertex)")
         print(io, "number of set coefficients: $(length(u.coefficients))")
@@ -50,7 +58,11 @@ function (u::StandaloneInteriorEigenfunction)(
     end
 
     r, θ = polar_from_cartesian(xy)
-    νs = u.stride*(div(ks.start, 2):div(ks.stop, 2))
+    if u.even
+        νs = u.stride*(ks.start - 1:ks.stop - 1)
+    else
+        νs = u.stride*(div(ks.start, 2):div(ks.stop, 2))
+    end
     bessel_js = let sqrtλr = sqrt(λ)*r
         Dict(ν => bessel_j(u.parent(ν), sqrtλr) for ν in νs)
     end
@@ -58,14 +70,20 @@ function (u::StandaloneInteriorEigenfunction)(
     res = similar(ks, T)
     for i in eachindex(ks)
         k = ks[i]
-        ν = u.stride*div(k, 2)
+        if u.even
+            ν = u.stride*(k - 1)
 
-        if k == 1
-            res[i] = bessel_js[ν]
-        elseif iseven(k)
-            res[i] = bessel_js[ν]*sin(ν*θ)
-        else
             res[i] = bessel_js[ν]*cos(ν*θ)
+        else
+            ν = u.stride*div(k, 2)
+
+            if k == 1
+                res[i] = bessel_js[ν]
+            elseif iseven(k)
+                res[i] = bessel_js[ν]*sin(ν*θ)
+            else
+                res[i] = bessel_js[ν]*cos(ν*θ)
+            end
         end
     end
 

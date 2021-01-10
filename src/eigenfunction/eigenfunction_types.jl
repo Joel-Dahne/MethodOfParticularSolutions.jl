@@ -61,6 +61,7 @@ The values of `ν` that are used are 0, `stride`, `2stride`,
 struct StandaloneInteriorEigenfunction <: AbstractPlanarEigenfunction
     vertex::SVector{2,arb}
     stride::Int
+    even::Bool
     coefficients::Vector{arb}
     parent::ArbField
 end
