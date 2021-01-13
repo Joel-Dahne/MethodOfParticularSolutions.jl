@@ -49,14 +49,28 @@ function example_domain_ngon(
     domain = Polygon(angles, vertices, parent)
 
     if !lightning
-        us = [
-            StandaloneVertexEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
-            for i in boundaries(domain)
-        ]
-        us_to_boundary = [
-            setdiff(boundaries(domain), (i, mod1(i - 1, length(boundaries(domain)))))
-            for i in eachindex(us)
-        ]
+        if linked
+            # FIXME: Linked VertexEigenfunctions cannot have separate
+            # boundaries they are active on
+            us = [
+                LinkedEigenfunction(
+                    [
+                        StandaloneVertexEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
+                        for i in boundaries(domain)
+                    ]
+                )
+            ]
+            us_to_boundary = fill(BitSet([1]), length(us))
+        else
+            us = [
+                StandaloneVertexEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
+                for i in boundaries(domain)
+            ]
+            us_to_boundary = [
+                setdiff(boundaries(domain), (i, mod1(i - 1, length(boundaries(domain)))))
+                for i in eachindex(us)
+            ]
+        end
     else
         if linked
             us = [
@@ -67,7 +81,7 @@ function example_domain_ngon(
                     ],
                     ones(n),
                 ),
-                StandaloneInteriorEigenfunction(domain, n),
+                StandaloneInteriorEigenfunction(domain, stride = n),
             ]
 
             us_to_boundary = fill(BitSet([1]), length(us))
@@ -133,7 +147,12 @@ function example_domain_triangle_in_triangle(parent = RealField(precision(BigFlo
     return domain, u
 end
 
-function example_domain_ngon_in_ngon(n1, n2, parent = RealField(precision(BigFloat)))
+function example_domain_ngon_in_ngon(
+    n1,
+    n2,
+    parent = RealField(precision(BigFloat));
+    linked = true,
+)
     θ1 = fmpq((n1 - 2)//n1)
     angles1 = fill(θ1, n1)
     vertices1 = [(cos(θ), sin(θ)) for θ in (2parent(π)/n1).*(0:n1-1)]
@@ -151,20 +170,42 @@ function example_domain_ngon_in_ngon(n1, n2, parent = RealField(precision(BigFlo
 
     domain = IntersectedDomain(domain1, domain2)
 
-    us = vcat(
-        [StandaloneLightningEigenfunction(domain1, i) for i in boundaries(domain1)],
-        [
-            StandaloneLightningEigenfunction(domain2, i, outside = true, l = parent(0.1))
-            for i in boundaries(domain2)
-        ],
-        [StandaloneInteriorEigenfunction(domain)]
-    )
+    if linked
+        us = [
+            LinkedEigenfunction(
+                [StandaloneLightningEigenfunction(domain1, i) for i in boundaries(domain1)]
+            ),
+            LinkedEigenfunction(
+                [
+                    StandaloneLightningEigenfunction(domain2, i, outside = true, l = parent(0.4))
+                    for i in boundaries(domain2)
+                ]
+            ),
+            StandaloneInteriorEigenfunction(domain, stride = 4)
+        ]
 
-    u = CombinedEigenfunction(
-        domain,
-        us,
-        [1, 1, 1, 1, 1, 1, 1],
-    )
+        u = CombinedEigenfunction(
+            domain,
+            us,
+            [3, 3, 2],
+            us_to_boundary = fill(BitSet([1, 5]), length(us)),
+        )
+    else
+        us = vcat(
+            [StandaloneLightningEigenfunction(domain1, i) for i in boundaries(domain1)],
+            [
+                StandaloneLightningEigenfunction(domain2, i, outside = true, l = parent(0.5))
+                for i in boundaries(domain2)
+            ],
+            [StandaloneInteriorEigenfunction(domain)]
+        )
+
+        u = CombinedEigenfunction(
+            domain,
+            us,
+            [3, 3, 3, 3, 3, 3, 3, 3, 2],
+        )
+    end
 
     return domain, u
 end
@@ -218,7 +259,7 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
             StandaloneLightningEigenfunction(
                 vertex(exterior, i),
                 fmpq(mod(Rational(1 - θ//2 + (i - 1)*(1 - θ)), 2)),
-                θ,
+                θ
             )
             for i in boundaries(exterior)
         ]
@@ -241,7 +282,7 @@ function example_domain_goal(parent = RealField(precision(BigFloat)))
     )
 
     # Expansion from the center
-    u4 = StandaloneInteriorEigenfunction(domain, 6)
+    u4 = StandaloneInteriorEigenfunction(domain, stride = 6)
 
     us = [u1, u2, u3, u4]
     us_to_boundary = fill(BitSet([1, 7, 8, 9]), length(us))
@@ -273,7 +314,7 @@ method gives
 """
 function example_domain_goal_v2(
     parent = RealField(precision(BigFloat));
-    even = false,
+    even = true,
     a = 0.18,
     b = 0.1,
     c = 0.2,
@@ -326,11 +367,17 @@ function example_domain_goal_v2(
     # Expansions from the vertices of the hexagon
     u1 = LinkedEigenfunction(
         [
-            StandaloneLightningEigenfunction(
+            #StandaloneLightningEigenfunction(
+            #    vertex(exterior, i),
+            #    fmpq(mod(Rational(1 - θ//2 + (i - 1)*(1 - θ)), 2)),
+            #    θ,
+            #    even = even,
+            #)
+            StandaloneVertexEigenfunction(
                 vertex(exterior, i),
-                fmpq(mod(Rational(1 - θ//2 + (i - 1)*(1 - θ)), 2)),
+                i*(1 - θ) + θ*1//2,
                 θ,
-                even = even,
+                2,
             )
             for i in boundaries(exterior)
         ]
@@ -377,16 +424,29 @@ function example_domain_goal_v2(
     )
 
     # Expansion from the center
-    u4 = StandaloneInteriorEigenfunction(domain, 6, even = even)
+    u4 = StandaloneInteriorEigenfunction(SVector(parent(0), parent(0)), stride = 6; even)
 
-    us = [u1, u2, u3, u4]
-    #us = [u1.us..., u2.us..., u3.us..., u4]
+    # Interior expansions closer to outer boundaries
+    u5 = LinkedEigenfunction(
+        [
+            StandaloneInteriorEigenfunction(
+                parent(3//4).*SVector(cospi(fmpq(i//3), parent), sinpi(fmpq(i//3), parent)),
+                fmpq(i//3),
+                stride = 6,
+                even = true
+            )
+            for i in 0:5
+        ]
+    )
+
+    us = [u1, u2, u3, u5]
+    #us = [u1.us..., u2.us..., u3.us..., u4, u5.us...]
     us_to_boundary = fill(BitSet([1, 7, 8, 10]), length(us))
 
     u = CombinedEigenfunction(
         domain,
         us,
-        ifelse(even, [2, 2, 2, 1], [3, 3, 3, 2]),
+        ifelse(even, [2, 2, 2, 1], [3, 3, 3, 1]),
         us_to_boundary = us_to_boundary,
     )
 
