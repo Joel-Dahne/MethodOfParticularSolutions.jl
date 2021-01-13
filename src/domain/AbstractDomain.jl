@@ -44,7 +44,7 @@ with information about which boundary they are from.
 function boundary_points(
     domain::AbstractDomain,
     n::Integer;
-    distribution = :ifelse(domain isa AbstractPlanarDomain, :chebyshev, :linear),
+    distribution = ifelse(domain isa AbstractPlanarDomain, :chebyshev, :linear),
 )
     m = length(boundaries(domain))
     res = [
