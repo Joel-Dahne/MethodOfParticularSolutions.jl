@@ -1,11 +1,16 @@
 function StandaloneInteriorEigenfunction(
     vertex::AbstractVector{arb},
-    stride::Integer = 1,
+    orientation::T = fmpq(0),
     parent::ArbField = parent(first(vertex));
+    stride::Integer = 1,
     even = false,
-)
+) where {T <: Union{Rational,fmpq,arb}}
+    if T == fmpq || T <: Rational
+        orientation = fmpq(orientation)
+    end
     return StandaloneInteriorEigenfunction(
         vertex,
+        orientation,
         stride,
         even,
         arb[],
@@ -15,9 +20,10 @@ end
 
 StandaloneInteriorEigenfunction(
     domain::AbstractPlanarDomain,
-    stride::Integer = 1;
+    orientation = fmpq(0);
+    stride::Integer = 1,
     even = false,
-) = StandaloneInteriorEigenfunction(center(domain), stride, domain.parent; even)
+) = StandaloneInteriorEigenfunction(center(domain), orientation, domain.parent; stride, even)
 
 function Base.show(io::IO, u::StandaloneInteriorEigenfunction)
     println(
@@ -26,6 +32,7 @@ function Base.show(io::IO, u::StandaloneInteriorEigenfunction)
     )
     if !haskey(io, :compact) || !io[:compact]
         println(io, "vertex: $(u.vertex)")
+        println(io, "orientation: $(u.orientation)")
         print(io, "number of set coefficients: $(length(u.coefficients))")
     end
 end
@@ -42,8 +49,19 @@ Takes a 2-element vector `xy` representing a point in the plane in
 Cartesian coordinates and makes a (affine) change of coordinates so
 that `u.vertex` is put at the origin.
 """
-function coordinate_transformation(u::StandaloneInteriorEigenfunction, xy::AbstractVector)
-    return xy .- u.vertex
+function coordinate_transformation(
+    u::StandaloneInteriorEigenfunction{T},
+    xy::AbstractVector,
+) where {T}
+    iszero(u.orientation) && return xy .- u.vertex
+
+    if T == fmpq
+        s, c = sincospi(u.orientation, u.parent)
+    elseif T == arb
+        s, c = sincos(u.orientation)
+    end
+    M = SMatrix{2, 2}(c, s, -s, c)
+    return M*(xy .- u.vertex)
 end
 
 function (u::StandaloneInteriorEigenfunction)(

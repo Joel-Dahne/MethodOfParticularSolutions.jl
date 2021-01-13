@@ -22,8 +22,14 @@ function eigenfunction_plotdata(u::StandaloneVertexEigenfunction{T}) where {T}
     return vertex, edges, arc
 end
 
-function eigenfunction_plotdata(u::StandaloneInteriorEigenfunction)
+function eigenfunction_plotdata(u::StandaloneInteriorEigenfunction{T}) where {T}
     vertex = (Float64[u.vertex[1]], Float64[u.vertex[2]])
+    edge = begin
+        orientation = ifelse(T == arb, u.orientation, u.parent(u.orientation)*u.parent(π))
+        s, c = sincos(orientation)
+        v = u.vertex + 0.1*SVector(c, s)
+        (Float64[u.vertex[1], v[1]], Float64[u.vertex[2], v[2]])
+    end
     arc = begin
         res = [
             u.vertex + 0.1*SVector(cos(θ), sin(θ))
@@ -32,7 +38,7 @@ function eigenfunction_plotdata(u::StandaloneInteriorEigenfunction)
         (Float64.(getindex.(res, 1)), Float64.(getindex.(res, 2)))
     end
 
-    return vertex, arc
+    return vertex, edge, arc
 end
 
 function eigenfunction_plotdata(u::StandaloneLightningEigenfunction{T}) where {T}
@@ -90,23 +96,24 @@ end
 end
 
 @recipe function f(u::StandaloneInteriorEigenfunction)
-    seriestype := [:path :scatter]
-    linewidth := [2 3]
+    seriestype := [:path :path :scatter]
+    linewidth := [2 2 3]
     markersize := 5
-    label --> ["" "u"]
-    seriescolor := [:blue :red]
-    linestyle := [:dot :solid]
-    vertex, arc = eigenfunction_plotdata(u)
-    println(vertex)
+    label --> ["" "" "u"]
+    seriescolor := [:blue :blue :red]
+    linestyle := [:dot :solid :solid]
+    vertex, edge, arc = eigenfunction_plotdata(u)
+
     x = hcat(
         arc[1],
+        [edge[1]; fill(NaN, length(arc[1]) - length(edge[1]))],
         [vertex[1]; fill(NaN, length(arc[1]) - length(vertex[1]))],
     )
     y = hcat(
         arc[2],
+        [edge[2]; fill(NaN, length(arc[2]) - length(edge[2]))],
         [vertex[2]; fill(NaN, length(arc[2]) - length(vertex[2]))],
     )
-
     return (x, y)
 end
 

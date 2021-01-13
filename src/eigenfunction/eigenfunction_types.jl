@@ -48,18 +48,21 @@ struct StandaloneVertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEig
 end
 
 """"
-    StandaloneInteriorEigenfunction(vertex, stride = 1)
+    StandaloneInteriorEigenfunction(vertex, orientation, parent; stride = 1, even = false)
 
 An eigenfunction consisting of the functions `bessel_j(ν,
 r*√λ)*sin(ν*θ)` and `bessel_j(ν, ν*√λ)*cos(j*θ)` for `ν` = 0, 1, 2,
-... Here `r` and `θ` are polar coordinates around `vertex`.
+... Here `r` and `θ` are polar coordinates around `vertex` take so
+that `θ = 0` at the given orientation.
 
 The values of `ν` that are used are 0, `stride`, `2stride`,
 `3stride`,...
 
+If `even` is true then use only the function with `cos(j*θ)`.
 """
-struct StandaloneInteriorEigenfunction <: AbstractPlanarEigenfunction
+struct StandaloneInteriorEigenfunction{T <: Union{fmpq,arb}} <: AbstractPlanarEigenfunction
     vertex::SVector{2,arb}
+    orientation::T
     stride::Int
     even::Bool
     coefficients::Vector{arb}
