@@ -6,6 +6,7 @@ function StandaloneLightningEigenfunction(
     l::arb = parent(1),
     σ::arb = parent(2.5),
     even::Bool = false,
+    reversed::Bool = false,
 ) where {T <: Union{arb,fmpq}}
     return StandaloneLightningEigenfunction(
         vertex,
@@ -14,6 +15,7 @@ function StandaloneLightningEigenfunction(
         l,
         σ,
         even,
+        reversed,
         arb[],
         parent,
     )
@@ -26,6 +28,7 @@ function StandaloneLightningEigenfunction(
     l::arb = domain.parent(1),
     σ::arb = domain.parent(2.5),
     even::Bool = false,
+    reversed::Bool = false,
 ) where {T <: Union{arb,fmpq}}
     θ = domain.angles[i]
 
@@ -49,7 +52,9 @@ function StandaloneLightningEigenfunction(
         θ,
         domain.parent;
         l,
-        σ
+        σ,
+        even,
+        reversed,
     )
 end
 
@@ -63,6 +68,7 @@ function StandaloneLightningEigenfunction(
     l::arb = domain.parent(1),
     σ::arb = domain.parent(2.5),
     even::Bool = false,
+    reversed::Bool = false,
 ) where {T <: Union{arb,fmpq}}
     θ = angle(domain, i)
 
@@ -84,7 +90,9 @@ function StandaloneLightningEigenfunction(
         θ,
         domain.parent;
         l,
-        σ
+        σ,
+        even,
+        reversed,
     )
 end
 
@@ -95,8 +103,9 @@ function StandaloneLightningEigenfunction(
     l::arb = domain.parent(1),
     σ::arb = domain.parent(2.5),
     even::Bool = false,
+    reversed::Bool = false,
 )
-    u = StandaloneLightningEigenfunction(domain.original, i; outside, l, σ, even)
+    u = StandaloneLightningEigenfunction(domain.original, i; outside, l, σ, even, reversed)
     if typeof(u.orientation) == typeof(domain.rotation)
         orientation = u.orientation + domain.rotation
     else
@@ -114,6 +123,7 @@ function StandaloneLightningEigenfunction(
         u.l,
         u.σ,
         u.even,
+        u.reversed,
         u.coefficients,
         domain.parent
     )
@@ -124,7 +134,10 @@ end
 function Base.show(io::IO, u::StandaloneLightningEigenfunction)
     println(
         io,
-        "Standalone lightning eigenfunction" * ifelse(u.even, " - even", ""),
+        "Standalone lightning eigenfunction" *
+        ifelse(u.even, " - even", "") *
+        ifelse(u.reversed, " - reversed", "")
+        ,
     )
     if !haskey(io, :compact) || !io[:compact]
         println(io, "vertex: $(u.vertex)")
@@ -158,7 +171,12 @@ function coordinate_transformation(
         s, c = sincos(-u.orientation - u.θ/2)
     end
     M = SMatrix{2, 2}(c, s, -s, c)
-    return M*(xy .- u.vertex)
+    res = M*(xy .- u.vertex)
+    if u.reversed
+        return SVector(res[1], -res[2])
+    else
+        return res
+    end
 end
 
 """
