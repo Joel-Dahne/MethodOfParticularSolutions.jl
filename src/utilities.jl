@@ -6,6 +6,12 @@ function cartesian_from_polar(r, θ)
 end
 
 function polar_from_cartesian(xy)
+    if eltype(xy) == arb && contains_zero(xy[2]) && !iszero(radius(xy[2])) && !isnonnegative(xy[1])
+        @warn "computing polar coordinates of a ball overlapping the negative x-axis, trying to be smart!"
+        r = sqrt(xy[1]^2 + xy[2]^2)
+        θ = atan(xy[2], -xy[1]) + parent(xy[1])(π)
+        return r, θ
+    end
     r = sqrt(xy[1]^2 + xy[2]^2)
     θ = atan(xy[2], xy[1])
     return r, θ
