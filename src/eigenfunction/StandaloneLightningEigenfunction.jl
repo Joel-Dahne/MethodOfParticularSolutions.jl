@@ -4,7 +4,7 @@ function StandaloneLightningEigenfunction(
     θ::T,
     parent::ArbField = parent(vertex[1]);
     l::arb = parent(1),
-    σ::arb = parent(3),
+    σ::arb = parent(4),
     even::Bool = false,
     reversed::Bool = false,
 ) where {T <: Union{arb,fmpq}}
@@ -26,7 +26,7 @@ function StandaloneLightningEigenfunction(
     i::Integer;
     outside = false,
     l::arb = domain.parent(1),
-    σ::arb = domain.parent(3),
+    σ::arb = domain.parent(4),
     even::Bool = false,
     reversed::Bool = false,
 ) where {T <: Union{arb,fmpq}}
@@ -66,7 +66,7 @@ function StandaloneLightningEigenfunction(
     i::Integer;
     outside = false,
     l::arb = domain.parent(1),
-    σ::arb = domain.parent(3),
+    σ::arb = domain.parent(4),
     even::Bool = false,
     reversed::Bool = false,
 ) where {T <: Union{arb,fmpq}}
@@ -101,7 +101,7 @@ function StandaloneLightningEigenfunction(
     i::Integer;
     outside = false,
     l::arb = domain.parent(1),
-    σ::arb = domain.parent(3),
+    σ::arb = domain.parent(4),
     even::Bool = false,
     reversed::Bool = false,
 )
