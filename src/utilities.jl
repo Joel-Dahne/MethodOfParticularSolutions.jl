@@ -31,20 +31,8 @@ function LinearAlgebra.dot(xyz1::SVector{3, arb}, xyz2::SVector{3, arb})
     sum(xyz1.*xyz2)
 end
 
-function LinearAlgebra.norm(xy::SVector{2, arb})
-    sqrt(sum(xy.^2))
-end
+LinearAlgebra.norm(x::SVector{N,arb}) where {N} = sqrt(sum(x.^2))
 
-function LinearAlgebra.norm(xyz::SVector{3, arb})
-    sqrt(sum(xyz.^2))
-end
+LinearAlgebra.normalize(x::SVector{N,arb}) where {N} = x./sqrt(sum(x.^2))
 
-function LinearAlgebra.normalize(xyz::SVector{3, arb})
-    r = sqrt(sum(xyz.^2))
-    xyz./r
-end
-
-function LinearAlgebra.normalize(xyz::SVector{3, arb_series})
-    r = sqrt(sum(xyz.^2))
-    xyz./r
-end
+LinearAlgebra.normalize(x::SVector{N,arb_series}) where {N} = x./sqrt(sum(x.^2))
