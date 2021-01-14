@@ -4,7 +4,7 @@ function StandaloneLightningEigenfunction(
     θ::T,
     parent::ArbField = parent(vertex[1]);
     l::arb = parent(1),
-    σ::arb = parent(2.5),
+    σ::arb = parent(3),
     even::Bool = false,
     reversed::Bool = false,
 ) where {T <: Union{arb,fmpq}}
@@ -26,7 +26,7 @@ function StandaloneLightningEigenfunction(
     i::Integer;
     outside = false,
     l::arb = domain.parent(1),
-    σ::arb = domain.parent(2.5),
+    σ::arb = domain.parent(3),
     even::Bool = false,
     reversed::Bool = false,
 ) where {T <: Union{arb,fmpq}}
@@ -66,7 +66,7 @@ function StandaloneLightningEigenfunction(
     i::Integer;
     outside = false,
     l::arb = domain.parent(1),
-    σ::arb = domain.parent(2.5),
+    σ::arb = domain.parent(3),
     even::Bool = false,
     reversed::Bool = false,
 ) where {T <: Union{arb,fmpq}}
@@ -101,7 +101,7 @@ function StandaloneLightningEigenfunction(
     i::Integer;
     outside = false,
     l::arb = domain.parent(1),
-    σ::arb = domain.parent(2.5),
+    σ::arb = domain.parent(3),
     even::Bool = false,
     reversed::Bool = false,
 )
@@ -184,9 +184,14 @@ end
 
 Compute the distance from the vertex for the `i`th charge point
 assuming a total of `n` charge points are used.
+
+We use a tapered distribution as proposed by Trefethen but we reverse
+the order.
 """
 chargedistance(u::StandaloneLightningEigenfunction, i::Integer, n::Integer)=
-    u.l*exp(-u.σ*(i - 1)/sqrt(u.parent(n)))
+    u.l*exp(-u.σ*(sqrt(u.parent(n)) - sqrt(u.parent(n + 1 - i))))
+# An old alternative version is
+#u.l*exp(-u.σ*(i - 1)/sqrt(u.parent(n)))
 
 """
     charge(
