@@ -9,6 +9,7 @@ using LinearAlgebra
 using GenericSVD
 using Optim
 using OrderedCollections
+import SpecialFunctions
 
 using TimerOutputs
 using Printf
@@ -64,6 +65,7 @@ export AbstractDomain,
 include("arb.jl")
 include("arb_series.jl")
 include("utilities.jl")
+include("special-functions.jl")
 
 # Include types for domains and eigenfunctions
 include("domain/domain_types.jl")
