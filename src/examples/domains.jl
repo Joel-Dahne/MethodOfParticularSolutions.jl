@@ -361,6 +361,7 @@ function example_domain_goal_v2(
     parent = RealField(precision(BigFloat));
     even = true,
     reversed = true,
+    T = arb,
     a = 0.18,
     b = 0.1,
     c = 0.2,
@@ -413,7 +414,7 @@ function example_domain_goal_v2(
     # Expansions from the vertices of the hexagon
     u1 = LinkedEigenfunction(
         [
-            StandaloneLightningEigenfunction(
+            StandaloneLightningEigenfunction{arb,fmpq}(
                 vertex(exterior, i),
                 fmpq(mod(Rational(1 - θ//2 + (i - 1)*(1 - θ)), 2)),
                 θ,
@@ -438,7 +439,7 @@ function example_domain_goal_v2(
             #    outside = true,
             #    l = parent(0.01),
             #)
-            StandaloneLightningEigenfunction(
+            StandaloneLightningEigenfunction{T,fmpq}(
                 vertex(d, i),
                 ifelse(i == 2, fmpq(4//3), fmpq(5//3)) + fmpq(d.rotation),
                 2 - d.original.angles[i],
@@ -459,7 +460,7 @@ function example_domain_goal_v2(
             #    outside = true,
             #    l = parent(0.02),
             #)
-            StandaloneLightningEigenfunction(
+            StandaloneLightningEigenfunction{T,fmpq}(
                 vertex(d, i),
                 ifelse(i == 1, fmpq(2//3), fmpq(0)) + fmpq(d.rotation),
                 2 - d.original.angles[i],

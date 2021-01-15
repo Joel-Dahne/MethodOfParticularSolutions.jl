@@ -107,26 +107,33 @@ function StandaloneLightningEigenfunction(
     return u
 end
 
-function Base.show(io::IO, u::StandaloneLightningEigenfunction)
+function Base.show(io::IO, u::StandaloneLightningEigenfunction{T}) where {T}
     println(
         io,
-        "Standalone lightning eigenfunction" *
+        "StandaloneLightningEigenfunction{$T}" *
         ifelse(u.even, " - even", "") *
         ifelse(u.reversed, " - reversed", "")
         ,
     )
     if !haskey(io, :compact) || !io[:compact]
         println(io, "vertex: $(u.vertex)")
-        println(io, "orientation: $(u.orientation)")
-        println(io, "θ: $(u.θ)")
+        println(io, "orientation: $(u.orientation), θ: $(u.θ)")
         println(io, "l = $(u.l), σ = $(u.σ)")
         print(io, "number of set coefficients: $(length(u.coefficients))")
     end
 end
 
-function set_eigenfunction!(u::StandaloneLightningEigenfunction, coefficients::Vector)
+function set_eigenfunction!(u::StandaloneLightningEigenfunction{arb}, coefficients::Vector)
     resize!(u.coefficients, length(coefficients))
     copy!(u.coefficients, u.parent.(coefficients))
+end
+
+function set_eigenfunction!(
+    u::StandaloneLightningEigenfunction{T},
+    coefficients::Vector,
+) where {T}
+    resize!(u.coefficients, length(coefficients))
+    copy!(u.coefficients, coefficients)
 end
 
 """
@@ -140,12 +147,16 @@ clockwise.
 function coordinate_transformation(
     u::StandaloneLightningEigenfunction{T,S},
     xy::AbstractVector,
-) where {T,S <: Union{fmpq,arb}}
+) where {T,S}
     if S == fmpq
         s, c = sincospi(-u.orientation - u.θ//2, u.parent)
     elseif S == arb
         s, c = sincos(-u.orientation - u.θ/2)
     end
+
+    s, c = convert.(T, (s, c))
+    xy = convert(SVector{2,T}, xy)
+
     M = SMatrix{2, 2}(c, s, -s, c)
     res = M*(xy .- u.vertex)
     if u.reversed
@@ -163,11 +174,15 @@ assuming a total of `n` charge points are used.
 
 We use a tapered distribution as proposed by Trefethen but we reverse
 the order.
+
+An old alternative version is `u.l*exp(-u.σ*(i - 1)/sqrt(u.parent(n)))`.
 """
-chargedistance(u::StandaloneLightningEigenfunction, i::Integer, n::Integer)=
+chargedistance(u::StandaloneLightningEigenfunction{arb}, i::Integer, n::Integer) =
     u.l*exp(-u.σ*(sqrt(u.parent(n)) - sqrt(u.parent(n + 1 - i))))
-# An old alternative version is
-#u.l*exp(-u.σ*(i - 1)/sqrt(u.parent(n)))
+
+
+chargedistance(u::StandaloneLightningEigenfunction{T}, i::Integer, n::Integer) where {T} =
+    u.l*exp(-u.σ*(sqrt(convert(T, n)) - sqrt(convert(T, n + 1 - i))))
 
 """
     charge(
@@ -192,25 +207,33 @@ function charge(
 ) where {T,S<:Union{arb,fmpq}}
     d = chargedistance(u, i, n)
     if standard_coordinates
-        if T == fmpq
+        if S == fmpq
             s, c = sincospi(u.orientation + u.θ//2, u.parent)
         else
             s, c = sincos(u.orientation + u.θ/2)
         end
-        return u.vertex - d.*SVector{2,arb}(c, s)
+
+        return u.vertex - d.*SVector{2,T}(c, s)
     else
-        SVector{2,arb}(-d, zero(d))
+        SVector{2}(-d, zero(d))
     end
 end
 
-function (u::StandaloneLightningEigenfunction)(
-    xy::AbstractVector{T},
-    λ::arb,
+function (u::StandaloneLightningEigenfunction{T,S})(
+    xy::AbstractVector,
+    λ::Union{arb,Real},
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
-    n = div(length(ks) - 1, 3) + 1, # Total number of charge points
-) where {T <: Union{arb, arb_series}}
+) where {T,S}
+    if T == arb
+        xy = SVector{2,arb}(u.parent(xy[1]), u.parent(xy[2]))
+        λ = u.parent(λ)
+    else
+        xy = convert(SVector{2,T}, xy)
+        λ = convert(T, λ)
+    end
+
     if !notransform
         xy = coordinate_transformation(u, xy)
     end
@@ -225,7 +248,7 @@ function (u::StandaloneLightningEigenfunction)(
     for charge_index in charge_indices
         # Perform the change of coordinates corresponding to the charge
         # point
-        xy_local = xy - charge(u, charge_index, n)
+        xy_local = xy - charge(u, charge_index, charge_indices.stop)
         r, θ = polar_from_cartesian(xy_local)
 
         rsqrtλ = r*sqrt(λ)

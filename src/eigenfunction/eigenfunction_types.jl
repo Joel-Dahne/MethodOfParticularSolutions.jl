@@ -69,15 +69,15 @@ struct StandaloneInteriorEigenfunction{T <: Union{fmpq,arb}} <: AbstractPlanarEi
     parent::ArbField
 end
 
-struct StandaloneLightningEigenfunction{T <: Union{Real,arb}, S <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
-    vertex::SVector{2,arb}
+struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmpq, arb}} <: AbstractPlanarEigenfunction
+    vertex::SVector{2,T}
     orientation::S
     θ::S
-    l::arb
-    σ::arb
+    l::T
+    σ::T
     even::Bool
     reversed::Bool
-    coefficients::Vector{arb}
+    coefficients::Vector{T}
     parent::ArbField
 
     function StandaloneLightningEigenfunction(
@@ -103,6 +103,50 @@ struct StandaloneLightningEigenfunction{T <: Union{Real,arb}, S <: Union{fmpq, a
         )
     end
 
+    function StandaloneLightningEigenfunction{arb,S}(
+        vertex::SVector{2,arb},
+        orientation::S,
+        θ::S,
+        parent::ArbField = parent(vertex[1]);
+        l::arb = parent(1),
+        σ::arb = parent(4),
+        even::Bool = false,
+        reversed::Bool = false,
+    ) where {S <: Union{arb,fmpq}}
+        return new{arb,S}(
+            vertex,
+            orientation,
+            θ,
+            l,
+            σ,
+            even,
+            reversed,
+            arb[],
+            parent,
+        )
+    end
+
+    function StandaloneLightningEigenfunction{T,S}(
+        vertex::AbstractVector,
+        orientation::S,
+        θ::S;
+        l = one(T),
+        σ = 4one(T),
+        even::Bool = false,
+        reversed::Bool = false,
+    ) where {T <: AbstractFloat, S <: Union{arb,fmpq}}
+        return new{T,S}(
+            convert(SVector{2,T}, vertex),
+            orientation,
+            θ,
+            convert(T, l),
+            convert(T, σ),
+            even,
+            reversed,
+            T[],
+            ArbField(precision(T)),
+        )
+    end
 end
 
 # TODO: Currently this can't handle the case when some eigenfunctions
