@@ -1,27 +1,4 @@
 function StandaloneLightningEigenfunction(
-    vertex::SVector{2,arb},
-    orientation::T,
-    θ::T,
-    parent::ArbField = parent(vertex[1]);
-    l::arb = parent(1),
-    σ::arb = parent(4),
-    even::Bool = false,
-    reversed::Bool = false,
-) where {T <: Union{arb,fmpq}}
-    return StandaloneLightningEigenfunction(
-        vertex,
-        orientation,
-        θ,
-        l,
-        σ,
-        even,
-        reversed,
-        arb[],
-        parent,
-    )
-end
-
-function StandaloneLightningEigenfunction(
     domain::Triangle{T},
     i::Integer;
     outside = false,
@@ -120,12 +97,11 @@ function StandaloneLightningEigenfunction(
         domain.map(u.vertex),
         orientation,
         u.θ,
-        u.l,
-        u.σ,
-        u.even,
-        u.reversed,
-        u.coefficients,
-        domain.parent
+        domain.parent,
+        l = u.l,
+        σ = u.σ,
+        even = u.even,
+        reversed = u.reversed,
     )
 
     return u
@@ -162,12 +138,12 @@ that `u.vertex` is put at the origin and rotated `u.orientation + u.θ/2`
 clockwise.
 """
 function coordinate_transformation(
-    u::StandaloneLightningEigenfunction{T},
+    u::StandaloneLightningEigenfunction{T,S},
     xy::AbstractVector,
-) where {T <: Union{fmpq,arb}}
-    if T == fmpq
+) where {T,S <: Union{fmpq,arb}}
+    if S == fmpq
         s, c = sincospi(-u.orientation - u.θ//2, u.parent)
-    elseif T == arb
+    elseif S == arb
         s, c = sincos(-u.orientation - u.θ/2)
     end
     M = SMatrix{2, 2}(c, s, -s, c)
@@ -205,15 +181,15 @@ Compute the location of the `i`th charge point assuming a total of `n`
 points is used. The charge points are numbered from `1` to `n`.
 
 They are returned in the coordinate system used by `u`, so they all
-lie on the negative part of the x-axis. If `defualt_coordinates` is
+lie on the negative part of the x-axis. If `standard_coordinates` is
 true then return them in the standard coordinate system instead.
 """
 function charge(
-    u::StandaloneLightningEigenfunction{T},
+    u::StandaloneLightningEigenfunction{T,S},
     i::Integer,
     n::Integer,
     standard_coordinates = false,
-) where {T<:Union{arb,fmpq}}
+) where {T,S<:Union{arb,fmpq}}
     d = chargedistance(u, i, n)
     if standard_coordinates
         if T == fmpq

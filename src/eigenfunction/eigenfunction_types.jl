@@ -69,16 +69,40 @@ struct StandaloneInteriorEigenfunction{T <: Union{fmpq,arb}} <: AbstractPlanarEi
     parent::ArbField
 end
 
-struct StandaloneLightningEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
+struct StandaloneLightningEigenfunction{T <: Union{Real,arb}, S <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
     vertex::SVector{2,arb}
-    orientation::T
-    θ::T
+    orientation::S
+    θ::S
     l::arb
     σ::arb
     even::Bool
     reversed::Bool
     coefficients::Vector{arb}
     parent::ArbField
+
+    function StandaloneLightningEigenfunction(
+        vertex::SVector{2,arb},
+        orientation::S,
+        θ::S,
+        parent::ArbField = parent(vertex[1]);
+        l::arb = parent(1),
+        σ::arb = parent(4),
+        even::Bool = false,
+        reversed::Bool = false,
+    ) where {S <: Union{arb,fmpq}}
+        return new{arb,S}(
+            vertex,
+            orientation,
+            θ,
+            l,
+            σ,
+            even,
+            reversed,
+            arb[],
+            parent,
+        )
+    end
+
 end
 
 # TODO: Currently this can't handle the case when some eigenfunctions
