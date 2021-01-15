@@ -109,7 +109,7 @@ function enclose_eigenvalue_approx(
 )
     ## Approximate maximum on boundary
     # Points to evaluate u on
-    pts, bds = boundary_points(domain, u, max_numpoints, distribution = :chebyshev);
+    pts, bds = boundary_points(domain, u, length(coefficients(u)), max_numpoints);
     values = similar(pts, arb)
     @Threads.threads for i in eachindex(pts)
         values[i] = u(pts[i], λ, boundary = bds[i])

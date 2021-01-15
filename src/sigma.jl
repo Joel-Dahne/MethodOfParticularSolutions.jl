@@ -21,7 +21,7 @@ function sigma_matrix(
 ) where {T}
     @timeit_debug "points" begin
         # Compute boundary and interior points of the domain
-        boundary, boundary_index = boundary_points(domain, u, num_boundary)
+        boundary, boundary_index = boundary_points(domain, u, N, num_boundary)
         interior = interior_points(domain, num_interior)
     end
 

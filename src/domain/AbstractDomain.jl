@@ -55,17 +55,28 @@ function boundary_points(
 end
 
 """
-    boundary_points(domain::AbstractDomain, u::AbstractEigenfunction, n::Integer; distribution)
+    boundary_points(
+        domain::AbstractDomain,
+        u::AbstractEigenfunction,
+        N::Integer,
+        n::Integer;
+        distribution,
+)
 
-Return n points from boundaries of the domain on which the
+Return `n` points from boundaries of the domain on which the
 eigenfunction is not identically zero, together with information about
 which boundary they are from.
 
 The boundaries where the egienfunction is not identically equal to
 zero on is determined by `active_boundaries(domain, u)`.
+
+`N` should be set to the number of expansion terms used for `u`. It's
+not used in the default implementation but some type of eigenfunctions
+need access to this to compute good boundary points.
 """
 function boundary_points(domain::AbstractDomain,
                          u::AbstractEigenfunction,
+                         ::Integer,
                          n::Integer;
                          distribution = ifelse(
                              domain isa AbstractPlanarDomain,
