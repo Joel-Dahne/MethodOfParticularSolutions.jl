@@ -97,6 +97,8 @@ include("eigenfunction/LinkedEigenfunction.jl")
 include("eigenfunction/CombinedEigenfunction.jl")
 include("eigenfunction/plotting.jl")
 
+include("Payne/PayneEigenfunction.jl")
+
 include("sigma.jl")
 include("enclose.jl")
 include("mps.jl")
