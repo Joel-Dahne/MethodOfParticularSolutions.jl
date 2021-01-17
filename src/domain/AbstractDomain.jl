@@ -93,6 +93,34 @@ function boundary_points(domain::AbstractDomain,
     return vcat(getindex.(res, 1)...), vcat(getindex.(res, 2)...)
 end
 
+function boundary_points(domain::AbstractDomain,
+                         u::CombinedEigenfunction,
+                         ::Integer,
+                         n::Integer;
+                         distribution = ifelse(
+                             domain isa AbstractPlanarDomain,
+                             :chebyshev,
+                             :linear,
+                         ),
+                         )
+    active = active_boundaries(domain, u)
+    m = length(active)
+    per_boundary = fill(div(n, m), m) + [n % m >= i for i in 1:m]
+    res = [
+        getindex.(
+            boundary_points(
+                domain,
+                active[i],
+                ifelse(active[i] ∈ u.even_boundaries, 2per_boundary[i] - 1, per_boundary[i]);
+                distribution,
+            ),
+            Ref(1:per_boundary[i]),
+        )
+        for i in eachindex(active)
+    ]
+    return vcat(getindex.(res, 1)...), vcat(getindex.(res, 2)...)
+end
+
 """
     interior_points(domain::AbstractDomain, n::Integer; rng = MersenneTwister(42))
 

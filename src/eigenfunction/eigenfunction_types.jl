@@ -175,6 +175,7 @@ mutable struct CombinedEigenfunction <: AbstractPlanarEigenfunction
     domain::AbstractPlanarDomain
     us::Vector{<:AbstractPlanarEigenfunction}
     boundary_to_us::OrderedDict{Int,BitSet}
+    even_boundaries::BitSet
     orders::Vector{Int}
 end
 

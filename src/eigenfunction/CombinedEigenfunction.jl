@@ -2,7 +2,8 @@ function CombinedEigenfunction(
     domain::AbstractPlanarDomain,
     us::Vector{<:AbstractPlanarEigenfunction},
     orders::Vector{Int} = ones(Int, length(us));
-    us_to_boundary = [active_boundaries(domain, u) for u in us]
+    us_to_boundary = [active_boundaries(domain, u) for u in us],
+    even_boundaries = BitSet(),
 )
     boundary_to_us = OrderedDict(
         i => BitSet(findall(B -> i ∈ B, us_to_boundary))
@@ -13,6 +14,7 @@ function CombinedEigenfunction(
         domain,
         us,
         boundary_to_us,
+        BitSet(even_boundaries),
         orders,
     )
 end
@@ -66,6 +68,7 @@ function CombinedEigenfunction(
         domain,
         us,
         boundary_to_us,
+        BitSet(),
         orders,
     )
 end
