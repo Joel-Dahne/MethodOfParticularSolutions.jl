@@ -108,8 +108,8 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
         orientation::S,
         θ::S,
         parent::ArbField = parent(vertex[1]);
-        l::arb = parent(1),
-        σ::arb = parent(4),
+        l = 1,
+        σ = 4,
         even::Bool = false,
         reversed::Bool = false,
     ) where {S <: Union{arb,fmpq}}
@@ -117,8 +117,8 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
             vertex,
             orientation,
             θ,
-            l,
-            σ,
+            parent(l),
+            parent(σ),
             even,
             reversed,
             arb[],

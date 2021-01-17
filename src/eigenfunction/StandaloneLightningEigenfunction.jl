@@ -1,20 +1,31 @@
-function StandaloneLightningEigenfunction(
+StandaloneLightningEigenfunction(
     domain::Triangle{T},
     i::Integer;
     outside = false,
-    l::arb = domain.parent(1),
-    σ::arb = domain.parent(4),
+    l = 1,
+    σ = 4,
     even::Bool = false,
     reversed::Bool = false,
-) where {T <: Union{arb,fmpq}}
+) where {T <: Union{arb,fmpq}} =
+    StandaloneLightningEigenfunction{arb,T}(domain, i; outside, l, σ, even, reversed)
+
+function StandaloneLightningEigenfunction{T,S}(
+    domain::Triangle{S},
+    i::Integer;
+    outside::Bool = false,
+    l = 1,
+    σ = 4,
+    even::Bool = false,
+    reversed::Bool = false,
+) where {T,S}
     θ = domain.angles[i]
 
     if i == 1
         orientation = zero(θ)
     elseif i == 2
-        orientation = ifelse(T == arb, domain.parent(π), 1) - θ
+        orientation = ifelse(S == arb, domain.parent(π), 1) - θ
     elseif i == 3
-        orientation = 2ifelse(T == arb, domain.parent(π), 1) -
+        orientation = 2ifelse(S == arb, domain.parent(π), 1) -
             domain.angles[2] - θ
     end
 
@@ -23,11 +34,10 @@ function StandaloneLightningEigenfunction(
         θ = ifelse(T == arb, 2domain.parent(π), 2) - θ
     end
 
-    return StandaloneLightningEigenfunction(
+    return StandaloneLightningEigenfunction{T,S}(
         vertex(domain, i),
         orientation,
-        θ,
-        domain.parent;
+        θ;
         l,
         σ,
         even,
@@ -73,6 +83,40 @@ function StandaloneLightningEigenfunction(
     )
 end
 
+function StandaloneLightningEigenfunction{T,arb}(
+    domain::Polygon,
+    i::Integer;
+    outside = false,
+    l = 1,
+    σ = 4,
+    even::Bool = false,
+    reversed::Bool = false,
+) where {T}
+    θ = angle(domain, i)
+
+    v = vertex(domain, mod1(i + 1, length(vertices(domain)))) - vertex(domain, i)
+    orientation = atan(v[2], v[1])
+
+    if contains_zero(v[2])
+        @warn "orientation could not be computed accurately, orientation = $orientation"
+    end
+
+    if outside
+        orientation += θ
+        θ = 2domain.parent(π) - θ
+    end
+
+    return StandaloneLightningEigenfunction{T,arb}(
+        vertex(domain, i),
+        orientation,
+        θ;
+        l,
+        σ,
+        even,
+        reversed,
+    )
+end
+
 function StandaloneLightningEigenfunction(
     domain::TransformedDomain,
     i::Integer;
@@ -102,6 +146,39 @@ function StandaloneLightningEigenfunction(
         σ = u.σ,
         even = u.even,
         reversed = u.reversed,
+    )
+
+    return u
+end
+
+function StandaloneLightningEigenfunction{T,S}(
+    domain::TransformedDomain,
+    i::Integer;
+    outside = false,
+    l = 1,
+    σ = 4,
+    even::Bool = false,
+    reversed::Bool = false,
+) where {T,S}
+    u = StandaloneLightningEigenfunction{T,S}(domain.original, i; outside, l, σ, even, reversed)
+    if typeof(u.orientation) == typeof(domain.rotation)
+        orientation = u.orientation + domain.rotation
+    else
+        if u.orientation isa fmpq
+            orientation = domain.parent(π)*u.orientation + domain.rotation
+        else
+            orientation = u.orientation + domain.parent(π)*domain.rotation
+        end
+    end
+
+    u = StandaloneLightningEigenfunction{T,S}(
+        domain.map(u.vertex),
+        orientation,
+        u.θ;
+        u.l,
+        u.σ,
+        u.even,
+        u.reversed,
     )
 
     return u
