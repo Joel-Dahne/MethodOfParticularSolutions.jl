@@ -1,5 +1,5 @@
 function Base.show(io::IO, u::LinkedEigenfunction)
-    println(io, "$(length(u.us)) linked $(eltype(u.us)) eigenfunctions")
+    println(io, "$(length(u.us)) linked $(eltype(u.us))")
     if !haskey(io, :compact) || !io[:compact]
         recur_io = IOContext(io, :compact => true)
         for v in u.us
