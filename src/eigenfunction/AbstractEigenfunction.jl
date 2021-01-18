@@ -81,5 +81,9 @@ function norm(domain::AbstractDomain,
               numpoints::Int = 1000)
     @error "using a non-rigorous implementation of norm for $(typeof(u))"
     interior = interior_points(domain, numpoints)
-    sqrt(area(domain)*sum(abs(u(i, λ))^2 for i in interior)/length(interior))
+    res = similar(interior, arb)
+    for i in eachindex(interior)
+        res[i] = abs(u(interior[i], λ))^2
+    end
+    return sqrt(area(domain)*sum(res)/length(interior))
 end
