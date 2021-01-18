@@ -388,15 +388,21 @@ end
 Return the domain given by a hexagon with 6 polygon cut out as well
 as a corresponding eigenfunction.
 
-Computing the first few eigenvalues in Matlab using a finite element
-method gives
+With `a = 0.18`, `b = 0.1` and `c = 0.2` computing the first few
+eigenvalues in Matlab using a finite element method gives
 ```
-26.3259
-56.8914
-56.9041
-56.9041
+   26.3259
+   56.8914
+   56.9041
+   56.9041
 ```
-
+If `rotated` is true they are
+```
+   26.3348
+   59.1647
+   59.3959
+   59.3959
+```
 """
 function example_domain_goal_v2(
     parent = RealField(precision(BigFloat));
@@ -408,6 +414,7 @@ function example_domain_goal_v2(
     a = 0.18,
     b = 0.1,
     c = 0.2,
+    rotated = true,
 )
     # The main domain is a hexagon
     n = 6
@@ -434,12 +441,14 @@ function example_domain_goal_v2(
 
     interior_angles = [1//3, 2//3, 2//3, 1//3]
 
+    ϕ = ifelse(rotated, -1//6, 0//6)
+
     interiors = [
         TransformedDomain(
             Polygon(interior_angles, points, parent),
-            fmpq(i//3),
+            fmpq(i//3 + ϕ),
             parent(1),
-            c.*SVector(cospi(fmpq(i//3 + 1//6), parent), sinpi(fmpq(i//3 + 1//6), parent)),
+            c.*SVector(cospi(fmpq(i//3 + 1//6 + ϕ), parent), sinpi(fmpq(i//3 + 1//6 + ϕ), parent)),
         )
         for i in 0:5
     ]
@@ -505,7 +514,7 @@ function example_domain_goal_v2(
         ]
     )
 
-    us = [u1, u2, u3]
+    us = AbstractPlanarEigenfunction[u1, u2, u3]
 
     if even && reversed
         orders = [2, 3, 3]
