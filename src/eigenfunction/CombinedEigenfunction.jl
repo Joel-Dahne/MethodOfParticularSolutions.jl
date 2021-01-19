@@ -207,7 +207,7 @@ function (u::CombinedEigenfunction)(xy::AbstractVector{T},
     res_per_index = similar(u.us, Vector{T})
     for i in eachindex(u.us)
         if i in indices
-            res_per_index[i] = u.us[i](
+            res_per_index[i] = one(λ).*u.us[i](
                 xy,
                 λ,
                 ks_per_index[i],
