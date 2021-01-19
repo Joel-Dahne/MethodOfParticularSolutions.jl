@@ -234,19 +234,17 @@ as a corresponding eigenfunction.
 Computing the first few eigenvalues in Matlab using a finite element
 method gives
 ```
-47.1851
-49.2548
-49.2668
-54.8239
-54.8292
-59.6856
-61.8997
-78.3523
-87.4298
-87.4398
+   30.6209
+   68.9811
+   69.0296
+   69.0296
+   73.0933
+   73.0933
+   75.2604
+   78.4972
+   78.4972
 ```
-though it's likely not accurate to more than 1 or 2 digits.
-
+though it's likely not accurate to more than 1 or 2 decimals.
 """
 function example_domain_goal_v1(
     parent = RealField(precision(BigFloat));
@@ -256,6 +254,10 @@ function example_domain_goal_v1(
     reversed = true,
     inner_expansion = true,
     outer_expansion = false,
+    b = 0.28,
+    c = 0.17,
+    outwards = true,
+    rotated = true,
 )
     # The main domain is a hexagon
     n = 6
@@ -265,12 +267,26 @@ function example_domain_goal_v1(
     exterior = Polygon(angles, vertices, parent)
 
     # The interior domains are triangles
+    points = [
+        SVector(parent(1), parent(0)),
+        SVector(parent(0), parent(0)),
+        SVector(cospi(fmpq(1//3), parent), sinpi(fmpq(1//3), parent)),
+    ]
+
+    points[1] *= b
+    points[3] *= b
+
+    points[2] += 2*sinpi(fmpq(1//3), parent)*b.*SVector(cospi(fmpq(1//6), parent), sinpi(fmpq(1//6), parent))
+
+    interior_angles = [1//3, 1//3, 1//3]
+
+    ϕ = ifelse(rotated, -1//6, 0//6)
     interiors = [
         TransformedDomain(
-            Triangle(fmpq(1//3), fmpq(1//3), parent),
-            fmpq(i//3),
-            parent(0.25),
-            SVector(cospi(fmpq(i//3 + 1//6), parent), sinpi(fmpq(i//3 + 1//6), parent))/4,
+            Polygon(interior_angles, points, parent),
+            fmpq(i//3 + ϕ),
+            parent(1),
+            c.*SVector(cospi(fmpq(i//3 + 1//6 + ϕ), parent), sinpi(fmpq(i//3 + 1//6 + ϕ), parent)),
         )
         for i in 0:5
     ]
@@ -308,28 +324,28 @@ function example_domain_goal_v1(
     u2 = LinkedEigenfunction(
         [
             StandaloneLightningEigenfunction{T,fmpq}(
-                d,
-                1,
-                l = parent(0.15),
-                outside = true;
-                even,
+                vertex(d, 2),
+                fmpq(4//3) + fmpq(d.rotation),
+                2 - d.original.angles[2],
+                l = parent(c),
+                even = even,
             )
             for d in interiors
-        ]
+        ][:]
     )
 
     # Expansions from the inner tips of the triangles
     u3 = LinkedEigenfunction(
         [
             StandaloneLightningEigenfunction{T,fmpq}(
-                d,
-                i,
-                l = parent(0.15),
-                outside = true,
+                vertex(d, i),
+                ifelse(i == 1, fmpq(2//3), fmpq(0)) + fmpq(d.rotation),
+                2 - d.original.angles[i],
+                l = parent(c),
                 even = even && !reversed,
                 reversed = reversed && i == 3,
             )
-            for d in interiors, i in 2:3
+            for d in interiors, i in [1, 3]
         ][:]
     )
 
@@ -369,7 +385,7 @@ function example_domain_goal_v1(
     end
 
     us_to_boundary = fill(BitSet([1, 7, 9]), length(us))
-    even_boundaries = ifelse(even, Int[1, 7], Int[])
+    even_boundaries = ifelse(even, Int[1, 9], Int[])
 
     u = CombinedEigenfunction(
         domain,
