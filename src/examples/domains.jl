@@ -234,15 +234,12 @@ as a corresponding eigenfunction.
 Computing the first few eigenvalues in Matlab using a finite element
 method gives
 ```
-   30.6209
-   68.9811
-   69.0296
-   69.0296
-   73.0933
-   73.0933
-   75.2604
-   78.4972
-   78.4972
+   30.6180
+   68.9723
+   69.0183
+   69.0183
+   73.0861
+   73.0861
 ```
 though it's likely not accurate to more than 1 or 2 decimals.
 """
