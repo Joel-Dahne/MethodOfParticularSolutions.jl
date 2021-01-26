@@ -109,4 +109,7 @@ include("examples/triangles.jl")
 include("examples/denominators.jl")
 include("examples/domains.jl")
 
+include("Payne/validate_nodalline.jl")
+include("Payne/bounded_by.jl")
+
 end # module
