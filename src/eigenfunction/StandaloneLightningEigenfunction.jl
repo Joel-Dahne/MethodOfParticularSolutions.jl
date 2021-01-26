@@ -232,7 +232,12 @@ function coordinate_transformation(
     end
 
     s, c = convert.(T, (s, c))
-    xy = convert(SVector{2,T}, xy)
+
+    if eltype(xy) == arb_series
+        xy = convert(SVector{2,arb_series}, xy)
+    else
+        xy = convert(SVector{2,T}, xy)
+    end
 
     M = SMatrix{2, 2}(c, s, -s, c)
     res = M*(xy .- u.vertex)
@@ -303,7 +308,10 @@ function (u::StandaloneLightningEigenfunction{T,S})(
     boundary = nothing,
     notransform::Bool = false,
 ) where {T,S}
-    if T == arb
+    if T == arb && eltype(xy) == arb_series
+        xy = SVector{2,arb_series}(xy[1], xy[2])
+        λ = u.parent(λ)
+    elseif T == arb
         xy = SVector{2,arb}(u.parent(xy[1]), u.parent(xy[2]))
         λ = u.parent(λ)
     else
@@ -315,7 +323,11 @@ function (u::StandaloneLightningEigenfunction{T,S})(
         xy = coordinate_transformation(u, xy)
     end
 
-    res = similar(ks, T)
+    if T == arb && eltype(xy) == arb_series
+        res = similar(ks, arb_series)
+    else
+        res = similar(ks, T)
+    end
     i = 1
     if u.even
         charge_indices = (div(ks.start-1, 2)+1):(div(ks.stop-1, 2)+1)
