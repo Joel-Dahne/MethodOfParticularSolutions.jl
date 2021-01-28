@@ -232,25 +232,32 @@ Return the domain given by a hexagon with 6 triangles cut out as well
 as a corresponding eigenfunction.
 
 Computing the first few eigenvalues in Matlab using a finite element
-method gives
+method gives (with `(N, d, h) = (22, 9, 6)`)
 ```
    31.5943
    75.8995
    75.9633
    75.9633
 ```
-though it's likely not accurate to more than 1 or 2 decimals.
+though it's likely not accurate to more than 1 or 2 decimals. If `(N,
+d, h) = (27, 11, 6)` then they are
+```
+   31.0432
+   63.2104
+   63.7259
+   63.7259
+```
 """
 function example_domain_goal_v1(
     parent = RealField(precision(BigFloat));
     T = arb,
-    lightning = true,
+    lightning = false,
     even = true,
     reversed = true,
     inner_expansion = true,
     outer_expansion = false,
-    N::Integer = 22,
-    d::Integer = 9,
+    N::Integer = 27,
+    d::Integer = 11,
     h::Integer = 6
 )
     # The main domain is a hexagon
@@ -293,7 +300,11 @@ function example_domain_goal_v1(
                     even
                 )
                 for i in boundaries(exterior)
-            ]
+            ],
+            excluded_boundaries = [
+                BitSet([mod1(i - 1, length(boundaries(exterior))), i])
+                for i in boundaries(exterior)
+            ],
         )
     else
         u1 = LinkedEigenfunction(
@@ -356,12 +367,18 @@ function example_domain_goal_v1(
 
     us = AbstractPlanarEigenfunction[u1, u2, u3]
 
-    if even && reversed
-        orders = [2, 2, 3]
-    elseif even
-        orders = [2, 2, 2]
+    if lightning
+        orders = [ifelse(even, 2, 3)]
     else
-        orders = [3, 3, 3]
+        orders = [ifelse(even, 1, 2)]
+    end
+
+    if even && reversed
+        append!(orders, [2, 3])
+    elseif even
+        append!(orders, [2, 2])
+    else
+        append!(orders, [3, 3])
     end
 
     if inner_expansion
