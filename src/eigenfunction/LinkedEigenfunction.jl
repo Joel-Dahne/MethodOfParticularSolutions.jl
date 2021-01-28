@@ -37,10 +37,14 @@ function (u::LinkedEigenfunction)(
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
-    return sum(
-        i ->
-            u.extra_coefficients[i] .*
-            u.us[i](xy, λ, ks, boundary = boundary, notransform = notransform),
-        eachindex(u.us),
-    )
+    res = [zero(first(xy)) for _ in eachindex(ks)]
+
+    for i in eachindex(u.us)
+        if !(boundary ∈ u.excluded_boundaries)
+            res .+= u.extra_coefficients[i] .*
+                u.us[i](xy, λ, ks, boundary = boundary, notransform = notransform)
+        end
+    end
+
+    return res
 end

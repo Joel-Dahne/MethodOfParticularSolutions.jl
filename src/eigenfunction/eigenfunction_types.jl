@@ -149,17 +149,15 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
     end
 end
 
-# TODO: Currently this can't handle the case when some eigenfunctions
-# are identically equal to zero on some parts of the boundary. As long
-# as we are working with lightning and interior eigenfunctions this is
-# fine, but it means it's not very useful for vertex eigenfunctions.
 struct LinkedEigenfunction{T<:AbstractPlanarEigenfunction} <: AbstractPlanarEigenfunction
     us::Vector{T}
     extra_coefficients::Vector{arb}
+    excluded_boundaries::Vector{BitSet}
 
     function LinkedEigenfunction(
         us::Vector{T},
-        extra_coefficients::Vector = ones(length(us)),
+        extra_coefficients::Vector = ones(length(us));
+        excluded_boundaries::Vector = fill(BitSet(), length(us))
     ) where {T <: AbstractPlanarEigenfunction}
         isempty(us) && throw(ArgumentError("us must not be empty"))
         length(us) == length(extra_coefficients) ||
@@ -167,7 +165,7 @@ struct LinkedEigenfunction{T<:AbstractPlanarEigenfunction} <: AbstractPlanarEige
 
         extra_coefficients = first(us).parent.(extra_coefficients)
 
-        return new{T}(us, extra_coefficients)
+        return new{T}(us, extra_coefficients, excluded_boundaries)
     end
 end
 
