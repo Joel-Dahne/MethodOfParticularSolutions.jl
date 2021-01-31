@@ -108,11 +108,11 @@ function boundary_points(domain::Polygon, i::Integer, n::Integer; distribution =
     elseif distribution == :root_exponential
         m = (n + 1)//2
         f = j -> begin
-            d = exp(-domain.parent(m - j)/sqrt(domain.parent(n)))
+            d = exp(-4(sqrt(domain.parent(m)) - sqrt(domain.parent(min(j, n - j + 1)))))
             if j < m
                 return d/2
             elseif j > m
-                return 1 - inv(d)/2
+                return 1 - d/2
             else
                 return domain.parent(0.5)
             end

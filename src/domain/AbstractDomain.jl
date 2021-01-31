@@ -99,7 +99,7 @@ function boundary_points(domain::AbstractDomain,
                          n::Integer;
                          distribution = ifelse(
                              domain isa AbstractPlanarDomain,
-                             :chebyshev,
+                             :root_exponential,
                              :linear,
                          ),
                          )
