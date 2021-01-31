@@ -26,8 +26,7 @@ struct PayneEigenfunction <: AbstractPlanarEigenfunction
         @assert length(u.us) == 4
         @assert length(weights) == 4
 
-        @assert u.us[1] isa LinkedEigenfunction{<:StandaloneLightningEigenfunction}
-        @assert u.us[1].us[1].even
+        @assert u.us[1] isa LinkedEigenfunction
 
         @assert u.us[2] isa LinkedEigenfunction{<:StandaloneLightningEigenfunction}
         @assert u.us[2].us[1].even
