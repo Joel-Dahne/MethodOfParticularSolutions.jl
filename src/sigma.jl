@@ -34,10 +34,10 @@ function sigma_matrix(
 
         # TODO: Allow evaluation on ranges of indices, to be able to
         # reuse computations similar to several basis functions.
-        for i in 1:num_boundary
+        @Threads.threads for i in 1:num_boundary
             A[i, :] = u(boundary[i], λ, 1:N, boundary = boundary_index[i])
         end
-        for i in 1:num_interior
+        @Threads.threads for i in 1:num_interior
             A[num_boundary + i, :] = u(interior[i], λ, 1:N)
         end
     end
