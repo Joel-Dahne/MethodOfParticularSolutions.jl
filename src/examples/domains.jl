@@ -374,7 +374,7 @@ function example_domain_goal_v1(
     end
 
     if even && reversed
-        append!(orders, [2, 3])
+        append!(orders, 3*[2, 3])
     elseif even
         append!(orders, [2, 2])
     else
