@@ -58,7 +58,7 @@ export AbstractDomain,
 
     cartesian, spherical,
 
-    mps, iteratemps,
+    mps!, iteratemps,
 
     certifyindices
 
