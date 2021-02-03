@@ -11,7 +11,7 @@
     interval = ball(RR(9.6), RR(0.5))
 
     println("Computing eigenvalue for the $domain")
-    λs = iteratemps(
+    λs, _ = iteratemps(
         domain,
         u,
         interval,

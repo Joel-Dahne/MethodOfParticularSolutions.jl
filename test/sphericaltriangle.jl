@@ -23,7 +23,7 @@
         println("$i: Computing eigenvalue for the $domain")
 
         optim_prec_final = ifelse(i != 4, 60, 100)
-        λs = iteratemps(
+        λs, _ = iteratemps(
             domain,
             u,
             interval,

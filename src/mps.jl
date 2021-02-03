@@ -221,9 +221,9 @@ function iteratemps(
 
     # Copy the domain and eigenfunction to avoid changing the originals
     domain = deepcopy(domain)
-    u = deepcopy(u)
 
     λs = similar(Ns, arb)
+    us = [deepcopy(u) for _ in eachindex(Ns)]
 
     trace = MPSTrace()
     tracing = store_trace || show_trace || extended_trace
@@ -247,9 +247,9 @@ function iteratemps(
             ### Update the domain and eigenfunction with the new precision ###
             RR = RealField(new_prec)
             domain = typeof(domain)(domain, RR)
-            set_domain!(u, domain)
+            set_domain!(us[i], domain)
             if recompute
-                recompute!(u)
+                recompute!(us[i])
             end
 
             ### Run the computations ###
@@ -257,7 +257,7 @@ function iteratemps(
                 @timeit_debug "mps" begin
                     λ = setprecision(BigFloat, new_prec) do
                         mps!(
-                            u,
+                            us[i],
                             domain,
                             getinterval(BigFloat, enclosure)...,
                             N,
@@ -280,7 +280,7 @@ function iteratemps(
                     if rigorous_enclosure
                         new_enclosure = enclose_eigenvalue(
                             domain,
-                            u,
+                            us[i],
                             λ,
                             store_trace = tracing;
                             rigorous_norm,
@@ -290,7 +290,7 @@ function iteratemps(
                     else
                         new_enclosure = enclose_eigenvalue_approx(
                             domain,
-                            u,
+                            us[i],
                             λ,
                             max_numpoints = 4num_boundary_factor * N,
                             norm_numpoints = 4num_interior_factor * N,
@@ -329,8 +329,8 @@ function iteratemps(
     end
 
     if store_trace
-        return λs, trace
+        return λs, us, trace
     else
-        return λs
+        return λs, us
     end
 end
