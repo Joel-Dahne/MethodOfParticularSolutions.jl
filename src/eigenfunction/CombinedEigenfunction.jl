@@ -66,15 +66,25 @@ function CombinedEigenfunction(
     return CombinedEigenfunction(domain, us, boundary_to_us, BitSet(), orders)
 end
 
-function Base.show(io::IO, u::CombinedEigenfunction)
-    println(io, "Combined eigenfunction on $(u.domain)")
-    recur_io = IOContext(io, :compact => true)
-    for v in u.us
-        print(io, "- ")
-        show(recur_io, v)
+function Base.show(io::IO, ::MIME"text/plain", u::CombinedEigenfunction)
+    print(
+        io,
+        "Combined eigenfunction on $(typeof(u.domain)) with $(length(coefficients(u))) coefficients",
+    )
+    if !get(io, :compact, false)
+        println(io, "")
+        recur_io = IOContext(io, :compact => true)
+        for v in u.us
+            print(io, "- ")
+            show(recur_io, v)
+        end
     end
-    print(io, "number of set coefficients: $(length(coefficients(u)))")
 end
+
+Base.show(io::IO, u::CombinedEigenfunction) = print(
+    io,
+    "Combined eigenfunction on $(typeof(u.domain)) with $(length(coefficients(u))) coefficients",
+)
 
 function set_domain!(u::CombinedEigenfunction, domain::AbstractDomain)
     u.domain = domain
