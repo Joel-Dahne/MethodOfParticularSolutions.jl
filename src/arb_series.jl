@@ -1,3 +1,5 @@
+Base.zero(x::arb_series) = arb_series(x.poly.parent(0), x.length)
+
 """
     bessel_j(ν::arb, z::arb_series[, n = length(z)])
 
