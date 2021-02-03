@@ -14,7 +14,7 @@
                    "[6.7771080545983009573857 +/- 5.76e-23]",
                    ])
 
-    goalradius = [2e-5, 4e-9, 5e-4, 3e-21, 2e-7, 4e-14, 1.2e-1, 2e-1, 2e-1, 9e-4]
+    goalradius = [2e-5, 4e-9, 5e-4, 3e-20, 2e-7, 2e-12, 1.2e-1, 2e-1, 2e-1, 9e-4]
 
     for i in 1:10
         domain, u, interval = MethodOfParticularSolutions.triangle(i)
