@@ -50,14 +50,15 @@ function example_domain_ngon(
 
     if !lightning
         if linked
-            # FIXME: Linked VertexEigenfunctions cannot have separate
-            # boundaries they are active on
             us = [
                 LinkedEigenfunction(
                     [
                         StandaloneVertexEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
                         for i in boundaries(domain)
-                    ]
+                    ],
+                    excluded_boundaries = [
+                        BitSet([mod1(i - 1, n), i]) for i in boundaries(domain)
+                    ],
                 )
             ]
             us_to_boundary = fill(BitSet([1]), length(us))
@@ -316,7 +317,11 @@ function example_domain_goal_v1(
                     ifelse(even, 2, 1),
                 )
                 for i in boundaries(exterior)
-            ]
+            ],
+            excluded_boundaries = [
+                BitSet([mod1(i - 1, length(boundaries(exterior))), i])
+                for i in boundaries(exterior)
+            ],
         )
     end
 
