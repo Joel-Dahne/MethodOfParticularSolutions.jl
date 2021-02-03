@@ -40,7 +40,7 @@ function (u::LinkedEigenfunction)(
     res = [zero(first(xy)) for _ in eachindex(ks)]
 
     for i in eachindex(u.us)
-        if !(boundary ∈ u.excluded_boundaries)
+        if !(boundary ∈ u.excluded_boundaries[i])
             res .+= u.extra_coefficients[i] .*
                 u.us[i](xy, λ, ks, boundary = boundary, notransform = notransform)
         end
