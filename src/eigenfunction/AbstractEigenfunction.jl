@@ -81,7 +81,7 @@ function norm(domain::AbstractDomain,
               numpoints::Int = 1000,
               warn::Bool = true,
               )
-    warn && @error "using a non-rigorous implementation of norm for $(typeof(u))"
+    warn && @warn "using a non-rigorous implementation of norm for $(typeof(u))"
     interior = interior_points(domain, numpoints)
     res = similar(interior, arb)
     @Threads.threads for i in eachindex(interior)
