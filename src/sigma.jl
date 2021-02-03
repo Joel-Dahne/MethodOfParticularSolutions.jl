@@ -34,11 +34,11 @@ function sigma_matrix(
 
         # TODO: Allow evaluation on ranges of indices, to be able to
         # reuse computations similar to several basis functions.
-        @Threads.threads for i in 1:num_boundary
+        Threads.@threads for i = 1:num_boundary
             A[i, :] = u(boundary[i], λ, 1:N, boundary = boundary_index[i])
         end
-        @Threads.threads for i in 1:num_interior
-            A[num_boundary + i, :] = u(interior[i], λ, 1:N)
+        Threads.@threads for i = 1:num_interior
+            A[num_boundary+i, :] = u(interior[i], λ, 1:N)
         end
     end
 
@@ -118,15 +118,16 @@ function sigma_coefficients(
 
         # We create a copy of Q to be able to call svd! directly,
         # otherwise it prints a warning about alg keyword being ignored.
-        @timeit_debug "svd" v = svd!(
-            LinearAlgebra.copy_oftype(
-                Q[1:num_boundary, :],
-                LinearAlgebra.eigtype(eltype(A))
-            )
-        ).V[:, end]
+        @timeit_debug "svd" v = svd!(LinearAlgebra.copy_oftype(
+            Q[1:num_boundary, :],
+            LinearAlgebra.eigtype(eltype(A)),
+        )).V[
+            :,
+            end,
+        ]
 
         # Compute the coefficients
-        coefficients = q \ (Q*v)
+        coefficients = q \ (Q * v)
     end
 
     return coefficients

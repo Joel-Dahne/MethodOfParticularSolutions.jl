@@ -16,50 +16,43 @@ using Printf
 using RecipesBase
 
 export AbstractDomain,
-    boundaries, area, boundary_parameterization, boundary_points, interior_points,
-
+    boundaries,
+    area,
+    boundary_parameterization,
+    boundary_points,
+    interior_points,
     SphericalTriangle,
-    angles, vertex, center, greatcircleplane, greatcircle,
-
+    angles,
+    vertex,
+    center,
+    greatcircleplane,
+    greatcircle,
     LShape,
-
     Triangle,
-
     Polygon,
-
     TransformedDomain,
-
     IntersectedDomain,
-
     AbstractEigenfunction,
-    coefficients, set_eigenfunction!,
-
-    SphericalVertexEigenfunction, mu,
-
+    coefficients,
+    set_eigenfunction!,
+    SphericalVertexEigenfunction,
+    mu,
     SphericalInteriorEigenfunction,
-
-    SphericalCombinedEigenfunction, basis_function,
-
+    SphericalCombinedEigenfunction,
+    basis_function,
     KrewerasEigenfunction,
-
     LShapeEigenfunction,
-
     StandaloneVertexEigenfunction,
-
     StandaloneInteriorEigenfunction,
-
     StandaloneLightningEigenfunction,
-
     LinkedEigenfunction,
-
     CombinedEigenfunction,
-
-    sigma, sigma_coefficients,
-
-    cartesian, spherical,
-
-    mps!, iteratemps,
-
+    sigma,
+    sigma_coefficients,
+    cartesian,
+    spherical,
+    mps!,
+    iteratemps,
     certifyindices
 
 include("arb.jl")

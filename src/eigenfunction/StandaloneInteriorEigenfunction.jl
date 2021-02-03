@@ -4,18 +4,11 @@ function StandaloneInteriorEigenfunction(
     parent::ArbField = parent(first(vertex));
     stride::Integer = 1,
     even = false,
-) where {T <: Union{Rational,fmpq,arb}}
+) where {T<:Union{Rational,fmpq,arb}}
     if T == fmpq || T <: Rational
         orientation = fmpq(orientation)
     end
-    return StandaloneInteriorEigenfunction(
-        vertex,
-        orientation,
-        stride,
-        even,
-        arb[],
-        parent,
-    )
+    return StandaloneInteriorEigenfunction(vertex, orientation, stride, even, arb[], parent)
 end
 
 StandaloneInteriorEigenfunction(
@@ -23,13 +16,16 @@ StandaloneInteriorEigenfunction(
     orientation = fmpq(0);
     stride::Integer = 1,
     even = false,
-) = StandaloneInteriorEigenfunction(center(domain), orientation, domain.parent; stride, even)
+) = StandaloneInteriorEigenfunction(
+    center(domain),
+    orientation,
+    domain.parent;
+    stride,
+    even,
+)
 
 function Base.show(io::IO, u::StandaloneInteriorEigenfunction)
-    println(
-        io,
-        "Standalone interior eigenfunction" * ifelse(u.even, " - even", ""),
-    )
+    println(io, "Standalone interior eigenfunction" * ifelse(u.even, " - even", ""))
     if !haskey(io, :compact) || !io[:compact]
         println(io, "vertex: $(u.vertex)")
         println(io, "orientation: $(u.orientation)")
@@ -60,8 +56,8 @@ function coordinate_transformation(
     elseif T == arb
         s, c = sincos(u.orientation)
     end
-    M = SMatrix{2, 2}(c, s, -s, c)
-    return M*(xy .- u.vertex)
+    M = SMatrix{2,2}(c, s, -s, c)
+    return M * (xy .- u.vertex)
 end
 
 function (u::StandaloneInteriorEigenfunction)(
@@ -70,18 +66,18 @@ function (u::StandaloneInteriorEigenfunction)(
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
-) where {T <: Union{arb, arb_series}}
+) where {T<:Union{arb,arb_series}}
     if !notransform
         xy = coordinate_transformation(u, xy)
     end
 
     r, θ = polar_from_cartesian(xy)
     if u.even
-        νs = u.stride*(ks.start - 1:ks.stop - 1)
+        νs = u.stride * (ks.start-1:ks.stop-1)
     else
-        νs = u.stride*(div(ks.start, 2):div(ks.stop, 2))
+        νs = u.stride * (div(ks.start, 2):div(ks.stop, 2))
     end
-    bessel_js = let sqrtλr = sqrt(λ)*r
+    bessel_js = let sqrtλr = sqrt(λ) * r
         Dict(ν => bessel_j(u.parent(ν), sqrtλr) for ν in νs)
     end
 
@@ -89,18 +85,18 @@ function (u::StandaloneInteriorEigenfunction)(
     for i in eachindex(ks)
         k = ks[i]
         if u.even
-            ν = u.stride*(k - 1)
+            ν = u.stride * (k - 1)
 
-            res[i] = bessel_js[ν]*cos(ν*θ)
+            res[i] = bessel_js[ν] * cos(ν * θ)
         else
-            ν = u.stride*div(k, 2)
+            ν = u.stride * div(k, 2)
 
             if k == 1
                 res[i] = bessel_js[ν]
             elseif iseven(k)
-                res[i] = bessel_js[ν]*sin(ν*θ)
+                res[i] = bessel_js[ν] * sin(ν * θ)
             else
-                res[i] = bessel_js[ν]*cos(ν*θ)
+                res[i] = bessel_js[ν] * cos(ν * θ)
             end
         end
     end

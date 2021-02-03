@@ -18,8 +18,8 @@ abstract type AbstractPlanarDomain <: AbstractDomain end
   boundaries are ordered by which vertex they are opposite of, so
   boundary 1 is opposite of vertex 1.
 """
-struct SphericalTriangle{T <: Union{fmpq, arb}} <: AbstractSphericalDomain
-    angles::Tuple{T, T, T}
+struct SphericalTriangle{T<:Union{fmpq,arb}} <: AbstractSphericalDomain
+    angles::Tuple{T,T,T}
     parent::ArbField
 end
 
@@ -50,7 +50,7 @@ origin the vertex with angle `β` is taken to have `y = 0`.
 
 Vertex 1, 2 and 3 are opposite of angles α, β and γ respectively.
 """
-struct Triangle{T <: Union{fmpq,arb}} <: AbstractPlanarDomain
+struct Triangle{T<:Union{fmpq,arb}} <: AbstractPlanarDomain
     angles::NTuple{3,T}
     parent::ArbField
 
@@ -82,7 +82,7 @@ given.
 The boundaries are enumerated by which vertex they are next to, in
 positive order.
 """
-struct Polygon{T <: Union{fmpq,arb}} <: AbstractPlanarDomain
+struct Polygon{T<:Union{fmpq,arb}} <: AbstractPlanarDomain
     angles::Vector{T}
     vertices::Vector{SVector{2,arb}}
     parent::ArbField
@@ -118,7 +118,7 @@ struct IntersectedDomain{T<:AbstractPlanarDomain} <: AbstractPlanarDomain
     function IntersectedDomain(
         exterior::T,
         interiors::Vector{<:AbstractPlanarDomain},
-    ) where {T <: AbstractPlanarDomain}
+    ) where {T<:AbstractPlanarDomain}
         domain = new{T}(exterior, convert(Vector{AbstractPlanarDomain}, interiors))
     end
 end

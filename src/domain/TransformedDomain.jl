@@ -1,6 +1,14 @@
-function TransformedDomain{T,S}(domain::TransformedDomain{T,S}, parent::ArbField) where {T,S}
+function TransformedDomain{T,S}(
+    domain::TransformedDomain{T,S},
+    parent::ArbField,
+) where {T,S}
     # TODO: Might need to recompute values here
-    return TransformedDomain(S(domain.original, parent), domain.rotation, domain.scaling, domain.translation)
+    return TransformedDomain(
+        S(domain.original, parent),
+        domain.rotation,
+        domain.scaling,
+        domain.translation,
+    )
 end
 
 function TransformedDomain(domain, rotation::T, scaling, translation) where {T}
@@ -19,7 +27,10 @@ function Base.show(io::IO, domain::TransformedDomain{T}) where {T}
     if T == arb
         println(io, "Rotation: $(domain.rotation)")
     else
-        println(io, "Rotation: $(numerator(domain.rotation))π/$(denominator(domain.rotation))")
+        println(
+            io,
+            "Rotation: $(numerator(domain.rotation))π/$(denominator(domain.rotation))",
+        )
     end
     println(io, "Scaling: $(domain.scaling)")
     println(io, "Translation: $(domain.translation)")
@@ -35,16 +46,16 @@ function Base.getproperty(domain::TransformedDomain{T}, name::Symbol) where {T}
         elseif T == fmpq
             s, c = sincospi(domain.rotation, domain.parent)
         end
-        M = SMatrix{2, 2}(c, s, -s, c)
-        return xy -> domain.scaling.*M*xy + domain.translation
+        M = SMatrix{2,2}(c, s, -s, c)
+        return xy -> domain.scaling .* M * xy + domain.translation
     elseif name == :invmap
         if T == arb
             s, c = sincos(-domain.rotation)
         elseif T == fmpq
             s, c = sincospi(-domain.rotation, domain.parent)
         end
-        M = SMatrix{2, 2}(c, s, -s, c)
-        return xy -> M*(xy - domain.translation)./domain.scaling
+        M = SMatrix{2,2}(c, s, -s, c)
+        return xy -> M * (xy - domain.translation) ./ domain.scaling
     else
         return getfield(domain, name)
     end
@@ -62,7 +73,7 @@ vertices(domain::TransformedDomain) = domain.map.(vertices(domain.original))
 
 center(domain::TransformedDomain) = domain.map(center(domain.original))
 
-area(domain::TransformedDomain) = domain.scaling*area(domain.original)
+area(domain::TransformedDomain) = domain.scaling * area(domain.original)
 
 Base.in(xy, domain::TransformedDomain) = domain.invmap(xy) ∈ domain.original
 

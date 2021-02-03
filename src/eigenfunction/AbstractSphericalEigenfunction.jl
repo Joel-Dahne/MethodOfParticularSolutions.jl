@@ -12,23 +12,25 @@ end
   The point can be given in either Cartesian or spherical coordinates
   and the returned value will always be of the same type.
 """
-function coordinate_transformation(u::AbstractSphericalEigenfunction,
-                                   xyz::AbstractVector{T}
-                                   ) where {T <: Union{arb, arb_series}}
+function coordinate_transformation(
+    u::AbstractSphericalEigenfunction,
+    xyz::AbstractVector{T},
+) where {T<:Union{arb,arb_series}}
     throw(ErrorException("coordinate_transform not implemented for eigenfunction of type $(typeof(u))"))
 end
 
-function coordinate_transformation(u::AbstractSphericalEigenfunction,
-                                   θ::T,
-                                   ϕ::T
-                                   ) where {T <: Union{arb, arb_series}}
+function coordinate_transformation(
+    u::AbstractSphericalEigenfunction,
+    θ::T,
+    ϕ::T,
+) where {T<:Union{arb,arb_series}}
     spherical(coordinate_transformation(u, cartesian(θ, ϕ)))
 end
 
-function coordinate_transformation(u::AbstractSphericalEigenfunction,
-                                   (θ, ϕ)::Union{Tuple{T, T},
-                                                 NamedTuple{(:θ, :ϕ),Tuple{T, T}}},
-                                   ) where {T <: Union{arb, arb_series}}
+function coordinate_transformation(
+    u::AbstractSphericalEigenfunction,
+    (θ, ϕ)::Union{Tuple{T,T},NamedTuple{(:θ, :ϕ),Tuple{T,T}}},
+) where {T<:Union{arb,arb_series}}
     coordinate_transformation(u, θ, ϕ)
 end
 
@@ -51,43 +53,50 @@ end
 
   See also: [`coordinate_transform`](@ref)
 """
-function (u::AbstractSphericalEigenfunction)(xyz::AbstractVector{T},
-                                             λ::arb,
-                                             k::Integer;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
-    throw(ErrorException("evaluation of basis function not implemented"
-                         *" for eigenfunction of type $(typeof(u))"))
+function (u::AbstractSphericalEigenfunction)(
+    xyz::AbstractVector{T},
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
+    throw(ErrorException(
+        "evaluation of basis function not implemented" *
+        " for eigenfunction of type $(typeof(u))",
+    ))
 end
 
-function (u::AbstractSphericalEigenfunction)(θ::T,
-                                             ϕ::T,
-                                             λ::arb,
-                                             k::Integer;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
-    throw(ErrorException("evaluation of basis function not implemented"
-                         *" for eigenfunction of type $(typeof(u))"))
+function (u::AbstractSphericalEigenfunction)(
+    θ::T,
+    ϕ::T,
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
+    throw(ErrorException(
+        "evaluation of basis function not implemented" *
+        " for eigenfunction of type $(typeof(u))",
+    ))
 end
 
-function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{T, T},
-                                                           NamedTuple{(:θ, :ϕ),Tuple{T, T}}},
-                                             λ::arb,
-                                             k::Integer;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::AbstractSphericalEigenfunction)(
+    (θ, ϕ)::Union{Tuple{T,T},NamedTuple{(:θ, :ϕ),Tuple{T,T}}},
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     u(θ, ϕ, λ, k, boundary = boundary, notransform = notransform)
 end
 
-function (u::AbstractSphericalEigenfunction)(xyz::AbstractVector{T},
-                                             λ::arb,
-                                             ks::UnitRange{Int};
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::AbstractSphericalEigenfunction)(
+    xyz::AbstractVector{T},
+    λ::arb,
+    ks::UnitRange{Int};
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     if !notransform
         xyz = coordinate_transformation(u, xyz)
     end
@@ -100,13 +109,14 @@ function (u::AbstractSphericalEigenfunction)(xyz::AbstractVector{T},
     return res
 end
 
-function (u::AbstractSphericalEigenfunction)(θ::T,
-                                             ϕ::T,
-                                             λ::arb,
-                                             ks::UnitRange{Int};
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::AbstractSphericalEigenfunction)(
+    θ::T,
+    ϕ::T,
+    λ::arb,
+    ks::UnitRange{Int};
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     if !notransform
         θ, ϕ = coordinate_transformation(u, θ, ϕ)
     end
@@ -119,13 +129,13 @@ function (u::AbstractSphericalEigenfunction)(θ::T,
     return res
 end
 
-function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{T, T},
-                                                           NamedTuple{(:θ, :ϕ),Tuple{T, T}}},
-                                             λ::arb,
-                                             ks::UnitRange{Int};
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::AbstractSphericalEigenfunction)(
+    (θ, ϕ)::Union{Tuple{T,T},NamedTuple{(:θ, :ϕ),Tuple{T,T}}},
+    λ::arb,
+    ks::UnitRange{Int};
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     u(θ, ϕ, λ, ks, boundary = boundary, notransform = notransform)
 end
 
@@ -148,19 +158,20 @@ end
 
   See also: [`coordinate_transform`](@ref)
 """
-function (u::AbstractSphericalEigenfunction)(xyz::AbstractVector{T},
-                                             λ::arb;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::AbstractSphericalEigenfunction)(
+    xyz::AbstractVector{T},
+    λ::arb;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     res = u.domain.parent(0)
 
     if !notransform
         xyz = coordinate_transformation(u, xyz)
     end
 
-    for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(xyz, λ, k, boundary = boundary, notransform = true)
+    for k = 1:length(u.coefficients)
+        res += u.coefficients[k] * u(xyz, λ, k, boundary = boundary, notransform = true)
         if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
             return res
         end
@@ -169,20 +180,21 @@ function (u::AbstractSphericalEigenfunction)(xyz::AbstractVector{T},
     res
 end
 
-function (u::AbstractSphericalEigenfunction)(θ::T,
-                                             ϕ::T,
-                                             λ::arb;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::AbstractSphericalEigenfunction)(
+    θ::T,
+    ϕ::T,
+    λ::arb;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     res = u.domain.parent(0)
 
     if !notransform
         θ, ϕ = coordinate_transformation(u, θ, ϕ)
     end
 
-    for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(θ, ϕ, λ, k, boundary = boundary, notransform = true)
+    for k = 1:length(u.coefficients)
+        res += u.coefficients[k] * u(θ, ϕ, λ, k, boundary = boundary, notransform = true)
         if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
             return res
         end
@@ -191,12 +203,12 @@ function (u::AbstractSphericalEigenfunction)(θ::T,
     res
 end
 
-function (u::AbstractSphericalEigenfunction)((θ, ϕ)::Union{Tuple{T, T},
-                                                           NamedTuple{(:θ, :ϕ),Tuple{T, T}}},
-                                             λ::arb;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::AbstractSphericalEigenfunction)(
+    (θ, ϕ)::Union{Tuple{T,T},NamedTuple{(:θ, :ϕ),Tuple{T,T}}},
+    λ::arb;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     u(θ, ϕ, λ, boundary = boundary, notransform = notransform)
 end
 
@@ -218,7 +230,7 @@ function sphericalcaparea(λ::arb)
     @assert roots[2][1] == 1
     θ = setinterval(roots[1][1]...)
 
-    return 2λ.parent(π)*(1 - cos(θ))
+    return 2λ.parent(π) * (1 - cos(θ))
 end
 
 """
@@ -233,9 +245,7 @@ end
   minimum principle the area of the triangle needs to be small enough
   compared to the eigenvalue.
 """
-function norm2(u::AbstractSphericalEigenfunction,
-               λ::arb,
-               (a, b, c))
+function norm2(u::AbstractSphericalEigenfunction, λ::arb, (a, b, c))
     # Check that the area is small enough
     area = sum(anglesfromvertices(a, b, c)) - λ.parent(π)
 
@@ -247,16 +257,19 @@ function norm2(u::AbstractSphericalEigenfunction,
 
     m = λ.parent(Inf)
     for (v, w) in [(a, b), (b, c), (c, a)]
-        f = t -> -u(normalize(v .+ t.*(w - v)), λ)^2
+        f = t -> -u(normalize(v .+ t .* (w - v)), λ)^2
 
-        M = -enclosemaximum(f,
-                            zero(λ),
-                            one(λ),
-                            evaltype = :taylor,
-                            n = div(length(coefficients(u)), 4),
-                            atol = 1e-10,
-                            rtol = 1e-3,
-                            maxevals = 1000)
+        M =
+            -enclosemaximum(
+                f,
+                zero(λ),
+                one(λ),
+                evaltype = :taylor,
+                n = div(length(coefficients(u)), 4),
+                atol = 1e-10,
+                rtol = 1e-3,
+                maxevals = 1000,
+            )
 
         m = min(m, M)
         if !isfinite(m) || !(m > 0)
@@ -264,7 +277,7 @@ function norm2(u::AbstractSphericalEigenfunction,
         end
     end
 
-    res = m*area
+    res = m * area
 
     if isfinite(res) && res > 0
         return res
@@ -273,9 +286,7 @@ function norm2(u::AbstractSphericalEigenfunction,
     end
 end
 
-function norm(domain::SphericalTriangle,
-              u::AbstractSphericalEigenfunction,
-              λ::arb)
+function norm(domain::SphericalTriangle, u::AbstractSphericalEigenfunction, λ::arb)
     a, b, c = subtriangle(domain, ratio = 0.5)
     triangles = partitiontriangle(a, b, c, iterations = 1)
 

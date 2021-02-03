@@ -10,8 +10,7 @@ end
     set_eigenfunction!(u::AbstractEigenfunction, coefficients)
 > Set the coefficients for the expansion of the eigenfunction.
 """
-function set_eigenfunction!(u::AbstractEigenfunction,
-                            coefficients::Vector)
+function set_eigenfunction!(u::AbstractEigenfunction, coefficients::Vector)
     resize!(u.coefficients, length(coefficients))
     copy!(u.coefficients, u.domain.parent.(coefficients))
 end
@@ -20,8 +19,7 @@ end
     set_domain!(u::AbstractEigenfunction, domain::AbstractDomain)
 > Set the domain for the eigenfunction.
 """
-function set_domain!(u::AbstractEigenfunction,
-                     domain::AbstractDomain)
+function set_domain!(u::AbstractEigenfunction, domain::AbstractDomain)
     u.domain = domain
     u
 end
@@ -67,25 +65,28 @@ active_boundaries(domain::AbstractDomain, u::AbstractEigenfunction) = boundaries
 
   Depending on the type of eigenfunction the type of the point varies
 """
-function (u::AbstractEigenfunction)(point,
-                                    λ::arb,
-                                    k::Integer;
-                                    boundary = nothing,
-                                    notransform::Bool = false)
+function (u::AbstractEigenfunction)(
+    point,
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+)
     throw(ErrorException("evaluation not implemented for eigenfunction of type $(typeof(u))"))
 end
 
-function norm(domain::AbstractDomain,
-              u::AbstractEigenfunction,
-              λ::arb;
-              numpoints::Int = 1000,
-              warn::Bool = true,
-              )
+function norm(
+    domain::AbstractDomain,
+    u::AbstractEigenfunction,
+    λ::arb;
+    numpoints::Int = 1000,
+    warn::Bool = true,
+)
     warn && @warn "using a non-rigorous implementation of norm for $(typeof(u))"
     interior = interior_points(domain, numpoints)
     res = similar(interior, arb)
-    @Threads.threads for i in eachindex(interior)
+    Threads.@threads for i in eachindex(interior)
         res[i] = abs(u(interior[i], λ))^2
     end
-    return sqrt(area(domain)*sum(res)/length(interior))
+    return sqrt(area(domain) * sum(res) / length(interior))
 end

@@ -1,5 +1,7 @@
-function SphericalCombinedEigenfunction(domain::SphericalTriangle,
-                                        us::Vector{<:AbstractSphericalEigenfunction})
+function SphericalCombinedEigenfunction(
+    domain::SphericalTriangle,
+    us::Vector{<:AbstractSphericalEigenfunction},
+)
     orders = ones(Int, length(us))
     !isempty(us) || throw(ArgumentError("us must be non-empty"))
 
@@ -18,8 +20,7 @@ function Base.show(io::IO, u::SphericalCombinedEigenfunction)
     print(io, "number of set coefficients: $(length(coefficients(u)))")
 end
 
-function set_domain!(u::SphericalCombinedEigenfunction,
-                     domain::AbstractDomain)
+function set_domain!(u::SphericalCombinedEigenfunction, domain::AbstractDomain)
     u.domain = domain
     for v in u.us
         set_domain!(v, domain)
@@ -55,8 +56,7 @@ end
 
   See also: [`active_boundaries`](@ref)
 """
-function active_eigenfunctions(u::SphericalCombinedEigenfunction,
-                               i::Integer)
+function active_eigenfunctions(u::SphericalCombinedEigenfunction, i::Integer)
     indices = [j for j in 1:length(u.us) if i ∈ active_boundaries(u.us[j])]
 
     if isempty(indices)
@@ -79,8 +79,7 @@ end
   returns i, j which corresponds to calling the j-th basis-function of
   u.us[i].
 """
-function basis_function(u::SphericalCombinedEigenfunction,
-                        k::Integer)
+function basis_function(u::SphericalCombinedEigenfunction, k::Integer)
     k > 0 || throw(ArgumentError("k must be positive not $k"))
     i = 1
     j = 0
@@ -94,7 +93,7 @@ function basis_function(u::SphericalCombinedEigenfunction,
         end
     end
 
-    i, u.orders[i]*j + k
+    i, u.orders[i] * j + k
 end
 
 """
@@ -111,66 +110,60 @@ function basis_function(u::SphericalCombinedEigenfunction, ks::UnitRange{Int})
 
     A = [0; cumsum(u.orders)]
     fullcycles = div(ks.stop, A[end])
-    R = ks.stop%A[end]
+    R = ks.stop % A[end]
     remaining = [max(min(u.orders[i], R - A[i]), 0) for i in eachindex(u.us)]
-    return [
-        1:(fullcycles*u.orders[i] + remaining[i])
-        for i in eachindex(u.us)
-    ]
+    return [1:(fullcycles*u.orders[i]+remaining[i]) for i in eachindex(u.us)]
 end
 
 function coefficients(u::SphericalCombinedEigenfunction)
     coeffs = [coefficients(v) for v in u.us]
     N = sum(length, coeffs)
-    [coeffs[i][j] for (i, j) in [basis_function(u, k) for k in 1:N]]
+    [coeffs[i][j] for (i, j) in [basis_function(u, k) for k = 1:N]]
 end
 
-function set_eigenfunction!(u::SphericalCombinedEigenfunction,
-                            coefficients::Vector)
-    is = [basis_function(u, k)[1] for k in 1:length(coefficients)]
-    for i in 1:length(u.us)
-        set_eigenfunction!(u.us[i], coefficients[is .== i])
+function set_eigenfunction!(u::SphericalCombinedEigenfunction, coefficients::Vector)
+    is = [basis_function(u, k)[1] for k = 1:length(coefficients)]
+    for i = 1:length(u.us)
+        set_eigenfunction!(u.us[i], coefficients[is.==i])
     end
 end
 
-function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
-                                             λ::arb,
-                                             k::Integer;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             )  where {T <: Union{arb, arb_series}}
+function (u::SphericalCombinedEigenfunction)(
+    xyz::AbstractVector{T},
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     i, j = basis_function(u, k)
     u.us[i](xyz, λ, j, boundary = boundary, notransform = notransform)
 end
 
-function (u::SphericalCombinedEigenfunction)(θ::T,
-                                             ϕ::T,
-                                             λ::arb,
-                                             k::Integer;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::SphericalCombinedEigenfunction)(
+    θ::T,
+    ϕ::T,
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     i, j = basis_function(u, k)
     u.us[i](θ, ϕ, λ, j, boundary = boundary, notransform = notransform)
 end
 
-function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
-                                             λ::arb,
-                                             ks::UnitRange{Int};
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             )  where {T <: Union{arb, arb_series}}
+function (u::SphericalCombinedEigenfunction)(
+    xyz::AbstractVector{T},
+    λ::arb,
+    ks::UnitRange{Int};
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     ks_per_index = basis_function(u, ks)
 
     res_per_index = similar(u.us, Vector{T})
     for i in eachindex(u.us)
-        res_per_index[i] = u.us[i](
-            xyz,
-            λ,
-            ks_per_index[i],
-            boundary = boundary,
-            notransform = notransform,
-        )
+        res_per_index[i] =
+            u.us[i](xyz, λ, ks_per_index[i], boundary = boundary, notransform = notransform)
     end
 
     res = similar(ks, T)
@@ -183,13 +176,14 @@ function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
     return res
 end
 
-function (u::SphericalCombinedEigenfunction)(θ::T,
-                                             ϕ::T,
-                                             λ::arb,
-                                             ks::UnitRange{Int};
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::SphericalCombinedEigenfunction)(
+    θ::T,
+    ϕ::T,
+    λ::arb,
+    ks::UnitRange{Int};
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     ks_per_index = basis_function(u, ks)
 
     res_per_index = similar(u.us, Vector{T})
@@ -214,11 +208,12 @@ function (u::SphericalCombinedEigenfunction)(θ::T,
     return res
 end
 
-function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
-                                             λ::arb;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::SphericalCombinedEigenfunction)(
+    xyz::AbstractVector{T},
+    λ::arb;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     res = u.domain.parent(0)
 
     for v in u.us
@@ -231,12 +226,13 @@ function (u::SphericalCombinedEigenfunction)(xyz::AbstractVector{T},
     res
 end
 
-function (u::SphericalCombinedEigenfunction)(θ::T,
-                                             ϕ::T,
-                                             λ::arb;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
+function (u::SphericalCombinedEigenfunction)(
+    θ::T,
+    ϕ::T,
+    λ::arb;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     res = u.domain.parent(0)
 
     for v in u.us

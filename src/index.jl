@@ -13,20 +13,23 @@ eigenvalues in `λs` are smaller then `λ`. For the upper bound it
 computes eigenvalues of enclosing domains and uses those to lower
 bound the eigenvalues of the domain.
 """
-function certifyindices(domain::SphericalTriangle{T},
-                        λs::AbstractVector{arb};
-                        show_trace = false) where {T}
+function certifyindices(
+    domain::SphericalTriangle{T},
+    λs::AbstractVector{arb};
+    show_trace = false,
+) where {T}
     indices = certifyindices(domain, λs, 1, show_trace = show_trace)
 
     if all(((λ, minindex, maxindex),) -> minindex == maxindex, indices)
         return indices
     end
 
-    for vertex in 2:3
+    for vertex = 2:3
         indices2 = certifyindices(domain, λs, vertex, show_trace = show_trace)
 
-        indices = [(λs[i], max(indices[i][2], indices2[i][2]), min(indices[i][3], indices2[i][3]))
-                   for i in 1:length(indices)]
+        indices = [
+            (λs[i], max(indices[i][2], indices2[i][2]), min(indices[i][3], indices2[i][3])) for i = 1:length(indices)
+        ]
 
         if all(((λ, minindex, maxindex),) -> minindex == maxindex, indices)
             return indices
@@ -36,11 +39,16 @@ function certifyindices(domain::SphericalTriangle{T},
     return indices
 end
 
-function certifyindices(domain::SphericalTriangle{T},
-                        λs::AbstractVector{arb},
-                        vertex;
-                        show_trace = false) where {T}
-    domain = SphericalTriangle(domain.angles[[mod1(i, 3) for i in vertex:vertex+2]], domain.parent)
+function certifyindices(
+    domain::SphericalTriangle{T},
+    λs::AbstractVector{arb},
+    vertex;
+    show_trace = false,
+) where {T}
+    domain = SphericalTriangle(
+        domain.angles[[mod1(i, 3) for i = vertex:vertex+2]],
+        domain.parent,
+    )
 
     # Define interval to work on and the parameters to use
     start = domain.parent(0)
@@ -61,16 +69,20 @@ function certifyindices(domain::SphericalTriangle{T},
 
     while true
         if T == fmpq
-            μ = domain.parent(-k*inv(domain.angles[1]))
+            μ = domain.parent(-k * inv(domain.angles[1]))
         else
-            μ = -k*inv(domain.angles[1])*domain.parent(π)
+            μ = -k * inv(domain.angles[1]) * domain.parent(π)
         end
 
         f = ν -> legendre_p(ν, μ, z)
-        roots, flags = isolateroots(f, start, stop,
-                                    evaltype = :taylor,
-                                    maxevals = 5000,
-                                    show_trace = false)
+        roots, flags = isolateroots(
+            f,
+            start,
+            stop,
+            evaltype = :taylor,
+            maxevals = 5000,
+            show_trace = false,
+        )
 
         if !all(flags)
             @error "unable to isolate the roots of the legendre function"
@@ -87,14 +99,17 @@ function certifyindices(domain::SphericalTriangle{T},
             break
         end
 
-        append!(eigenvalues, [setinterval(l, u)*(setinterval(l, u) + 1) for (l, u) in roots])
+        append!(
+            eigenvalues,
+            [setinterval(l, u) * (setinterval(l, u) + 1) for (l, u) in roots],
+        )
         append!(eigenvaluesflags, flags)
         k += 1
     end
 
-    indices = Tuple{arb, Int, Int}[]
+    indices = Tuple{arb,Int,Int}[]
     for λ in λs
-        minindex = length(filter(eig -> eig < λ , λs)) + 1
+        minindex = length(filter(eig -> eig < λ, λs)) + 1
 
         # Find all eigenvalues of the enclosing domain that at least
         # as small as λ. Ensure that all of them have flag = 1
@@ -109,7 +124,7 @@ function certifyindices(domain::SphericalTriangle{T},
     end
 
     return indices
-    return [(λ, Int[length(filter(eig -> !(eig > λ) , eigenvalues))]) for λ in λs]
+    return [(λ, Int[length(filter(eig -> !(eig > λ), eigenvalues))]) for λ in λs]
 
     eigenvalues, λs, res
     # Compare with the given eigenvalues

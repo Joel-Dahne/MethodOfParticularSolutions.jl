@@ -38,7 +38,7 @@ function interior_boundaries(domain::IntersectedDomain)
 end
 
 boundaries(domain::IntersectedDomain) =
-    1:(length(exterior_boundaries(domain)) + length(interior_boundaries(domain)))
+    1:(length(exterior_boundaries(domain))+length(interior_boundaries(domain)))
 
 function get_domain_and_boundary(domain::IntersectedDomain, i::Integer)
     boundaries_exterior = boundaries(domain.exterior)
@@ -76,8 +76,12 @@ Base.in(xy, domain::IntersectedDomain) =
 boundary_parameterization(t, domain::IntersectedDomain, i::Integer) =
     boundary_parameterization(t, get_domain_and_boundary(domain, i)...)
 
-boundary_points(domain::IntersectedDomain, i::Integer, n::Integer; distribution = :chebyshev) =
-    (boundary_points(get_domain_and_boundary(domain, i)..., n; distribution)[1], fill(i, n))
+boundary_points(
+    domain::IntersectedDomain,
+    i::Integer,
+    n::Integer;
+    distribution = :chebyshev,
+) = (boundary_points(get_domain_and_boundary(domain, i)..., n; distribution)[1], fill(i, n))
 
 # TODO: Exclude points landing in the interior domain
 function interior_points(domain::IntersectedDomain, n::Integer; rng = MersenneTwister(42))
@@ -85,14 +89,14 @@ function interior_points(domain::IntersectedDomain, n::Integer; rng = MersenneTw
     # those which are also in domain.interior. The issue is that we
     # then don't know how many interior points we need to generate.
     gotten = 0
-    points = SVector{2, arb}[]
+    points = SVector{2,arb}[]
     while gotten < n
         new_points = Iterators.take(
             filter(
                 xy -> !any(d -> xy ∈ d, domain.interiors),
                 interior_points(domain.exterior, 2(n - gotten), rng = rng),
             ),
-            n - gotten
+            n - gotten,
         )
 
         gotten += length(new_points)

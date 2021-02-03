@@ -1,19 +1,19 @@
 function eigenfunction_plotdata(u::StandaloneVertexEigenfunction{T}) where {T}
     v = u.vertex
-    orientation = ifelse(T == arb, u.orientation, u.parent(u.orientation)*u.parent(π))
-    θ = ifelse(T == arb, u.θ, u.parent(u.θ)*u.parent(π))
+    orientation = ifelse(T == arb, u.orientation, u.parent(u.orientation) * u.parent(π))
+    θ = ifelse(T == arb, u.θ, u.parent(u.θ) * u.parent(π))
 
     vertex = (Float64[u.vertex[1]], Float64[u.vertex[2]])
     edges = begin
         s1, c1 = sincos(orientation)
-        v1 = v + 0.1*SVector(c1, s1)
+        v1 = v + 0.1 * SVector(c1, s1)
         s2, c2 = sincos(orientation + θ)
-        v2 = v + 0.1*SVector(c2, s2)
+        v2 = v + 0.1 * SVector(c2, s2)
         (Float64[v1[1], u.vertex[1], v2[1]], Float64[v1[2], u.vertex[2], v2[2]])
     end
     arc = begin
         res = [
-            v + 0.1*SVector(cos(orientation + t*θ), sin(orientation + t*θ))
+            v + 0.1 * SVector(cos(orientation + t * θ), sin(orientation + t * θ))
             for t in range(0, 1, length = 20)
         ]
         (Float64.(getindex.(res, 1)), Float64.(getindex.(res, 2)))
@@ -25,16 +25,13 @@ end
 function eigenfunction_plotdata(u::StandaloneInteriorEigenfunction{T}) where {T}
     vertex = (Float64[u.vertex[1]], Float64[u.vertex[2]])
     edge = begin
-        orientation = ifelse(T == arb, u.orientation, u.parent(u.orientation)*u.parent(π))
+        orientation = ifelse(T == arb, u.orientation, u.parent(u.orientation) * u.parent(π))
         s, c = sincos(orientation)
-        v = u.vertex + 0.1*SVector(c, s)
+        v = u.vertex + 0.1 * SVector(c, s)
         (Float64[u.vertex[1], v[1]], Float64[u.vertex[2], v[2]])
     end
     arc = begin
-        res = [
-            u.vertex + 0.1*SVector(cos(θ), sin(θ))
-            for θ in range(0, 2π, length = 50)
-        ]
+        res = [u.vertex + 0.1 * SVector(cos(θ), sin(θ)) for θ in range(0, 2π, length = 50)]
         (Float64.(getindex.(res, 1)), Float64.(getindex.(res, 2)))
     end
 
@@ -43,20 +40,20 @@ end
 
 function eigenfunction_plotdata(u::StandaloneLightningEigenfunction{T,S}) where {T,S}
     v = u.vertex
-    orientation = ifelse(S == arb, u.orientation, u.parent(u.orientation)*u.parent(π))
-    θ = ifelse(S == arb, u.θ, u.parent(u.θ)*u.parent(π))
+    orientation = ifelse(S == arb, u.orientation, u.parent(u.orientation) * u.parent(π))
+    θ = ifelse(S == arb, u.θ, u.parent(u.θ) * u.parent(π))
 
     vertex = (Float64[u.vertex[1]], Float64[u.vertex[2]])
     edges = begin
         s1, c1 = sincos(orientation)
-        v1 = v + 0.1*SVector(c1, s1)
+        v1 = v + 0.1 * SVector(c1, s1)
         s2, c2 = sincos(orientation + θ)
-        v2 = v + 0.1*SVector(c2, s2)
+        v2 = v + 0.1 * SVector(c2, s2)
         (Float64[v1[1], u.vertex[1], v2[1]], Float64[v1[2], u.vertex[2], v2[2]])
     end
     arc = begin
         res = [
-            v + 0.1*SVector(cos(orientation + t*θ), sin(orientation + t*θ))
+            v + 0.1 * SVector(cos(orientation + t * θ), sin(orientation + t * θ))
             for t in range(0, 1, length = 20)
         ]
         (Float64.(getindex.(res, 1)), Float64.(getindex.(res, 2)))
@@ -64,7 +61,7 @@ function eigenfunction_plotdata(u::StandaloneLightningEigenfunction{T,S}) where 
 
     charges = begin
         n = div(length(coefficients(u)) - 1, 3) + 1
-        cs = [charge(u, i, n, true) for i in 1:n]
+        cs = [charge(u, i, n, true) for i = 1:n]
         (Float64.(getindex.(cs, 1)), Float64.(getindex.(cs, 2)))
     end
 
@@ -169,13 +166,13 @@ end
     twosided = !absolute_value,
     include_exterior = false,
 )
-    if !(length(h.args) == 3  || length(h.args) == 5) ||
-        !(typeof(h.args[1]) <: AbstractDomain) ||
-        !(typeof(h.args[2]) <: AbstractEigenfunction) ||
-        !(typeof(h.args[3]) <: Union{Real,arb})
+    if !(length(h.args) == 3 || length(h.args) == 5) ||
+       !(typeof(h.args[1]) <: AbstractDomain) ||
+       !(typeof(h.args[2]) <: AbstractEigenfunction) ||
+       !(typeof(h.args[3]) <: Union{Real,arb})
         throw(ArgumentError(
             "EigenfunctionHeatmap should be given a domain, an eigenfunction, an eigenvalue " *
-            "and x, y. Got: $(typeof(h.args))"
+            "and x, y. Got: $(typeof(h.args))",
         ))
     end
     if length(h.args) == 5
@@ -194,10 +191,10 @@ end
         ys = range(extrema(Float64.(collect(getindex.(vs, 2))))..., length = ys)
     end
 
-    pts = SVector.(domain.parent.(xs'), domain.parent.(ys));
+    pts = SVector.(domain.parent.(xs'), domain.parent.(ys))
     res = similar(pts, Float64)
     let λ = domain.parent(λ)
-        @Threads.threads for i in eachindex(pts)
+        Threads.@threads for i in eachindex(pts)
             if include_exterior || pts[i] ∈ domain
                 res[i] = ifelse(absolute_value, abs, identity)(u(pts[i], λ))
             else

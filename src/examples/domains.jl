@@ -1,26 +1,44 @@
 function example_domain_H(parent = RealField(precision(BigFloat)))
-    angles = fmpq.([3//2, 1//2, 1//2, 1//2, 1//2, 3//2, 3//2, 1//2, 1//2, 1//2, 1//2, 3//2])
-    vertices = [parent.(v) for v in [
-        (0, 0),
-        (0, 1),
-        (-1, 1),
-        (-1, -2),
-        (0, -2),
-        (0, -1),
-        (1, -1),
-        (1, -2),
-        (2, -2),
-        (2, 1),
-        (1, 1),
-        (1, 0),
-    ]]
+    angles =
+        fmpq.([
+            3 // 2,
+            1 // 2,
+            1 // 2,
+            1 // 2,
+            1 // 2,
+            3 // 2,
+            3 // 2,
+            1 // 2,
+            1 // 2,
+            1 // 2,
+            1 // 2,
+            3 // 2,
+        ])
+    vertices = [
+        parent.(v)
+        for
+        v in [
+            (0, 0),
+            (0, 1),
+            (-1, 1),
+            (-1, -2),
+            (0, -2),
+            (0, -1),
+            (1, -1),
+            (1, -2),
+            (2, -2),
+            (2, 1),
+            (1, 1),
+            (1, 0),
+        ]
+    ]
 
     domain = Polygon(angles, vertices, parent)
 
-    u1 = StandaloneVertexEigenfunction(vertex(domain, 1), fmpq(1//2), fmpq(3//2))
-    u2 = StandaloneVertexEigenfunction(vertex(domain, 6), fmpq(0), fmpq(3//2))
-    u3 = StandaloneVertexEigenfunction(vertex(domain, 7), fmpq(-1//2), fmpq(3//2))
-    u4 = StandaloneVertexEigenfunction(vertex(domain, 12), fmpq(1), fmpq(3//2))
+    u1 = StandaloneVertexEigenfunction(vertex(domain, 1), fmpq(1 // 2), fmpq(3 // 2))
+    u2 = StandaloneVertexEigenfunction(vertex(domain, 6), fmpq(0), fmpq(3 // 2))
+    u3 = StandaloneVertexEigenfunction(vertex(domain, 7), fmpq(-1 // 2), fmpq(3 // 2))
+    u4 = StandaloneVertexEigenfunction(vertex(domain, 12), fmpq(1), fmpq(3 // 2))
 
 
     u = CombinedEigenfunction(
@@ -30,7 +48,7 @@ function example_domain_H(parent = RealField(precision(BigFloat)))
             setdiff(boundaries(domain), (12, 1)),
             setdiff(boundaries(domain), (5, 6)),
             setdiff(boundaries(domain), (6, 7)),
-            setdiff(boundaries(domain), (11, 12))
+            setdiff(boundaries(domain), (11, 12)),
         ],
     )
 
@@ -43,33 +61,36 @@ function example_domain_ngon(
     lightning = false,
     linked = false,
 )
-    θ = fmpq((n - 2)//n)
+    θ = fmpq((n - 2) // n)
     angles = fill(θ, n)
-    vertices = [(cos(θ), sin(θ)) for θ in (2parent(π)/n).*(0:n-1)]
+    vertices = [(cos(θ), sin(θ)) for θ in (2parent(π) / n) .* (0:n-1)]
     domain = Polygon(angles, vertices, parent)
 
     if !lightning
         if linked
-            us = [
-                LinkedEigenfunction(
-                    [
-                        StandaloneVertexEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
-                        for i in boundaries(domain)
-                    ],
-                    excluded_boundaries = [
-                        BitSet([mod1(i - 1, n), i]) for i in boundaries(domain)
-                    ],
-                )
-            ]
+            us = [LinkedEigenfunction(
+                [
+                    StandaloneVertexEigenfunction(
+                        vertex(domain, i),
+                        i * (1 - θ) + θ * 1 // 2,
+                        θ,
+                    ) for i in boundaries(domain)
+                ],
+                excluded_boundaries = [
+                    BitSet([mod1(i - 1, n), i]) for i in boundaries(domain)
+                ],
+            )]
             us_to_boundary = fill(BitSet([1]), length(us))
         else
             us = [
-                StandaloneVertexEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
-                for i in boundaries(domain)
+                StandaloneVertexEigenfunction(
+                    vertex(domain, i),
+                    i * (1 - θ) + θ * 1 // 2,
+                    θ,
+                ) for i in boundaries(domain)
             ]
             us_to_boundary = [
-                setdiff(boundaries(domain), (i, mod1(i - 1, length(boundaries(domain)))))
-                for i in eachindex(us)
+                setdiff(boundaries(domain), (i, mod1(i - 1, length(boundaries(domain))))) for i in eachindex(us)
             ]
         end
     else
@@ -77,8 +98,11 @@ function example_domain_ngon(
             us = [
                 LinkedEigenfunction(
                     [
-                        StandaloneLightningEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
-                        for i in boundaries(domain)
+                        StandaloneLightningEigenfunction(
+                            vertex(domain, i),
+                            i * (1 - θ) + θ * 1 // 2,
+                            θ,
+                        ) for i in boundaries(domain)
                     ],
                     ones(n),
                 ),
@@ -87,10 +111,16 @@ function example_domain_ngon(
 
             us_to_boundary = fill(BitSet([1]), length(us))
         else
-            us = [[
-                StandaloneLightningEigenfunction(vertex(domain, i), i*(1 - θ) + θ*1//2, θ)
-                for i in boundaries(domain)
-            ]; StandaloneInteriorEigenfunction(domain)]
+            us = [
+                [
+                    StandaloneLightningEigenfunction(
+                        vertex(domain, i),
+                        i * (1 - θ) + θ * 1 // 2,
+                        θ,
+                    ) for i in boundaries(domain)
+                ]
+                StandaloneInteriorEigenfunction(domain)
+            ]
 
             us_to_boundary = fill(boundaries(domain), length(us))
         end
@@ -102,33 +132,26 @@ function example_domain_ngon(
 end
 
 function example_domain_triangle_in_triangle(parent = RealField(precision(BigFloat)))
-    domain1 = Triangle(fmpq(1//3), fmpq(1//3), parent)
+    domain1 = Triangle(fmpq(1 // 3), fmpq(1 // 3), parent)
     domain2 = TransformedDomain(
-        Triangle(fmpq(1//3), fmpq(1//3), parent),
+        Triangle(fmpq(1 // 3), fmpq(1 // 3), parent),
         fmpq(0),
         parent(0.25),
-        SVector(cospi(fmpq(1//6), parent), sinpi(fmpq(1//6), parent))/4
+        SVector(cospi(fmpq(1 // 6), parent), sinpi(fmpq(1 // 6), parent)) / 4,
     )
 
     domain = IntersectedDomain(domain1, domain2)
 
     u1 = StandaloneLightningEigenfunction(domain1, 1)
 
-    u2 = LinkedEigenfunction(
-        [
-            StandaloneLightningEigenfunction(domain1, i)
-            for i in 2:3
-        ]
-    )
+    u2 = LinkedEigenfunction([StandaloneLightningEigenfunction(domain1, i) for i = 2:3])
 
     u3 = StandaloneLightningEigenfunction(domain2, 1, l = parent(0.15), outside = true)
 
-    u4 = LinkedEigenfunction(
-        [
-            StandaloneLightningEigenfunction(domain2, i, l = parent(0.15), outside = true)
-            for i in 2:3
-        ]
-    )
+    u4 = LinkedEigenfunction([
+        StandaloneLightningEigenfunction(domain2, i, l = parent(0.15), outside = true)
+        for i = 2:3
+    ])
 
     u5 = StandaloneInteriorEigenfunction(domain)
 
@@ -138,12 +161,7 @@ function example_domain_triangle_in_triangle(parent = RealField(precision(BigFlo
     orders = [1, 1, 1, 1, 1]
     us_to_boundary = fill(1:6, length(us))
 
-    u = CombinedEigenfunction(
-        domain,
-        us,
-        orders,
-        us_to_boundary = us_to_boundary,
-    )
+    u = CombinedEigenfunction(domain, us, orders, us_to_boundary = us_to_boundary)
 
     return domain, u
 end
@@ -156,14 +174,14 @@ function example_domain_ngon_in_ngon(
     even = true,
     T = arb,
 )
-    θ1 = fmpq((n1 - 2)//n1)
+    θ1 = fmpq((n1 - 2) // n1)
     angles1 = fill(θ1, n1)
-    vertices1 = [(cos(θ), sin(θ)) for θ in (2parent(π)/n1).*(0:n1-1)]
+    vertices1 = [(cos(θ), sin(θ)) for θ in (2parent(π) / n1) .* (0:n1-1)]
     domain1 = Polygon(angles1, vertices1, parent)
 
-    θ2 = fmpq((n2 - 2)//n2)
+    θ2 = fmpq((n2 - 2) // n2)
     angles2 = fill(θ2, n2)
-    vertices2 = [(cos(θ), sin(θ)) for θ in (2parent(π)/n2).*(0:n2-1)]
+    vertices2 = [(cos(θ), sin(θ)) for θ in (2parent(π) / n2) .* (0:n2-1)]
     domain2 = TransformedDomain(
         Polygon(angles2, vertices2, parent),
         fmpq(0),
@@ -175,25 +193,20 @@ function example_domain_ngon_in_ngon(
 
     if linked
         us = [
-            LinkedEigenfunction(
-                [
-                    StandaloneLightningEigenfunction{T,arb}(domain1, i; even)
-                    for i in boundaries(domain1)
-                ]
-            ),
-            LinkedEigenfunction(
-                [
-                    StandaloneLightningEigenfunction{T,arb}(
-                        domain2,
-                        i,
-                        outside = true,
-                        l = parent(0.4);
-                        even,
-                    )
-                    for i in boundaries(domain2)
-                ]
-            ),
-            StandaloneInteriorEigenfunction(domain, stride = 4; even)
+            LinkedEigenfunction([
+                StandaloneLightningEigenfunction{T,arb}(domain1, i; even)
+                for i in boundaries(domain1)
+            ]),
+            LinkedEigenfunction([
+                StandaloneLightningEigenfunction{T,arb}(
+                    domain2,
+                    i,
+                    outside = true,
+                    l = parent(0.4);
+                    even,
+                ) for i in boundaries(domain2)
+            ]),
+            StandaloneInteriorEigenfunction(domain, stride = 4; even),
         ]
 
         orders = ifelse(even, [2, 2, 1], [3, 3, 2])
@@ -204,23 +217,26 @@ function example_domain_ngon_in_ngon(
             us,
             orders,
             us_to_boundary = fill(BitSet([1, 5]), length(us));
-            even_boundaries
+            even_boundaries,
         )
     else
         us = vcat(
-            [StandaloneLightningEigenfunction{T,arb}(domain1, i) for i in boundaries(domain1)],
             [
-                StandaloneLightningEigenfunction{T,arb}(domain2, i, outside = true, l = parent(0.4))
-                for i in boundaries(domain2)
+                StandaloneLightningEigenfunction{T,arb}(domain1, i)
+                for i in boundaries(domain1)
             ],
-            [StandaloneInteriorEigenfunction(domain)]
+            [
+                StandaloneLightningEigenfunction{T,arb}(
+                    domain2,
+                    i,
+                    outside = true,
+                    l = parent(0.4),
+                ) for i in boundaries(domain2)
+            ],
+            [StandaloneInteriorEigenfunction(domain)],
         )
 
-        u = CombinedEigenfunction(
-            domain,
-            us,
-            [3, 3, 3, 3, 3, 3, 3, 3, 2],
-        )
+        u = CombinedEigenfunction(domain, us, [3, 3, 3, 3, 3, 3, 3, 3, 2])
     end
 
     return domain, u
@@ -259,33 +275,28 @@ function example_domain_goal_v1(
     outer_expansion = false,
     N::Integer = 27,
     d::Integer = 11,
-    h::Integer = 6
+    h::Integer = 6,
 )
     # The main domain is a hexagon
     n = 6
-    θ = fmpq((n - 2)//n)
+    θ = fmpq((n - 2) // n)
     angles = fill(θ, n)
-    vertices = [(cospi(θ, parent), sinpi(θ, parent)) for θ in fmpq(2//n).*(0:n-1)]
+    vertices = [(cospi(θ, parent), sinpi(θ, parent)) for θ in fmpq(2 // n) .* (0:n-1)]
     exterior = Polygon(angles, vertices, parent)
 
     # The interior domains are triangles
     @assert mod(h, 3) == 0
     points = [
-        SVector(parent(d//N), -parent(h//N)/sqrt(parent(3))),
-        SVector(parent((d + h)//N), parent(0)),
-        SVector(parent(d//N), parent(h//N)/sqrt(parent(3))),
+        SVector(parent(d // N), -parent(h // N) / sqrt(parent(3))),
+        SVector(parent((d + h) // N), parent(0)),
+        SVector(parent(d // N), parent(h // N) / sqrt(parent(3))),
     ]
 
-    interior_angles = [1//3, 1//3, 1//3]
+    interior_angles = [1 // 3, 1 // 3, 1 // 3]
 
     interiors = [
-        TransformedDomain(
-            Polygon(interior_angles, points, parent),
-            i//3,
-            1,
-            [0, 0],
-        )
-        for i in 0:5
+        TransformedDomain(Polygon(interior_angles, points, parent), i // 3, 1, [0, 0])
+        for i = 0:5
     ]
 
     domain = IntersectedDomain(exterior, interiors)
@@ -296,11 +307,10 @@ function example_domain_goal_v1(
             [
                 StandaloneLightningEigenfunction(
                     vertex(exterior, i),
-                    fmpq(mod(Rational(1 - θ//2 + (i - 1)*(1 - θ)), 2)),
+                    fmpq(mod(Rational(1 - θ // 2 + (i - 1) * (1 - θ)), 2)),
                     θ;
-                    even
-                )
-                for i in boundaries(exterior)
+                    even,
+                ) for i in boundaries(exterior)
             ],
             excluded_boundaries = [
                 BitSet([mod1(i - 1, length(boundaries(exterior))), i])
@@ -312,11 +322,10 @@ function example_domain_goal_v1(
             [
                 StandaloneVertexEigenfunction(
                     vertex(exterior, i),
-                    i*(1 - θ) + θ*1//2,
+                    i * (1 - θ) + θ * 1 // 2,
                     θ,
                     ifelse(even, 2, 1),
-                )
-                for i in boundaries(exterior)
+                ) for i in boundaries(exterior)
             ],
             excluded_boundaries = [
                 BitSet([mod1(i - 1, length(boundaries(exterior))), i])
@@ -326,49 +335,41 @@ function example_domain_goal_v1(
     end
 
     # Expansions from the outer tip of the triangles
-    u2 = LinkedEigenfunction(
-        [
-            StandaloneLightningEigenfunction{T,fmpq}(
-                vertex(d, 2),
-                7//6 + d.rotation,
-                2 - d.original.angles[2],
-                l = parent(h//2N),
-                even = even,
-            )
-            for d in interiors
-        ][:]
-    )
+    u2 = LinkedEigenfunction([
+        StandaloneLightningEigenfunction{T,fmpq}(
+            vertex(d, 2),
+            7 // 6 + d.rotation,
+            2 - d.original.angles[2],
+            l = parent(h // 2N),
+            even = even,
+        ) for d in interiors
+    ][:])
 
     # Expansions from the inner tips of the triangles
-    u3 = LinkedEigenfunction(
-        [
-            StandaloneLightningEigenfunction{T,fmpq}(
-                vertex(d, i),
-                ifelse(i == 1, 1//2, -1//6) + d.rotation,
-                2 - d.original.angles[i],
-                l = parent(h//2N),
-                even = even && !reversed,
-                reversed = reversed && i == 3,
-            )
-            for d in interiors, i in [1, 3]
-        ][:]
-    )
+    u3 = LinkedEigenfunction([
+        StandaloneLightningEigenfunction{T,fmpq}(
+            vertex(d, i),
+            ifelse(i == 1, 1 // 2, -1 // 6) + d.rotation,
+            2 - d.original.angles[i],
+            l = parent(h // 2N),
+            even = even && !reversed,
+            reversed = reversed && i == 3,
+        ) for d in interiors, i in [1, 3]
+    ][:])
 
     # Expansion from the center
     u4 = StandaloneInteriorEigenfunction(domain, stride = 6; even)
 
     # Interior expansions closer to outer boundaries
-    u5 = LinkedEigenfunction(
-        [
-            StandaloneInteriorEigenfunction(
-                parent(3//4).*SVector(cospi(fmpq(i//3), parent), sinpi(fmpq(i//3), parent)),
-                fmpq(i//3),
-                stride = 6,
-                even = true
-            )
-            for i in 0:5
-        ]
-    )
+    u5 = LinkedEigenfunction([
+        StandaloneInteriorEigenfunction(
+            parent(3 // 4) .*
+            SVector(cospi(fmpq(i // 3), parent), sinpi(fmpq(i // 3), parent)),
+            fmpq(i // 3),
+            stride = 6,
+            even = true,
+        ) for i = 0:5
+    ])
 
     us = AbstractPlanarEigenfunction[u1, u2, u3]
 
@@ -379,7 +380,7 @@ function example_domain_goal_v1(
     end
 
     if even && reversed
-        append!(orders, 3*[2, 3])
+        append!(orders, 3 * [2, 3])
     elseif even
         append!(orders, [2, 2])
     else
@@ -398,13 +399,7 @@ function example_domain_goal_v1(
     us_to_boundary = fill(BitSet([1, 7, 9]), length(us))
     even_boundaries = ifelse(even, Int[1, 9], Int[])
 
-    u = CombinedEigenfunction(
-        domain,
-        us,
-        orders;
-        us_to_boundary,
-        even_boundaries,
-    )
+    u = CombinedEigenfunction(domain, us, orders; us_to_boundary, even_boundaries)
 
     return domain, u
 end
@@ -445,17 +440,17 @@ function example_domain_goal_v2(
 )
     # The main domain is a hexagon
     n = 6
-    θ = fmpq((n - 2)//n)
+    θ = fmpq((n - 2) // n)
     angles = fill(θ, n)
-    vertices = [(cospi(θ, parent), sinpi(θ, parent)) for θ in fmpq(2//n).*(0:n-1)]
+    vertices = [(cospi(θ, parent), sinpi(θ, parent)) for θ in fmpq(2 // n) .* (0:n-1)]
     exterior = Polygon(angles, vertices, parent)
 
     # Points for the interior domains
     points = [
         SVector(parent(1), parent(0)),
         SVector(parent(1), parent(0)),
-        SVector(cospi(fmpq(1//3), parent), sinpi(fmpq(1//3), parent)),
-        SVector(cospi(fmpq(1//3), parent), sinpi(fmpq(1//3), parent)),
+        SVector(cospi(fmpq(1 // 3), parent), sinpi(fmpq(1 // 3), parent)),
+        SVector(cospi(fmpq(1 // 3), parent), sinpi(fmpq(1 // 3), parent)),
     ]
 
     points[1] *= a + b
@@ -463,83 +458,77 @@ function example_domain_goal_v2(
     points[3] *= a
     points[4] *= a + b
 
-    points[2] += 2*sinpi(fmpq(1//3), parent)*b.*SVector(cospi(fmpq(1//6), parent), sinpi(fmpq(1//6), parent))
-    points[3] += 2*sinpi(fmpq(1//3), parent)*b.*SVector(cospi(fmpq(1//6), parent), sinpi(fmpq(1//6), parent))
+    points[2] +=
+        2 * sinpi(fmpq(1 // 3), parent) * b .*
+        SVector(cospi(fmpq(1 // 6), parent), sinpi(fmpq(1 // 6), parent))
+    points[3] +=
+        2 * sinpi(fmpq(1 // 3), parent) * b .*
+        SVector(cospi(fmpq(1 // 6), parent), sinpi(fmpq(1 // 6), parent))
 
-    interior_angles = [1//3, 2//3, 2//3, 1//3]
+    interior_angles = [1 // 3, 2 // 3, 2 // 3, 1 // 3]
 
-    ϕ = ifelse(rotated, -1//6, 0//6)
+    ϕ = ifelse(rotated, -1 // 6, 0 // 6)
 
     interiors = [
         TransformedDomain(
             Polygon(interior_angles, points, parent),
-            fmpq(i//3 + ϕ),
+            fmpq(i // 3 + ϕ),
             parent(1),
-            c.*SVector(cospi(fmpq(i//3 + 1//6 + ϕ), parent), sinpi(fmpq(i//3 + 1//6 + ϕ), parent)),
-        )
-        for i in 0:5
+            c .* SVector(
+                cospi(fmpq(i // 3 + 1 // 6 + ϕ), parent),
+                sinpi(fmpq(i // 3 + 1 // 6 + ϕ), parent),
+            ),
+        ) for i = 0:5
     ]
 
     domain = IntersectedDomain(exterior, interiors)
 
     # Expansions from the vertices of the hexagon
-    u1 = LinkedEigenfunction(
-        [
-            StandaloneLightningEigenfunction{arb,fmpq}(
-                vertex(exterior, i),
-                fmpq(mod(Rational(1 - θ//2 + (i - 1)*(1 - θ)), 2)),
-                θ;
-                even,
-            )
-            for i in boundaries(exterior)
-        ]
-    )
+    u1 = LinkedEigenfunction([
+        StandaloneLightningEigenfunction{arb,fmpq}(
+            vertex(exterior, i),
+            fmpq(mod(Rational(1 - θ // 2 + (i - 1) * (1 - θ)), 2)),
+            θ;
+            even,
+        ) for i in boundaries(exterior)
+    ])
 
     # Expansions from the outer part of the interior polygons
-    u2 = LinkedEigenfunction(
-        [
-            StandaloneLightningEigenfunction{T,fmpq}(
-                vertex(d, i),
-                ifelse(i == 2, fmpq(4//3), fmpq(5//3)) + fmpq(d.rotation),
-                2 - d.original.angles[i],
-                l = parent(0.08),
-                even = even && !reversed,
-                reversed = reversed && i == 3,
-            )
-            for d in interiors, i in [2, 3]
-        ][:]
-    )
+    u2 = LinkedEigenfunction([
+        StandaloneLightningEigenfunction{T,fmpq}(
+            vertex(d, i),
+            ifelse(i == 2, fmpq(4 // 3), fmpq(5 // 3)) + fmpq(d.rotation),
+            2 - d.original.angles[i],
+            l = parent(0.08),
+            even = even && !reversed,
+            reversed = reversed && i == 3,
+        ) for d in interiors, i in [2, 3]
+    ][:])
 
     # Expansions from the inner part of the interior polygons
-    u3 = LinkedEigenfunction(
-        [
-            StandaloneLightningEigenfunction{T,fmpq}(
-                vertex(d, i),
-                ifelse(i == 1, fmpq(2//3), fmpq(0)) + fmpq(d.rotation),
-                2 - d.original.angles[i],
-                l = parent(0.08),
-                even = even && !reversed,
-                reversed = reversed && i == 4,
-            )
-            for d in interiors, i in [1, 4]
-        ][:]
-    )
+    u3 = LinkedEigenfunction([
+        StandaloneLightningEigenfunction{T,fmpq}(
+            vertex(d, i),
+            ifelse(i == 1, fmpq(2 // 3), fmpq(0)) + fmpq(d.rotation),
+            2 - d.original.angles[i],
+            l = parent(0.08),
+            even = even && !reversed,
+            reversed = reversed && i == 4,
+        ) for d in interiors, i in [1, 4]
+    ][:])
 
     # Expansion from the center
     u4 = StandaloneInteriorEigenfunction(domain, stride = 6; even)
 
     # Interior expansions closer to outer boundaries
-    u5 = LinkedEigenfunction(
-        [
-            StandaloneInteriorEigenfunction(
-                3//4 .*SVector(cospi(fmpq(i//3), parent), sinpi(fmpq(i//3), parent)),
-                fmpq(i//3),
-                stride = 6,
-                even = true
-            )
-            for i in 0:5
-        ]
-    )
+    u5 = LinkedEigenfunction([
+        StandaloneInteriorEigenfunction(
+            3 // 4 .* SVector(cospi(fmpq(i // 3), parent), sinpi(fmpq(i // 3), parent)),
+            fmpq(i // 3),
+            stride = 6,
+            even = true,
+        ) for i = 0:5
+    ])
 
     us = AbstractPlanarEigenfunction[u1, u2, u3]
 
@@ -563,13 +552,7 @@ function example_domain_goal_v2(
     us_to_boundary = fill(BitSet([1, 7, 8, 10]), length(us))
     even_boundaries = ifelse(even, Int[1, 8, 10], Int[])
 
-    u = CombinedEigenfunction(
-        domain,
-        us,
-        orders;
-        us_to_boundary,
-        even_boundaries,
-    )
+    u = CombinedEigenfunction(domain, us, orders; us_to_boundary, even_boundaries)
 
     return domain, u
 end

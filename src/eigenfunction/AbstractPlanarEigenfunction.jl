@@ -29,7 +29,7 @@ function (u::AbstractPlanarEigenfunction) end
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
-) where {T <: Union{arb,arb_series}} =
+) where {T<:Union{arb,arb_series}} =
     u(xy, λ, k:k, boundary = boundary, notransform = notransform)
 
 function (u::AbstractPlanarEigenfunction)(
@@ -37,7 +37,7 @@ function (u::AbstractPlanarEigenfunction)(
     λ::arb;
     boundary = nothing,
     notransform::Bool = false,
-) where {T <: Union{arb,arb_series}}
+) where {T<:Union{arb,arb_series}}
     # TODO: This computes all terms even if some terms become NaN very
     # early on. Could potentially be optimized.
     coeffs = coefficients(u)

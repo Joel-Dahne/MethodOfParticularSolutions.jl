@@ -19,10 +19,7 @@ struct PayneEigenfunction <: AbstractPlanarEigenfunction
     has. `weights = [1, 1, 1, 4]` means that the fourth expansion gets
     four times as many collocation points per free coefficient.
     """
-    function PayneEigenfunction(
-        u::CombinedEigenfunction;
-        weights = [1, 1, 1, 4],
-    )
+    function PayneEigenfunction(u::CombinedEigenfunction; weights = [1, 1, 1, 4])
         @assert length(u.us) == 4
         @assert length(weights) == 4
 
@@ -59,10 +56,7 @@ function recompute!(u::PayneEigenfunction)
     return u
 end
 
-function set_eigenfunction!(
-    u::PayneEigenfunction,
-    coefficients::Vector,
-)
+function set_eigenfunction!(u::PayneEigenfunction, coefficients::Vector)
     set_eigenfunction!(u.u, coefficients)
     return u
 end
@@ -88,36 +82,33 @@ function payne_boundary(domain, u::PayneEigenfunction, N, i, n)
     if i == 1 || i == 2 || i == 3
         # Compute number of charges used
         # FIXME: This is not always correct
-        num_charges = cld(u.orders[i]*N, ifelse(i == 1, 2, 3)*sum(u.orders))
-        δs = [chargedistance(u.us[i].us[1], j, n) for j in 1:num_charges]
+        num_charges = cld(u.orders[i] * N, ifelse(i == 1, 2, 3) * sum(u.orders))
+        δs = [chargedistance(u.us[i].us[1], j, n) for j = 1:num_charges]
 
         # Distribute the points over the charges
-        per_charge = fill(div(n, num_charges), num_charges) +
-            [ifelse(n%num_charges >= j, 1, 0) for j in 1:num_charges]
+        per_charge =
+            fill(div(n, num_charges), num_charges) +
+            [ifelse(n % num_charges >= j, 1, 0) for j = 1:num_charges]
 
         if i == 1
             w = vertex(domain, 2) - vertex(domain, 1)
             @assert !(δs[1] > LinearAlgebra.norm(w))
             w = normalize(w)
 
-            distances = vcat(
-                [[j*δ/M for j in 1:M] for (δ, M) in zip(δs, per_charge)]...
-            )
+            distances = vcat([[j * δ / M for j = 1:M] for (δ, M) in zip(δs, per_charge)]...)
             distances = sort(distances, by = Float64, rev = true)
 
-            pts = map(d -> vertex(domain, 1) + d.*w, distances)
+            pts = map(d -> vertex(domain, 1) + d .* w, distances)
             return pts, fill(1, length(pts))
         elseif i == 2
             w = vertex(domain, 9) - vertex(domain, 8)
             @assert !(δs[1] > LinearAlgebra.norm(w))
             w = normalize(w)
 
-            distances = vcat(
-                [[j*δ/M for j in 1:M] for (δ, M) in zip(δs, per_charge)]...
-            )
+            distances = vcat([[j * δ / M for j = 1:M] for (δ, M) in zip(δs, per_charge)]...)
             distances = sort(distances, by = Float64, rev = true)
 
-            pts = map(d -> vertex(domain, 8) + d.*w, distances)
+            pts = map(d -> vertex(domain, 8) + d .* w, distances)
             return pts, fill(8, length(pts))
         elseif i == 3
             # Distribute the points between the two sides
@@ -131,17 +122,14 @@ function payne_boundary(domain, u::PayneEigenfunction, N, i, n)
             w₁ = normalize(w₁)
             w₂ = normalize(w₂)
 
-            distances₁ = vcat(
-                [[j*δ/M for j in 1:M] for (δ, M) in zip(δs, left_side)]...
-            )
+            distances₁ = vcat([[j * δ / M for j = 1:M] for (δ, M) in zip(δs, left_side)]...)
             distances₁ = sort(distances₁, by = Float64, rev = true)
-            distances₂ = vcat(
-                [[j*δ/M for j in 1:M] for (δ, M) in zip(δs, right_side)]...
-            )
+            distances₂ =
+                vcat([[j * δ / M for j = 1:M] for (δ, M) in zip(δs, right_side)]...)
             distances₂ = sort(distances₂, by = Float64, rev = true)
 
-            pts₁ = map(d -> vertex(domain, 9) + d.*w₁, distances₁)
-            pts₂ = map(d -> vertex(domain, 9) + d.*w₂, distances₂)
+            pts₁ = map(d -> vertex(domain, 9) + d .* w₁, distances₁)
+            pts₂ = map(d -> vertex(domain, 9) + d .* w₂, distances₂)
             return vcat(pts₁, pts₂), vcat(fill(8, length(pts₁)), fill(9, length(pts₂)))
         end
     elseif i == 4
@@ -173,7 +161,7 @@ function boundary_points(
             fullcycles, R = divrem(n, sum(ws))
             A = reverse([0; cumsum(reverse(ws))])[2:end]
             remaining = [max(min(ws[i], R - A[i]), 0) for i in eachindex(ws)]
-            fullcycles*ws + remaining
+            fullcycles * ws + remaining
         end
 
         return boundary_points(domain, u, N, tuple(ns...); distribution)
@@ -198,7 +186,7 @@ function boundary_points(
     ns::NTuple{4,<:Integer};
     distribution = :chebyshev,
 )
-    res = [payne_boundary(domain, u, N, i, ns[i]) for i in 1:4]
+    res = [payne_boundary(domain, u, N, i, ns[i]) for i = 1:4]
     res = vcat(res...)
     @assert sum(length, r[1] for r in res) == sum(ns)
     return vcat(getindex.(res, 1)...), vcat(getindex.(res, 2)...)

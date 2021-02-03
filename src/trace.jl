@@ -34,11 +34,13 @@ end
 
 Base.push!(tr::MPSTrace, st::MPSState) = push!(tr.states, st)
 
-function update!(tr::MPSTrace,
-                 st::MPSState,
-                 store_trace::Bool,
-                 show_trace::Bool,
-                 callback = nothing)
+function update!(
+    tr::MPSTrace,
+    st::MPSState,
+    store_trace::Bool,
+    show_trace::Bool,
+    callback = nothing,
+)
     if store_trace
         push!(tr, st)
     end

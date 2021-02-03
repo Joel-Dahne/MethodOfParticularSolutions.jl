@@ -4,15 +4,8 @@ function StandaloneVertexEigenfunction(
     θ::T,
     stride::Integer = 1,
     parent::ArbField = parent(vertex[1]),
-) where {T <: Union{arb,fmpq}}
-    return StandaloneVertexEigenfunction(
-        vertex,
-        orientation,
-        θ,
-        stride,
-        arb[],
-        parent,
-    )
+) where {T<:Union{arb,fmpq}}
+    return StandaloneVertexEigenfunction(vertex, orientation, θ, stride, arb[], parent)
 end
 
 function StandaloneVertexEigenfunction(
@@ -20,8 +13,9 @@ function StandaloneVertexEigenfunction(
     i::Integer;
     stride::Integer = 1,
     outside = false,
-) where {T <: Union{arb,fmpq}}
-    i ∈ boundaries(domain) || throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
+) where {T<:Union{arb,fmpq}}
+    i ∈ boundaries(domain) ||
+        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
 
     θ = domain.angles[i]
 
@@ -30,8 +24,7 @@ function StandaloneVertexEigenfunction(
     elseif i == 2
         orientation = ifelse(T == arb, domain.parent(π), 1) - θ
     elseif i == 3
-        orientation = 2ifelse(T == arb, domain.parent(π), 1) -
-            domain.angles[2] - θ
+        orientation = 2ifelse(T == arb, domain.parent(π), 1) - domain.angles[2] - θ
     end
 
     if outside
@@ -55,7 +48,12 @@ function StandaloneVertexEigenfunction(
     stride::Integer = 1,
     outside = false,
 )
-    u = StandaloneVertexEigenfunction(domain.original, i, stride = stride, outside = outside)
+    u = StandaloneVertexEigenfunction(
+        domain.original,
+        i,
+        stride = stride,
+        outside = outside,
+    )
     # FIXME: This only works if u.θ::arb or if u.θ and
     # domain.orientation both are fmpq.
     u = StandaloneVertexEigenfunction(
@@ -64,7 +62,7 @@ function StandaloneVertexEigenfunction(
         u.θ,
         stride,
         u.coefficients,
-        domain.parent
+        domain.parent,
     )
 
     return u
@@ -90,8 +88,8 @@ end
 
 Return `k*θ` as an `arb`, the parameter used for the Bessel function.
 """
-nu(u::StandaloneVertexEigenfunction{fmpq}, k::Integer = 1) = u.parent(k*inv(u.θ))
-nu(u::StandaloneVertexEigenfunction{arb}, k::Integer = 1) = u.parent(k*u.parent(π)/u.θ)
+nu(u::StandaloneVertexEigenfunction{fmpq}, k::Integer = 1) = u.parent(k * inv(u.θ))
+nu(u::StandaloneVertexEigenfunction{arb}, k::Integer = 1) = u.parent(k * u.parent(π) / u.θ)
 
 """
     coordinate_transformation(u::StandaloneVertexEigenfunction, xy::AbstractVector)
@@ -104,14 +102,14 @@ clockwise.
 function coordinate_transformation(
     u::StandaloneVertexEigenfunction{T},
     xy::AbstractVector,
-) where {T <: Union{arb,fmpq}}
+) where {T<:Union{arb,fmpq}}
     if T == fmpq
         s, c = sincospi(-u.orientation, u.parent)
     elseif T == arb
         s, c = sincos(-u.orientation)
     end
-    M = SMatrix{2, 2}(c, s, -s, c)
-    return M*(xy .- u.vertex)
+    M = SMatrix{2,2}(c, s, -s, c)
+    return M * (xy .- u.vertex)
 end
 
 function (u::StandaloneVertexEigenfunction)(
@@ -120,7 +118,7 @@ function (u::StandaloneVertexEigenfunction)(
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
-) where {T <: Union{arb, arb_series}}
+) where {T<:Union{arb,arb_series}}
     if !notransform
         xy = coordinate_transformation(u, xy)
     end
@@ -135,13 +133,13 @@ function (u::StandaloneVertexEigenfunction)(
         θ += 2parent(θ)(π)
     end
 
-    rsqrtλ = r*sqrt(λ)
+    rsqrtλ = r * sqrt(λ)
     res = similar(ks, T)
     for i in eachindex(ks)
-        k = 1 + (ks[i] - 1)*u.stride
+        k = 1 + (ks[i] - 1) * u.stride
         ν = nu(u, k)
 
-        res[i] = bessel_j(ν, rsqrtλ)*sin(ν*θ)
+        res[i] = bessel_j(ν, rsqrtλ) * sin(ν * θ)
     end
 
     return res

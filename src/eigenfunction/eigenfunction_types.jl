@@ -8,14 +8,16 @@ abstract type AbstractPlanarEigenfunction <: AbstractEigenfunction end
 ### Spherical eigenfunctions
 ###
 
-mutable struct SphericalVertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractSphericalEigenfunction
+mutable struct SphericalVertexEigenfunction{T<:Union{fmpq,arb}} <:
+               AbstractSphericalEigenfunction
     domain::SphericalTriangle{T}
     vertex::Int
     stride::Int
     coefficients::Vector{arb}
 end
 
-mutable struct SphericalInteriorEigenfunction{T <: Union{fmpq, arb}} <: AbstractSphericalEigenfunction
+mutable struct SphericalInteriorEigenfunction{T<:Union{fmpq,arb}} <:
+               AbstractSphericalEigenfunction
     domain::SphericalTriangle{T}
     θ::arb # θ value for the interior point
     ϕ::arb # ϕ value for the interior point
@@ -23,13 +25,14 @@ mutable struct SphericalInteriorEigenfunction{T <: Union{fmpq, arb}} <: Abstract
     coefficients::Vector{arb}
 end
 
-mutable struct SphericalCombinedEigenfunction{T <: Union{fmpq, arb}} <: AbstractSphericalEigenfunction
+mutable struct SphericalCombinedEigenfunction{T<:Union{fmpq,arb}} <:
+               AbstractSphericalEigenfunction
     domain::SphericalTriangle{T}
     us::Vector{<:AbstractSphericalEigenfunction}
     orders::Vector{Int}
 end
 
-mutable struct KrewerasEigenfunction{T <: Union{fmpq, arb}} <: AbstractSphericalEigenfunction
+mutable struct KrewerasEigenfunction{T<:Union{fmpq,arb}} <: AbstractSphericalEigenfunction
     domain::SphericalTriangle{T}
     coefficients::Vector{arb}
 end
@@ -38,7 +41,7 @@ end
 ### Planar eigenfunctions
 ###
 
-struct StandaloneVertexEigenfunction{T <: Union{fmpq, arb}} <: AbstractPlanarEigenfunction
+struct StandaloneVertexEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEigenfunction
     vertex::SVector{2,arb}
     orientation::T
     θ::T
@@ -60,7 +63,7 @@ The values of `ν` that are used are 0, `stride`, `2stride`,
 
 If `even` is true then use only the function with `cos(j*θ)`.
 """
-struct StandaloneInteriorEigenfunction{T <: Union{fmpq,arb}} <: AbstractPlanarEigenfunction
+struct StandaloneInteriorEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEigenfunction
     vertex::SVector{2,arb}
     orientation::T
     stride::Int
@@ -69,7 +72,8 @@ struct StandaloneInteriorEigenfunction{T <: Union{fmpq,arb}} <: AbstractPlanarEi
     parent::ArbField
 end
 
-struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmpq, arb}} <: AbstractPlanarEigenfunction
+struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmpq,arb}} <:
+       AbstractPlanarEigenfunction
     vertex::SVector{2,T}
     orientation::S
     θ::S
@@ -89,18 +93,8 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
         σ::arb = parent(4),
         even::Bool = false,
         reversed::Bool = false,
-    ) where {S <: Union{arb,fmpq}}
-        return new{arb,S}(
-            vertex,
-            orientation,
-            θ,
-            l,
-            σ,
-            even,
-            reversed,
-            arb[],
-            parent,
-        )
+    ) where {S<:Union{arb,fmpq}}
+        return new{arb,S}(vertex, orientation, θ, l, σ, even, reversed, arb[], parent)
     end
 
     function StandaloneLightningEigenfunction{arb,S}(
@@ -112,7 +106,7 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
         σ = 4,
         even::Bool = false,
         reversed::Bool = false,
-    ) where {S <: Union{arb,fmpq}}
+    ) where {S<:Union{arb,fmpq}}
         return new{arb,S}(
             vertex,
             orientation,
@@ -134,7 +128,7 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
         σ = 4one(T),
         even::Bool = false,
         reversed::Bool = false,
-    ) where {T <: AbstractFloat, S <: Union{arb,fmpq}}
+    ) where {T<:AbstractFloat,S<:Union{arb,fmpq}}
         return new{T,S}(
             convert(SVector{2,T}, vertex),
             orientation,
@@ -157,8 +151,8 @@ struct LinkedEigenfunction{T<:AbstractPlanarEigenfunction} <: AbstractPlanarEige
     function LinkedEigenfunction(
         us::Vector{T},
         extra_coefficients::Vector = ones(length(us));
-        excluded_boundaries::Vector = fill(BitSet(), length(us))
-    ) where {T <: AbstractPlanarEigenfunction}
+        excluded_boundaries::Vector = fill(BitSet(), length(us)),
+    ) where {T<:AbstractPlanarEigenfunction}
         isempty(us) && throw(ArgumentError("us must not be empty"))
         length(us) == length(extra_coefficients) ||
             throw(ArgumentError("us and extra_coefficients must have the same size"))

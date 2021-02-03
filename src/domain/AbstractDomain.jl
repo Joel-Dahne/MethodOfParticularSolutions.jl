@@ -74,49 +74,50 @@ zero on is determined by `active_boundaries(domain, u)`.
 not used in the default implementation but some type of eigenfunctions
 need access to this to compute good boundary points.
 """
-function boundary_points(domain::AbstractDomain,
-                         u::AbstractEigenfunction,
-                         ::Integer,
-                         n::Integer;
-                         distribution = ifelse(
-                             domain isa AbstractPlanarDomain,
-                             :chebyshev,
-                             :linear,
-                         ),
-                         )
+function boundary_points(
+    domain::AbstractDomain,
+    u::AbstractEigenfunction,
+    ::Integer,
+    n::Integer;
+    distribution = ifelse(domain isa AbstractPlanarDomain, :chebyshev, :linear),
+)
     active = active_boundaries(domain, u)
     m = length(active)
     res = [
-        boundary_points(domain, active[i], div(n, m) + ifelse(n % m >= i, 1, 0); distribution)
-        for i in eachindex(active)
+        boundary_points(
+            domain,
+            active[i],
+            div(n, m) + ifelse(n % m >= i, 1, 0);
+            distribution,
+        ) for i in eachindex(active)
     ]
     return vcat(getindex.(res, 1)...), vcat(getindex.(res, 2)...)
 end
 
-function boundary_points(domain::AbstractDomain,
-                         u::CombinedEigenfunction,
-                         ::Integer,
-                         n::Integer;
-                         distribution = ifelse(
-                             domain isa AbstractPlanarDomain,
-                             :root_exponential,
-                             :linear,
-                         ),
-                         )
+function boundary_points(
+    domain::AbstractDomain,
+    u::CombinedEigenfunction,
+    ::Integer,
+    n::Integer;
+    distribution = ifelse(domain isa AbstractPlanarDomain, :root_exponential, :linear),
+)
     active = active_boundaries(domain, u)
     m = length(active)
-    per_boundary = fill(div(n, m), m) + [n % m >= i for i in 1:m]
+    per_boundary = fill(div(n, m), m) + [n % m >= i for i = 1:m]
     res = [
         getindex.(
             boundary_points(
                 domain,
                 active[i],
-                ifelse(active[i] ∈ u.even_boundaries, 2per_boundary[i] - 1, per_boundary[i]);
+                ifelse(
+                    active[i] ∈ u.even_boundaries,
+                    2per_boundary[i] - 1,
+                    per_boundary[i],
+                );
                 distribution,
             ),
             Ref(1:per_boundary[i]),
-        )
-        for i in eachindex(active)
+        ) for i in eachindex(active)
     ]
     return vcat(getindex.(res, 1)...), vcat(getindex.(res, 2)...)
 end

@@ -6,7 +6,7 @@ StandaloneLightningEigenfunction(
     σ = 4,
     even::Bool = false,
     reversed::Bool = false,
-) where {T <: Union{arb,fmpq}} =
+) where {T<:Union{arb,fmpq}} =
     StandaloneLightningEigenfunction{arb,T}(domain, i; outside, l, σ, even, reversed)
 
 function StandaloneLightningEigenfunction{T,S}(
@@ -25,8 +25,7 @@ function StandaloneLightningEigenfunction{T,S}(
     elseif i == 2
         orientation = ifelse(S == arb, domain.parent(π), 1) - θ
     elseif i == 3
-        orientation = 2ifelse(S == arb, domain.parent(π), 1) -
-            domain.angles[2] - θ
+        orientation = 2ifelse(S == arb, domain.parent(π), 1) - domain.angles[2] - θ
     end
 
     if outside
@@ -56,7 +55,7 @@ function StandaloneLightningEigenfunction(
     σ::arb = domain.parent(4),
     even::Bool = false,
     reversed::Bool = false,
-) where {T <: Union{arb,fmpq}}
+) where {T<:Union{arb,fmpq}}
     θ = angle(domain, i)
 
     v = vertex(domain, mod1(i + 1, length(vertices(domain)))) - vertex(domain, i)
@@ -131,9 +130,9 @@ function StandaloneLightningEigenfunction(
         orientation = u.orientation + domain.rotation
     else
         if u.orientation isa fmpq
-            orientation = domain.parent(π)*u.orientation + domain.rotation
+            orientation = domain.parent(π) * u.orientation + domain.rotation
         else
-            orientation = u.orientation + domain.parent(π)*domain.rotation
+            orientation = u.orientation + domain.parent(π) * domain.rotation
         end
     end
 
@@ -160,14 +159,22 @@ function StandaloneLightningEigenfunction{T,S}(
     even::Bool = false,
     reversed::Bool = false,
 ) where {T,S}
-    u = StandaloneLightningEigenfunction{T,S}(domain.original, i; outside, l, σ, even, reversed)
+    u = StandaloneLightningEigenfunction{T,S}(
+        domain.original,
+        i;
+        outside,
+        l,
+        σ,
+        even,
+        reversed,
+    )
     if typeof(u.orientation) == typeof(domain.rotation)
         orientation = u.orientation + domain.rotation
     else
         if u.orientation isa fmpq
-            orientation = domain.parent(π)*u.orientation + domain.rotation
+            orientation = domain.parent(π) * u.orientation + domain.rotation
         else
-            orientation = u.orientation + domain.parent(π)*domain.rotation
+            orientation = u.orientation + domain.parent(π) * domain.rotation
         end
     end
 
@@ -189,8 +196,7 @@ function Base.show(io::IO, u::StandaloneLightningEigenfunction{T}) where {T}
         io,
         "StandaloneLightningEigenfunction{$T}" *
         ifelse(u.even, " - even", "") *
-        ifelse(u.reversed, " - reversed", "")
-        ,
+        ifelse(u.reversed, " - reversed", ""),
     )
     if !haskey(io, :compact) || !io[:compact]
         println(io, "vertex: $(u.vertex)")
@@ -226,9 +232,9 @@ function coordinate_transformation(
     xy::AbstractVector,
 ) where {T,S}
     if S == fmpq
-        s, c = sincospi(-u.orientation - u.θ//2, u.parent)
+        s, c = sincospi(-u.orientation - u.θ // 2, u.parent)
     elseif S == arb
-        s, c = sincos(-u.orientation - u.θ/2)
+        s, c = sincos(-u.orientation - u.θ / 2)
     end
 
     s, c = convert.(T, (s, c))
@@ -239,8 +245,8 @@ function coordinate_transformation(
         xy = convert(SVector{2,T}, xy)
     end
 
-    M = SMatrix{2, 2}(c, s, -s, c)
-    res = M*(xy .- u.vertex)
+    M = SMatrix{2,2}(c, s, -s, c)
+    res = M * (xy .- u.vertex)
     if u.reversed
         return SVector(res[1], -res[2])
     else
@@ -260,11 +266,11 @@ the order.
 An old alternative version is `u.l*exp(-u.σ*(i - 1)/sqrt(u.parent(n)))`.
 """
 chargedistance(u::StandaloneLightningEigenfunction{arb}, i::Integer, n::Integer) =
-    u.l*exp(-u.σ*(sqrt(u.parent(n)) - sqrt(u.parent(n + 1 - i))))
+    u.l * exp(-u.σ * (sqrt(u.parent(n)) - sqrt(u.parent(n + 1 - i))))
 
 
 chargedistance(u::StandaloneLightningEigenfunction{T}, i::Integer, n::Integer) where {T} =
-    u.l*exp(-u.σ*(sqrt(convert(T, n)) - sqrt(convert(T, n + 1 - i))))
+    u.l * exp(-u.σ * (sqrt(convert(T, n)) - sqrt(convert(T, n + 1 - i))))
 
 """
     charge(
@@ -290,12 +296,12 @@ function charge(
     d = chargedistance(u, i, n)
     if standard_coordinates
         if S == fmpq
-            s, c = sincospi(u.orientation + u.θ//2, u.parent)
+            s, c = sincospi(u.orientation + u.θ // 2, u.parent)
         else
-            s, c = sincos(u.orientation + u.θ/2)
+            s, c = sincos(u.orientation + u.θ / 2)
         end
 
-        return u.vertex - d.*SVector{2,T}(c, s)
+        return u.vertex - d .* SVector{2,T}(c, s)
     else
         SVector{2}(-d, zero(d))
     end
@@ -330,9 +336,9 @@ function (u::StandaloneLightningEigenfunction{T,S})(
     end
     i = 1
     if u.even
-        charge_indices = (div(ks.start-1, 2)+1):(div(ks.stop-1, 2)+1)
+        charge_indices = (div(ks.start - 1, 2)+1):(div(ks.stop - 1, 2)+1)
     else
-        charge_indices = (div(ks.start-1, 3)+1):(div(ks.stop-1, 3)+1)
+        charge_indices = (div(ks.start - 1, 3)+1):(div(ks.stop - 1, 3)+1)
     end
     for charge_index in charge_indices
         # Perform the change of coordinates corresponding to the charge
@@ -340,7 +346,7 @@ function (u::StandaloneLightningEigenfunction{T,S})(
         xy_local = xy - charge(u, charge_index, charge_indices.stop)
         r, θ = polar_from_cartesian(xy_local)
 
-        rsqrtλ = r*sqrt(λ)
+        rsqrtλ = r * sqrt(λ)
         b = bessel_y(one(λ), rsqrtλ)
         s, c = sincos(θ)
 
@@ -352,7 +358,7 @@ function (u::StandaloneLightningEigenfunction{T,S})(
                     i += 1
                 end
                 if mod1(ks.stop, 2) == 2
-                    res[i] = b*c
+                    res[i] = b * c
                     i += 1
                 end
             elseif charge_index == charge_indices.start
@@ -361,19 +367,19 @@ function (u::StandaloneLightningEigenfunction{T,S})(
                     res[i] = bessel_y(zero(λ), rsqrtλ)
                     i += 1
                 end
-                res[i] = b*c
+                res[i] = b * c
                 i += 1
             elseif charge_index == charge_indices.stop
                 # Might not want all terms from the last charge
                 res[i] = bessel_y(zero(λ), rsqrtλ)
                 i += 1
                 if mod1(ks.stop, 2) == 2
-                    res[i] = b*c
+                    res[i] = b * c
                     i += 1
                 end
             else
                 res[i] = bessel_y(zero(λ), rsqrtλ)
-                res[i + 1] = b*c
+                res[i+1] = b * c
                 i += 2
             end
         else
@@ -384,11 +390,11 @@ function (u::StandaloneLightningEigenfunction{T,S})(
                     i += 1
                 end
                 if mod1(ks.start, 3) <= 2 && mod1(ks.stop, 3) >= 2
-                    res[i] = b*s
+                    res[i] = b * s
                     i += 1
                 end
                 if mod1(ks.stop, 3) == 3
-                    res[i] = b*c
+                    res[i] = b * c
                     i += 1
                 end
             elseif charge_index == charge_indices.start
@@ -398,27 +404,27 @@ function (u::StandaloneLightningEigenfunction{T,S})(
                     i += 1
                 end
                 if mod1(ks.start, 3) <= 2
-                    res[i] = b*s
+                    res[i] = b * s
                     i += 1
                 end
-                res[i] = b*c
+                res[i] = b * c
                 i += 1
             elseif charge_index == charge_indices.stop
                 # Might not want all terms from the last charge
                 res[i] = bessel_y(zero(λ), rsqrtλ)
                 i += 1
                 if mod1(ks.stop, 3) >= 2
-                    res[i] = b*s
+                    res[i] = b * s
                     i += 1
                 end
                 if mod1(ks.stop, 3) >= 3
-                    res[i] = b*c
+                    res[i] = b * c
                     i += 1
                 end
             else
                 res[i] = bessel_y(zero(λ), rsqrtλ)
-                res[i + 1] = b*s
-                res[i + 2] = b*c
+                res[i+1] = b * s
+                res[i+2] = b * c
                 i += 3
             end
         end

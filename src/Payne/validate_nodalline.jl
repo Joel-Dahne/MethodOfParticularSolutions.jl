@@ -21,7 +21,7 @@ function validate_nodalline(
     @assert distance < vertex(domain.interiors[1], 1)[1]
 
     # First step is to check the sign of u inside
-    inside = u(SVector(distance/2, zero(distance)), λ)
+    inside = u(SVector(distance / 2, zero(distance)), λ)
 
     if isnegative(inside)
         sign_inside = -1
@@ -41,9 +41,9 @@ function validate_nodalline(
 
     # Parameterization of the line between (distance, 0) and
     # (distance, tan(π/6)*distance)
-    y_max = distance*tanpi(domain.parent(1//6))
-    parameterization(t::arb) =  SVector(distance, t*y_max)
-    parameterization(t::arb_series) =  SVector(distance + 0*t, t*y_max)
+    y_max = distance * tanpi(domain.parent(1 // 6))
+    parameterization(t::arb) = SVector(distance, t * y_max)
+    parameterization(t::arb_series) = SVector(distance + 0 * t, t * y_max)
 
     # Function for computing u along this line. Multiply u by the
     # opposite sign of the inverse so that it's supposed to be

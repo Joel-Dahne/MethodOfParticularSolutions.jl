@@ -1,5 +1,7 @@
 function KrewerasEigenfunction(domain::SphericalTriangle)
-    if domain.angles[1] != fmpq(2//3) || domain.angles[2] != fmpq(2//3) || domain.angles[3] != fmpq(2//3)
+    if domain.angles[1] != fmpq(2 // 3) ||
+       domain.angles[2] != fmpq(2 // 3) ||
+       domain.angles[3] != fmpq(2 // 3)
         throw(ArgumentError("domain must be the Kreweras triangle with angles (2π/3, 2π/3, 2π/3)"))
     end
     KrewerasEigenfunction(domain, arb[])
@@ -21,15 +23,16 @@ function active_boundaries(domain::SphericalTriangle, u::KrewerasEigenfunction)
     end
 end
 
-function (u::KrewerasEigenfunction)(xyz::AbstractVector{T},
-                                    λ::arb,
-                                    k::Integer;
-                                    boundary = nothing,
-                                    notransform::Bool = false
-                                    ) where {T <: Union{arb, arb_series}}
+function (u::KrewerasEigenfunction)(
+    xyz::AbstractVector{T},
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     ν::arb = -0.5 + sqrt(0.25 + λ)
-    if k%2 == 1
-        μ::arb = u.domain.parent(-k*inv(u.domain.angles[1]))
+    if k % 2 == 1
+        μ::arb = u.domain.parent(-k * inv(u.domain.angles[1]))
 
         # Create a linear map for rotating so that the next vertex ends up
         # at the north pole
@@ -41,19 +44,19 @@ function (u::KrewerasEigenfunction)(xyz::AbstractVector{T},
 
         if isnothing(boundary) || boundary == 1
             ϕ = atan(xyz[2], xyz[1])
-            res += legendre_p_safe(ν, μ, xyz[3])*sin(μ*ϕ)
+            res += legendre_p_safe(ν, μ, xyz[3]) * sin(μ * ϕ)
         end
 
         xyz = L(xyz)
         if isnothing(boundary) || boundary == 2
             ϕ = atan(xyz[2], xyz[1])
-            res += legendre_p_safe(ν, μ, xyz[3])*sin(μ*ϕ)
+            res += legendre_p_safe(ν, μ, xyz[3]) * sin(μ * ϕ)
         end
 
         if isnothing(boundary) || boundary == 3
             xyz = L(xyz)
             ϕ = atan(xyz[2], xyz[1])
-            res += legendre_p_safe(ν, μ, xyz[3])*sin(μ*ϕ)
+            res += legendre_p_safe(ν, μ, xyz[3]) * sin(μ * ϕ)
         end
 
         return res
@@ -64,19 +67,20 @@ function (u::KrewerasEigenfunction)(xyz::AbstractVector{T},
         L = LinearMap(RotYZ(-θ, -φ))
         xyz = L(xyz)
         ϕ = atan(xyz[2], xyz[1])
-        return legendre_p_safe(ν, μ, xyz[3])*cos(μ*ϕ)
+        return legendre_p_safe(ν, μ, xyz[3]) * cos(μ * ϕ)
     end
 end
 
-function (u::KrewerasEigenfunction)(xyz::AbstractVector{T},
-                                    λ::arb;
-                                    boundary = nothing,
-                                    notransform::Bool = false
-                                    ) where {T <: Union{arb, arb_series}}
+function (u::KrewerasEigenfunction)(
+    xyz::AbstractVector{T},
+    λ::arb;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     res = u.domain.parent(0)
 
-    for k in 1:length(u.coefficients)
-        res += u.coefficients[k]*u(xyz, λ, k, boundary = boundary)
+    for k = 1:length(u.coefficients)
+        res += u.coefficients[k] * u(xyz, λ, k, boundary = boundary)
         if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
             return res
         end

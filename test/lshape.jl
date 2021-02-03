@@ -11,10 +11,15 @@
     interval = ball(RR(9.6), RR(0.5))
 
     println("Computing eigenvalue for the $domain")
-    λs = iteratemps(domain, u, interval, Ns,
-                    optim_prec_final = optim_prec_final,
-                    optim_prec_linear = true,
-                    show_trace = true)
+    λs = iteratemps(
+        domain,
+        u,
+        interval,
+        Ns,
+        optim_prec_final = optim_prec_final,
+        optim_prec_linear = true,
+        show_trace = true,
+    )
     rad = Float64(radius(λs[end]))
 
     @test overlaps(result, λs[end])

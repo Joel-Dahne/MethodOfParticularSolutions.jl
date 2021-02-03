@@ -6,10 +6,10 @@ If `split` is true then returns the intervals as tuples and not balls.
 """
 function mince(xₗ::arb, xᵤ::arb, n::Integer; split = false)
     intervals = Vector{ifelse(split, NTuple{2,arb}, arb)}(undef, n)
-    dx = (xᵤ - xₗ)/n
+    dx = (xᵤ - xₗ) / n
     for i in eachindex(intervals)
-        yₗ = xₗ + (i - 1)*dx
-        yᵤ = xₗ + i*dx
+        yₗ = xₗ + (i - 1) * dx
+        yᵤ = xₗ + i * dx
         if split
             intervals[i] = (yₗ, yᵤ)
         else
@@ -35,18 +35,19 @@ intervals, using the `mince` method.
 If `return_enclosure` is `true` then also return a final enclosure of
 the maximum.
 """
-function bounded_by(f,
-                    a::arb,
-                    b::arb,
-                    C::arb;
-                    start_intervals::Integer = 1,
-                    max_iterations::Integer = typemax(Int),
-                    use_taylor = false,
-                    n::Integer = 4,
-                    return_enclosure = false,
-                    show_trace = false,
-                    show_evaluations = false,
-                    )
+function bounded_by(
+    f,
+    a::arb,
+    b::arb,
+    C::arb;
+    start_intervals::Integer = 1,
+    max_iterations::Integer = typemax(Int),
+    use_taylor = false,
+    n::Integer = 4,
+    return_enclosure = false,
+    show_trace = false,
+    show_evaluations = false,
+)
     if a > b
         # Empty interval, always true
         if return_enclosure
@@ -85,7 +86,9 @@ function bounded_by(f,
         iterations += 1
 
         if show_trace
-            @printf "%6d %11d %s\n" iterations length(intervals) string(getinterval(max_value))
+            @printf "%6d %11d %s\n" iterations length(intervals) string(getinterval(
+                max_value,
+            ))
         end
 
         res = similar(intervals, arb)
@@ -120,7 +123,7 @@ function bounded_by(f,
             elseif !(y < C)
                 # If we cannot determine if f([c, d]) is less than or
                 # equal to C then bisect it
-                midpoint = 0.5*(c + d)
+                midpoint = 0.5 * (c + d)
                 push!(next_intervals, (c, midpoint))
                 push!(next_intervals, (midpoint, d))
             else

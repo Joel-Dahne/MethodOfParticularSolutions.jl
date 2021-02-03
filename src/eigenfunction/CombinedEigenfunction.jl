@@ -6,8 +6,7 @@ function CombinedEigenfunction(
     even_boundaries = BitSet(),
 )
     boundary_to_us = OrderedDict(
-        i => BitSet(findall(B -> i ∈ B, us_to_boundary))
-        for i in boundaries(domain)
+        i => BitSet(findall(B -> i ∈ B, us_to_boundary)) for i in boundaries(domain)
     )
 
     return CombinedEigenfunction(
@@ -29,7 +28,7 @@ function CombinedEigenfunction(
     for i in exterior_boundaries(domain)
         # TODO: Handle other types
         @assert typeof(domain.exterior) <: Triangle ||
-            typeof(domain.exterior) <: TransformedDomain{<:Triangle}
+                typeof(domain.exterior) <: TransformedDomain{<:Triangle}
 
         v = StandaloneVertexEigenfunction(domain.exterior, i)
         push!(us, v)
@@ -44,7 +43,7 @@ function CombinedEigenfunction(
         _, ip = get_domain_and_boundary(domain, i)
         # TODO: Handle other types
         @assert typeof(domain.exterior) <: Triangle ||
-            typeof(domain.exterior) <: TransformedDomain{<:Triangle}
+                typeof(domain.exterior) <: TransformedDomain{<:Triangle}
 
         v = StandaloneVertexEigenfunction(domain.interior, ip, outside = true)
         push!(us, v)
@@ -64,13 +63,7 @@ function CombinedEigenfunction(
         push!(boundary_to_us[j], idx)
     end
 
-    return CombinedEigenfunction(
-        domain,
-        us,
-        boundary_to_us,
-        BitSet(),
-        orders,
-    )
+    return CombinedEigenfunction(domain, us, boundary_to_us, BitSet(), orders)
 end
 
 function Base.show(io::IO, u::CombinedEigenfunction)
@@ -132,7 +125,7 @@ function basis_function(u::CombinedEigenfunction, k::Integer)
         end
     end
 
-    return i, u.orders[i]*j + k
+    return i, u.orders[i] * j + k
 end
 
 """
@@ -149,53 +142,51 @@ function basis_function(u::CombinedEigenfunction, ks::UnitRange{Int})
 
     A = [0; cumsum(u.orders)]
     fullcycles = div(ks.stop, A[end])
-    R = ks.stop%A[end]
+    R = ks.stop % A[end]
     remaining = [max(min(u.orders[i], R - A[i]), 0) for i in eachindex(u.us)]
-    return [
-        1:(fullcycles*u.orders[i] + remaining[i])
-        for i in eachindex(u.us)
-    ]
+    return [1:(fullcycles*u.orders[i]+remaining[i]) for i in eachindex(u.us)]
 end
 
 function coefficients(u::CombinedEigenfunction)
     coeffs = [coefficients(v) for v in u.us]
     N = sum(length, coeffs)
-    return [coeffs[i][j] for (i, j) in [basis_function(u, k) for k in 1:N]]
+    return [coeffs[i][j] for (i, j) in [basis_function(u, k) for k = 1:N]]
 end
 
-function set_eigenfunction!(u::CombinedEigenfunction,
-                            coefficients::Vector)
-    is = [basis_function(u, k)[1] for k in 1:length(coefficients)]
-    for i in 1:length(u.us)
-        set_eigenfunction!(u.us[i], coefficients[is .== i])
+function set_eigenfunction!(u::CombinedEigenfunction, coefficients::Vector)
+    is = [basis_function(u, k)[1] for k = 1:length(coefficients)]
+    for i = 1:length(u.us)
+        set_eigenfunction!(u.us[i], coefficients[is.==i])
     end
     return u
 end
 
-function (u::CombinedEigenfunction)(xy::AbstractVector{T},
-                                    λ::arb,
-                                    k::Integer;
-                                    boundary = nothing,
-                                    notransform::Bool = false
-                                    )  where {T <: Union{arb, arb_series}}
+function (u::CombinedEigenfunction)(
+    xy::AbstractVector{T},
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     i, j = basis_function(u, k)
     if !isnothing(boundary) && !(i ∈ u.boundary_to_us[boundary])
         if T == arb
             return u.domain.parent(0)
         else
-            return 0*xy[1]
+            return 0 * xy[1]
         end
     end
 
     return u.us[i](xy, λ, j, boundary = boundary, notransform = notransform)
 end
 
-function (u::CombinedEigenfunction)(xy::AbstractVector{T},
-                                    λ::arb,
-                                    ks::UnitRange{Int};
-                                    boundary = nothing,
-                                    notransform::Bool = false
-                                    ) where {T <: Union{arb, arb_series}}
+function (u::CombinedEigenfunction)(
+    xy::AbstractVector{T},
+    λ::arb,
+    ks::UnitRange{Int};
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     if isnothing(boundary)
         indices = eachindex(u.us)
     else
@@ -207,15 +198,16 @@ function (u::CombinedEigenfunction)(xy::AbstractVector{T},
     res_per_index = similar(u.us, Vector{T})
     for i in eachindex(u.us)
         if i in indices
-            res_per_index[i] = one(λ).*u.us[i](
-                xy,
-                λ,
-                ks_per_index[i],
-                boundary = boundary,
-                notransform = notransform,
-            )
+            res_per_index[i] =
+                one(λ) .* u.us[i](
+                    xy,
+                    λ,
+                    ks_per_index[i],
+                    boundary = boundary,
+                    notransform = notransform,
+                )
         else
-            z = T == arb ? zero(λ) : 0*xy[1]
+            z = T == arb ? zero(λ) : 0 * xy[1]
             res_per_index[i] = fill(z, length(ks_per_index[i]))
         end
     end
@@ -230,11 +222,12 @@ function (u::CombinedEigenfunction)(xy::AbstractVector{T},
     return res
 end
 
-function (u::CombinedEigenfunction)(xy::AbstractVector{T},
-                                    λ::arb;
-                                    boundary = nothing,
-                                    notransform::Bool = false
-                                    ) where {T <: Union{arb, arb_series}}
+function (u::CombinedEigenfunction)(
+    xy::AbstractVector{T},
+    λ::arb;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
     if isnothing(boundary)
         indices = eachindex(u.us)
     else

@@ -261,8 +261,7 @@ function iteratemps(
                             domain,
                             getinterval(BigFloat, enclosure)...,
                             N,
-                            store_trace = extended_trace
-                            ;
+                            store_trace = extended_trace;
                             num_boundary,
                             num_interior,
                             optim_prec,
@@ -293,8 +292,8 @@ function iteratemps(
                             domain,
                             u,
                             λ,
-                            max_numpoints = 4num_boundary_factor*N,
-                            norm_numpoints = 4num_interior_factor*N,
+                            max_numpoints = 4num_boundary_factor * N,
+                            norm_numpoints = 4num_interior_factor * N,
                             store_trace = tracing;
                             extended_trace,
                         )
@@ -313,16 +312,7 @@ function iteratemps(
                     new_enclosure, n, m = new_enclosure
                 end
 
-                state = MPSState(
-                    N,
-                    new_prec,
-                    optim_prec,
-                    n,
-                    m,
-                    λ,
-                    new_enclosure,
-                    metadata,
-                )
+                state = MPSState(N, new_prec, optim_prec, n, m, λ, new_enclosure, metadata)
 
                 update!(trace, state, store_trace, show_trace)
             end

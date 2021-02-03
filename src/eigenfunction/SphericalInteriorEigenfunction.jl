@@ -1,18 +1,21 @@
-function SphericalInteriorEigenfunction(domain::SphericalTriangle,
-                                        θ::arb,
-                                        ϕ::arb;
-                                        stride::Int = 1)
+function SphericalInteriorEigenfunction(
+    domain::SphericalTriangle,
+    θ::arb,
+    ϕ::arb;
+    stride::Int = 1,
+)
     SphericalInteriorEigenfunction(domain, θ, ϕ, stride, arb[])
 end
 
-function SphericalInteriorEigenfunction(domain::SphericalTriangle,
-                                        xyz::AbstractVector{arb};
-                                        stride::Int = 1)
+function SphericalInteriorEigenfunction(
+    domain::SphericalTriangle,
+    xyz::AbstractVector{arb};
+    stride::Int = 1,
+)
     SphericalInteriorEigenfunction(domain, spherical(xyz)..., stride = stride)
 end
 
-function SphericalInteriorEigenfunction(domain::SphericalTriangle;
-                                        stride::Int = 1)
+function SphericalInteriorEigenfunction(domain::SphericalTriangle; stride::Int = 1)
     SphericalInteriorEigenfunction(domain, spherical(center(domain))..., stride = stride)
 end
 
@@ -30,9 +33,10 @@ function recompute!(u::SphericalInteriorEigenfunction)
     u
 end
 
-function coordinate_transformation(u::SphericalInteriorEigenfunction,
-                                   xyz::AbstractVector{T}
-                                   ) where {T <: Union{arb, arb_series}}
+function coordinate_transformation(
+    u::SphericalInteriorEigenfunction,
+    xyz::AbstractVector{T},
+) where {T<:Union{arb,arb_series}}
     # Rotate by u.ϕ along the along the z-axis so that the ϕ value of
     # the point becomes zero, the rotate by u.θ along the y-axis so
     # that the point ends up on the north pole.
@@ -40,23 +44,25 @@ function coordinate_transformation(u::SphericalInteriorEigenfunction,
     L(xyz)
 end
 
-function coordinate_transformation(u::SphericalInteriorEigenfunction,
-                                   θ::T,
-                                   ϕ::T
-                                   ) where {T <: Union{arb, arb_series}}
+function coordinate_transformation(
+    u::SphericalInteriorEigenfunction,
+    θ::T,
+    ϕ::T,
+) where {T<:Union{arb,arb_series}}
     # TODO: The performance could most likely be improved by
     # performing the rotation the z-axis while still in spherical
     # coordinates.
     spherical(coordinate_transformation(u, cartesian(θ, ϕ)))
 end
 
-function (u::SphericalInteriorEigenfunction)(xyz::AbstractVector{T},
-                                             λ::arb,
-                                             k::Integer;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
-    k = 1 + (k - 1)*u.stride
+function (u::SphericalInteriorEigenfunction)(
+    xyz::AbstractVector{T},
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
+    k = 1 + (k - 1) * u.stride
 
     ν::arb = -0.5 + sqrt(0.25 + λ)
     μ::arb = u.domain.parent(div(k, 2))
@@ -68,22 +74,23 @@ function (u::SphericalInteriorEigenfunction)(xyz::AbstractVector{T},
         return legendre_p_safe(ν, μ, xyz[3])
     elseif k % 2 == 0
         ϕ = atan(xyz[2], xyz[1])
-        return legendre_p_safe(ν, μ, xyz[3])*sin(μ*ϕ)
+        return legendre_p_safe(ν, μ, xyz[3]) * sin(μ * ϕ)
     else
         ϕ = atan(xyz[2], xyz[1])
-        return legendre_p_safe(ν, μ, xyz[3])*cos(μ*ϕ)
+        return legendre_p_safe(ν, μ, xyz[3]) * cos(μ * ϕ)
     end
 end
 
 
-function (u::SphericalInteriorEigenfunction)(θ::T,
-                                             ϕ::T,
-                                             λ::arb,
-                                             k::Integer;
-                                             boundary = nothing,
-                                             notransform::Bool = false
-                                             ) where {T <: Union{arb, arb_series}}
-    k = 1 + (k - 1)*u.stride
+function (u::SphericalInteriorEigenfunction)(
+    θ::T,
+    ϕ::T,
+    λ::arb,
+    k::Integer;
+    boundary = nothing,
+    notransform::Bool = false,
+) where {T<:Union{arb,arb_series}}
+    k = 1 + (k - 1) * u.stride
 
     ν::arb = -0.5 + sqrt(0.25 + λ)
     μ::arb = u.domain.parent(div(k, 2))
@@ -93,8 +100,8 @@ function (u::SphericalInteriorEigenfunction)(θ::T,
     if k == 1
         return legendre_p_safe(ν, μ, cos(θ))
     elseif k % 2 == 0
-        return legendre_p_safe(ν, μ, cos(θ))*sin(μ*ϕ)
+        return legendre_p_safe(ν, μ, cos(θ)) * sin(μ * ϕ)
     else
-        return legendre_p_safe(ν, μ, cos(θ))*cos(μ*ϕ)
+        return legendre_p_safe(ν, μ, cos(θ)) * cos(μ * ϕ)
     end
 end

@@ -1,15 +1,18 @@
-function maximize(domain::AbstractDomain,
-                  u::AbstractEigenfunction,
-                  λ::arb,
-                  n::Integer;
-                  store_trace = false,
-                  show_progress = false)
+function maximize(
+    domain::AbstractDomain,
+    u::AbstractEigenfunction,
+    λ::arb,
+    n::Integer;
+    store_trace = false,
+    show_progress = false,
+)
     N = length(coefficients(u))
     f = t -> u(boundary_parameterization(t, domain, n), λ, boundary = n)
 
     if show_progress
         enclose_progress(state) = begin
-            sticky = radius(state.maxenclosure)/abs(state.maxenclosure) <= 1e-2 ? :done : true
+            sticky =
+                radius(state.maxenclosure) / abs(state.maxenclosure) <= 1e-2 ? :done : true
             @info "Computing enclosure of maximum" state sticky = sticky
             false
         end
@@ -17,32 +20,41 @@ function maximize(domain::AbstractDomain,
         enclose_progress = nothing
     end
 
-    enclosemaximum(f,
-                   zero(λ),
-                   one(λ),
-                   absmax = true,
-                   evaltype = :taylor,
-                   n = N,
-                   atol = 0,
-                   rtol = 1e-2,
-                   store_trace = store_trace,
-                   extended_trace = store_trace,
-                   callback = enclose_progress)
+    enclosemaximum(
+        f,
+        zero(λ),
+        one(λ),
+        absmax = true,
+        evaltype = :taylor,
+        n = N,
+        atol = 0,
+        rtol = 1e-2,
+        store_trace = store_trace,
+        extended_trace = store_trace,
+        callback = enclose_progress,
+    )
 end
 
-function maximize(domain::AbstractDomain,
-                  u::AbstractEigenfunction,
-                  λ::arb;
-                  store_trace = false,
-                  show_progress = false)
+function maximize(
+    domain::AbstractDomain,
+    u::AbstractEigenfunction,
+    λ::arb;
+    store_trace = false,
+    show_progress = false,
+)
     boundaries = active_boundaries(domain, u)
     m = zero(λ)
 
     traces = Dict()
     for boundary in boundaries
-        m2 = maximize(domain, u, λ, boundary,
-                      store_trace = store_trace,
-                      show_progress = show_progress)
+        m2 = maximize(
+            domain,
+            u,
+            λ,
+            boundary,
+            store_trace = store_trace,
+            show_progress = show_progress,
+        )
         if store_trace
             m2, trace = m2
             traces[boundary] = trace
@@ -69,9 +81,8 @@ function enclose_eigenvalue(
     store_trace = false,
     extended_trace = false,
 )
-    @timeit_debug "maximize" m = maximize(domain, u, λ,
-                                          store_trace = extended_trace,
-                                          show_progress = show_progress)
+    @timeit_debug "maximize" m =
+        maximize(domain, u, λ, store_trace = extended_trace, show_progress = show_progress)
     if extended_trace
         m, trace = m
     end
@@ -84,9 +95,9 @@ function enclose_eigenvalue(
         end
     end
 
-    ϵ = sqrt(area(domain))*m/n
-    lower = λ/(1 + getinterval(ϵ)[2])
-    upper = λ/(1 - getinterval(ϵ)[2])
+    ϵ = sqrt(area(domain)) * m / n
+    lower = λ / (1 + getinterval(ϵ)[2])
+    upper = λ / (1 - getinterval(ϵ)[2])
     if lower <= upper
         enclosure = setinterval(lower, upper)
     else
@@ -98,7 +109,7 @@ function enclose_eigenvalue(
     elseif store_trace
         return enclosure, n, m
     else
-       return enclosure
+        return enclosure
     end
 end
 
@@ -113,9 +124,9 @@ function enclose_eigenvalue_approx(
 )
     ## Approximate maximum on boundary
     # Points to evaluate u on
-    pts, bds = boundary_points(domain, u, length(coefficients(u)), max_numpoints);
+    pts, bds = boundary_points(domain, u, length(coefficients(u)), max_numpoints)
     values = similar(pts, arb)
-    @Threads.threads for i in eachindex(pts)
+    Threads.@threads for i in eachindex(pts)
         values[i] = u(pts[i], λ, boundary = bds[i])
     end
     m = zero(λ)
@@ -127,9 +138,9 @@ function enclose_eigenvalue_approx(
     n = norm(domain, u, λ, numpoints = norm_numpoints, warn = false)
 
     ## Compute enclosure
-    ϵ = sqrt(area(domain))*m/n
-    lower = λ/(1 + getinterval(ϵ)[2])
-    upper = λ/(1 - getinterval(ϵ)[2])
+    ϵ = sqrt(area(domain)) * m / n
+    lower = λ / (1 + getinterval(ϵ)[2])
+    upper = λ / (1 - getinterval(ϵ)[2])
     if lower <= upper
         enclosure = setinterval(lower, upper)
     else

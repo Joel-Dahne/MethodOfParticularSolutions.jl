@@ -16,22 +16,22 @@ end
     convergents(expansion::Vector{T}) where {T <: Integer}
 Compute the convergents given a continued faction expansion `as`.
 """
-function convergents(as::Vector{T}) where {T <: Integer}
+function convergents(as::Vector{T}) where {T<:Integer}
     hs = zeros(T, length(as))
     ks = zeros(T, length(as))
 
     hs[1] = as[1]
     ks[1] = one(T)
 
-    hs[2] = as[1]*as[2] + 1
+    hs[2] = as[1] * as[2] + 1
     ks[2] = as[2]
 
-    for n in 3:length(as)
-        hs[n] = as[n]*hs[n - 1] + hs[n - 2]
-        ks[n] = as[n]*ks[n - 1] + ks[n - 2]
+    for n = 3:length(as)
+        hs[n] = as[n] * hs[n-1] + hs[n-2]
+        ks[n] = as[n] * ks[n-1] + ks[n-2]
     end
 
-    return hs.//ks
+    return hs .// ks
 end
 
 """
@@ -48,12 +48,12 @@ function convergents(as::Vector{arb})
     hs[1] = as[1]
     ks[1] = one(as[1])
 
-    hs[2] = as[1]*as[2] + 1
+    hs[2] = as[1] * as[2] + 1
     ks[2] = as[2]
 
-    for n in 3:length(as)
-        hs[n] = as[n]*hs[n - 1] + hs[n - 2]
-        ks[n] = as[n]*ks[n - 1] + ks[n - 2]
+    for n = 3:length(as)
+        hs[n] = as[n] * hs[n-1] + hs[n-2]
+        ks[n] = as[n] * ks[n-1] + ks[n-2]
     end
 
     return collect(zip(hs, ks))
