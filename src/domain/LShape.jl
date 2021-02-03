@@ -42,6 +42,7 @@ end
 
 function boundary_points(domain::LShape,
                          u::AbstractEigenfunction,
+                         ::Integer,
                          n::Integer;
                          distribution = :linear,
                          )
