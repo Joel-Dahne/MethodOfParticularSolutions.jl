@@ -1,17 +1,8 @@
 function StandaloneVertexEigenfunction(
-    vertex::SVector{2,arb},
-    orientation::T,
-    θ::T,
-    stride::Integer = 1,
-    parent::ArbField = parent(vertex[1]),
-) where {T<:Union{arb,fmpq}}
-    return StandaloneVertexEigenfunction(vertex, orientation, θ, stride, arb[], parent)
-end
-
-function StandaloneVertexEigenfunction(
     domain::Triangle{T},
     i::Integer;
     stride::Integer = 1,
+    reversed::Bool = false,
     outside = false,
 ) where {T<:Union{arb,fmpq}}
     i ∈ boundaries(domain) ||
@@ -35,9 +26,9 @@ function StandaloneVertexEigenfunction(
     return StandaloneVertexEigenfunction(
         vertex(domain, i),
         orientation,
-        θ,
+        θ;
         stride,
-        arb[],
+        reversed,
         domain.parent,
     )
 end
@@ -46,22 +37,24 @@ function StandaloneVertexEigenfunction(
     domain::TransformedDomain,
     i::Integer;
     stride::Integer = 1,
+    reversed::Bool = false,
     outside = false,
 )
     u = StandaloneVertexEigenfunction(
         domain.original,
-        i,
-        stride = stride,
-        outside = outside,
+        i;
+        stride,
+        reversed,
+        outside,
     )
     # FIXME: This only works if u.θ::arb or if u.θ and
     # domain.orientation both are fmpq.
     u = StandaloneVertexEigenfunction(
         domain.map(u.vertex),
         u.orientation + domain.rotation,
-        u.θ,
+        u.θ;
         stride,
-        u.coefficients,
+        reversed,
         domain.parent,
     )
 
@@ -104,12 +97,21 @@ function coordinate_transformation(
     xy::AbstractVector,
 ) where {T<:Union{arb,fmpq}}
     if T == fmpq
-        s, c = sincospi(-u.orientation, u.parent)
+        if u.reversed
+            s, c = sincospi(-u.orientation - u.θ, u.parent)
+        else
+            s, c = sincospi(-u.orientation, u.parent)
+        end
     elseif T == arb
         s, c = sincos(-u.orientation)
     end
     M = SMatrix{2,2}(c, s, -s, c)
-    return M * (xy .- u.vertex)
+    res = M * (xy .- u.vertex)
+    if u.reversed
+        return SVector(res[1], -res[2])
+    else
+        return res
+    end
 end
 
 function (u::StandaloneVertexEigenfunction)(
