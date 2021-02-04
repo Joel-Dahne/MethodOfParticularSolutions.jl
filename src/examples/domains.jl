@@ -266,6 +266,9 @@ d, h) = (27, 11, 6)` then they are
 ```
 """
 function example_domain_goal_v1(
+    N::Integer = 27,
+    d::Integer = 11,
+    h::Integer = 6,
     parent = RealField(precision(BigFloat));
     T = arb,
     lightning = false,
@@ -273,10 +276,8 @@ function example_domain_goal_v1(
     reversed = true,
     inner_expansion = true,
     outer_expansion = false,
-    N::Integer = 27,
-    d::Integer = 11,
-    h::Integer = 6,
 )
+    ### Compute the domain ###
     # The main domain is a hexagon
     n = 6
     θ = fmpq((n - 2) // n)
@@ -301,38 +302,36 @@ function example_domain_goal_v1(
 
     domain = IntersectedDomain(exterior, interiors)
 
+    ### Compute the eigenfunction ###
     # Expansions from the vertices of the hexagon
     if lightning
-        u1 = LinkedEigenfunction(
-            [
-                StandaloneLightningEigenfunction(
-                    vertex(exterior, i),
-                    fmpq(mod(Rational(1 - θ // 2 + (i - 1) * (1 - θ)), 2)),
-                    θ;
-                    even,
-                ) for i in boundaries(exterior)
-            ],
-            excluded_boundaries = [
-                BitSet([mod1(i - 1, length(boundaries(exterior))), i])
-                for i in boundaries(exterior)
-            ],
-        )
+        outer_eigenfunction =
+            i -> StandaloneLightningEigenfunction(
+                vertex(exterior, i),
+                fmpq(mod(Rational(1 - θ // 2 + (i - 1) * (1 - θ)), 2)),
+                θ;
+                even,
+            )
+        outer_excluded_boundary = i -> BitSet()
+        order1 = ifelse(even, 2, 3)
+
     else
-        u1 = LinkedEigenfunction(
-            [
-                StandaloneVertexEigenfunction(
-                    vertex(exterior, i),
-                    i * (1 - θ) + θ * 1 // 2,
-                    θ,
-                    ifelse(even, 2, 1),
-                ) for i in boundaries(exterior)
-            ],
-            excluded_boundaries = [
-                BitSet([mod1(i - 1, length(boundaries(exterior))), i])
-                for i in boundaries(exterior)
-            ],
-        )
+        outer_eigenfunction =
+            i -> StandaloneVertexEigenfunction(
+                vertex(exterior, i),
+                i * (1 - θ) + θ * 1 // 2,
+                θ,
+                ifelse(even, 2, 1),
+            )
+        outer_excluded_boundary =
+            i -> BitSet([mod1(i - 1, length(boundaries(exterior))), i])
+        order1 = ifelse(even, 1, 2)
     end
+
+    u1 = LinkedEigenfunction(
+        [outer_eigenfunction(i) for i in boundaries(exterior)],
+        excluded_boundaries = [outer_excluded_boundary(i) for i in boundaries(exterior)],
+    )
 
     # Expansions from the outer tip of the triangles
     u2 = LinkedEigenfunction([
@@ -343,7 +342,14 @@ function example_domain_goal_v1(
             l = parent(h // 2N),
             even = even,
         ) for d in interiors
-    ][:])
+    ])
+    if even && reversed
+        order2 = 3 * 2
+    elseif even
+        order2 = 2
+    else
+        order2 = 3
+    end
 
     # Expansions from the inner tips of the triangles
     u3 = LinkedEigenfunction([
@@ -356,9 +362,17 @@ function example_domain_goal_v1(
             reversed = reversed && i == 3,
         ) for d in interiors, i in [1, 3]
     ][:])
+    if even && reversed
+        order3 = 3 * 3
+    elseif even
+        order3 = 2
+    else
+        order3 = 3
+    end
 
     # Expansion from the center
     u4 = StandaloneInteriorEigenfunction(domain, stride = 6; even)
+    order4 = ifelse(even, 1, 2)
 
     # Interior expansions closer to outer boundaries
     u5 = LinkedEigenfunction([
@@ -370,30 +384,18 @@ function example_domain_goal_v1(
             even = true,
         ) for i = 0:5
     ])
+    order5 = ifelse(even, 1, 2)
 
     us = AbstractPlanarEigenfunction[u1, u2, u3]
-
-    if lightning
-        orders = [ifelse(even, 2, 3)]
-    else
-        orders = [ifelse(even, 1, 2)]
-    end
-
-    if even && reversed
-        append!(orders, 3 * [2, 3])
-    elseif even
-        append!(orders, [2, 2])
-    else
-        append!(orders, [3, 3])
-    end
+    orders = Int[order1, order2, order3]
 
     if inner_expansion
         push!(us, u4)
-        push!(orders, ifelse(even, 1, 2))
+        push!(orders, order4)
     end
     if outer_expansion
         push!(us, u5)
-        push!(orders, ifelse(even, 1, 2))
+        push!(orders, order5)
     end
 
     us_to_boundary = fill(BitSet([1, 7, 9]), length(us))
