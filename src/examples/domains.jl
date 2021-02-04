@@ -547,7 +547,8 @@ function example_domain_goal_v1(
         order4 = 1
 
         us = AbstractPlanarEigenfunction[u11, u12, u21, u22, u31, u32, u33, u4]
-        orders = Int[order11, order12, 3order21, 3order22, 3order31, 3order32, 3order33, order4]
+        orders =
+            Int[order11, order12, 3order21, 3order22, 3order31, 3order32, 3order33, order4]
 
         us_to_boundary = fill(BitSet([1, 2, 7, 9, 10, 11, 12]), length(us))
         even_boundaries = Int[2, 9]

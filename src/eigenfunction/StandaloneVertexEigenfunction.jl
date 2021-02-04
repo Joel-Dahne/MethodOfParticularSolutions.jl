@@ -40,13 +40,7 @@ function StandaloneVertexEigenfunction(
     reversed::Bool = false,
     outside = false,
 )
-    u = StandaloneVertexEigenfunction(
-        domain.original,
-        i;
-        stride,
-        reversed,
-        outside,
-    )
+    u = StandaloneVertexEigenfunction(domain.original, i; stride, reversed, outside)
     # FIXME: This only works if u.θ::arb or if u.θ and
     # domain.orientation both are fmpq.
     u = StandaloneVertexEigenfunction(
