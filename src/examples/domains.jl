@@ -272,10 +272,11 @@ function example_domain_goal_v1(
     parent = RealField(precision(BigFloat));
     T = arb,
     lightning = false,
-    even = true,
-    reversed = true,
     inner_expansion = true,
     outer_expansion = false,
+    symmetry_class = 1,
+    even = true,
+    reversed = true,
 )
     ### Compute the domain ###
     # The main domain is a hexagon
@@ -304,102 +305,255 @@ function example_domain_goal_v1(
 
     ### Compute the eigenfunction ###
     # Expansions from the vertices of the hexagon
-    if lightning
-        outer_eigenfunction =
-            i -> StandaloneLightningEigenfunction(
-                vertex(exterior, i),
-                fmpq(mod(Rational(1 - θ // 2 + (i - 1) * (1 - θ)), 2)),
-                θ;
-                even,
-            )
-        outer_excluded_boundary = i -> BitSet()
-        order1 = ifelse(even, 2, 3)
+    if symmetry_class == 1
+        if lightning
+            outer_eigenfunction =
+                i -> StandaloneLightningEigenfunction(
+                    vertex(exterior, i),
+                    fmpq(mod(Rational(1 - θ // 2 + (i - 1) * (1 - θ)), 2)),
+                    θ;
+                    even,
+                )
+            outer_excluded_boundary = i -> BitSet()
+            order1 = ifelse(even, 2, 3)
 
+        else
+            outer_eigenfunction =
+                i -> StandaloneVertexEigenfunction(
+                    vertex(exterior, i),
+                    i * (1 - θ) + θ * 1 // 2,
+                    θ,
+                    ifelse(even, 2, 1),
+                )
+            outer_excluded_boundary =
+                i -> BitSet([mod1(i - 1, length(boundaries(exterior))), i])
+            order1 = ifelse(even, 1, 2)
+        end
+
+        u1 = LinkedEigenfunction(
+            [outer_eigenfunction(i) for i in boundaries(exterior)],
+            excluded_boundaries = [
+                outer_excluded_boundary(i) for i in boundaries(exterior)
+            ],
+        )
+
+        # Expansions from the outer tip of the triangles
+        u2 = LinkedEigenfunction([
+            StandaloneLightningEigenfunction{T,fmpq}(
+                vertex(d, 2),
+                7 // 6 + d.rotation,
+                2 - d.original.angles[2],
+                l = parent(h // 2N),
+                even = even,
+            ) for d in interiors
+        ])
+        if even && reversed
+            order2 = 3 * 2
+        elseif even
+            order2 = 2
+        else
+            order2 = 3
+        end
+
+        # Expansions from the inner tips of the triangles
+        u3 = LinkedEigenfunction([
+            StandaloneLightningEigenfunction{T,fmpq}(
+                vertex(d, i),
+                ifelse(i == 1, 1 // 2, -1 // 6) + d.rotation,
+                2 - d.original.angles[i],
+                l = parent(h // 2N),
+                even = even && !reversed,
+                reversed = reversed && i == 3,
+            ) for d in interiors, i in [1, 3]
+        ][:])
+        if even && reversed
+            order3 = 3 * 3
+        elseif even
+            order3 = 2
+        else
+            order3 = 3
+        end
+
+        # Expansion from the center
+        u4 = StandaloneInteriorEigenfunction(domain, stride = 6; even)
+        order4 = ifelse(even, 1, 2)
+
+        # Interior expansions closer to outer boundaries
+        u5 = LinkedEigenfunction([
+            StandaloneInteriorEigenfunction(
+                parent(3 // 4) .*
+                SVector(cospi(fmpq(i // 3), parent), sinpi(fmpq(i // 3), parent)),
+                fmpq(i // 3),
+                stride = 6,
+                even = true,
+            ) for i = 0:5
+        ])
+        order5 = ifelse(even, 1, 2)
+
+        us = AbstractPlanarEigenfunction[u1, u2, u3]
+        orders = Int[order1, order2, order3]
+
+        if inner_expansion
+            push!(us, u4)
+            push!(orders, order4)
+        end
+        if outer_expansion
+            push!(us, u5)
+            push!(orders, order5)
+        end
+
+        us_to_boundary = fill(BitSet([1, 7, 9]), length(us))
+        even_boundaries = ifelse(even, Int[1, 9], Int[])
+    elseif symmetry_class == 2
+        ####################################################################
+        is_even = i -> i == 1 || i == 4
+        is_reversed = i -> i == 3 || i == 6
+
+        if lightning
+            outer_eigenfunction =
+                i -> StandaloneLightningEigenfunction(
+                    vertex(exterior, i),
+                    fmpq(mod(Rational(1 - θ // 2 + (i - 1) * (1 - θ)), 2)),
+                    θ;
+                    even = is_even(i),
+                    reversed = is_reversed(i),
+                )
+            outer_excluded_boundary = i -> BitSet()
+            order11 = 2
+            order12 = 3
+        else
+            outer_eigenfunction =
+                i -> StandaloneVertexEigenfunction(
+                    vertex(exterior, i),
+                    i * (1 - θ) + θ * 1 // 2,
+                    θ,
+                    stride = ifelse(is_even(i), 2, 1),
+                    reversed = is_reversed(i),
+                )
+            outer_excluded_boundary =
+                i -> BitSet([mod1(i - 1, length(boundaries(exterior))), i])
+            order11 = 1
+            order12 = 1
+        end
+
+        u11 = LinkedEigenfunction(
+            [outer_eigenfunction(i) for i in (1, 4)],
+            [parent(1), parent(-1)],
+            excluded_boundaries = [outer_excluded_boundary(i) for i in (1, 4)],
+        )
+
+        u12 = LinkedEigenfunction(
+            [outer_eigenfunction(i) for i in (2, 3, 5, 6)],
+            [parent(1), parent(-1), parent(-1), parent(1)],
+            excluded_boundaries = [outer_excluded_boundary(i) for i in (2, 3, 5, 6)],
+        )
+
+        # Expansions from the outer tip of the triangles
+        u21 = LinkedEigenfunction(
+            [
+                StandaloneLightningEigenfunction{T,fmpq}(
+                    vertex(d, 2),
+                    7 // 6 + d.rotation,
+                    2 - d.original.angles[2],
+                    l = parent(h // 2N),
+                    even = is_even(i),
+                ) for (i, d) in ((1, interiors[1]), (4, interiors[4]))
+            ],
+            [parent(1), parent(-1)],
+        )
+        order21 = 2
+
+        u22 = LinkedEigenfunction(
+            [
+                StandaloneLightningEigenfunction{T,fmpq}(
+                    vertex(d, 2),
+                    7 // 6 + d.rotation,
+                    2 - d.original.angles[2],
+                    l = parent(h // 2N),
+                    even = is_even(i),
+                    reversed = is_reversed(i),
+                )
+                for
+                (i, d) in (
+                    (2, interiors[2]),
+                    (3, interiors[3]),
+                    (5, interiors[5]),
+                    (6, interiors[6]),
+                )
+            ],
+            [parent(1), parent(-1), parent(-1), parent(1)],
+        )
+        order22 = 3
+
+        # Expansions from the inner tips of the triangles
+        u31 = LinkedEigenfunction(
+            [
+                StandaloneLightningEigenfunction{T,fmpq}(
+                    vertex(d, i),
+                    ifelse(i == 1, 1 // 2, -1 // 6) + d.rotation,
+                    2 - d.original.angles[i],
+                    l = parent(h // 2N),
+                    reversed = i == 3,
+                ) for (j, d) in ((1, interiors[1]), (4, interiors[4])), i in [1, 3]
+            ][:],
+            [parent(1), parent(-1), parent(1), parent(-1)],
+        )
+        order31 = 3
+
+        u32 = LinkedEigenfunction(
+            [
+                StandaloneLightningEigenfunction{T,fmpq}(
+                    vertex(d, i),
+                    ifelse(i == 1, 1 // 2, -1 // 6) + d.rotation,
+                    2 - d.original.angles[i],
+                    l = parent(h // 2N),
+                    reversed = i == 3,
+                )
+                for
+                (j, d, i) in (
+                    (2, interiors[2], 1),
+                    (3, interiors[3], 3),
+                    (5, interiors[5], 1),
+                    (6, interiors[6], 3),
+                )
+            ],
+            [parent(1), parent(-1), parent(-1), parent(1)],
+        )
+        order32 = 3
+
+        u33 = LinkedEigenfunction(
+            [
+                StandaloneLightningEigenfunction{T,fmpq}(
+                    vertex(d, i),
+                    ifelse(i == 1, 1 // 2, -1 // 6) + d.rotation,
+                    2 - d.original.angles[i],
+                    l = parent(h // 2N),
+                    reversed = i == 3,
+                )
+                for
+                (j, d, i) in (
+                    (2, interiors[2], 3),
+                    (3, interiors[3], 1),
+                    (5, interiors[5], 3),
+                    (6, interiors[6], 1),
+                )
+            ],
+            [parent(1), parent(-1), parent(-1), parent(1)],
+        )
+        order33 = 3
+
+        # Expansion from the center
+        u4 = StandaloneInteriorEigenfunction(domain, stride = 2, offset = 1; even)
+        order4 = 1
+
+        us = AbstractPlanarEigenfunction[u11, u12, u21, u22, u31, u32, u33, u4]
+        orders = Int[order11, order12, 3order21, 3order22, 3order31, 3order32, 3order33, order4]
+
+        us_to_boundary = fill(BitSet([1, 2, 7, 9, 10, 11, 12]), length(us))
+        even_boundaries = Int[2, 9]
     else
-        outer_eigenfunction =
-            i -> StandaloneVertexEigenfunction(
-                vertex(exterior, i),
-                i * (1 - θ) + θ * 1 // 2,
-                θ,
-                ifelse(even, 2, 1),
-            )
-        outer_excluded_boundary =
-            i -> BitSet([mod1(i - 1, length(boundaries(exterior))), i])
-        order1 = ifelse(even, 1, 2)
+        throw(ArgumentError("symmetry_class should be 1 or 2, got $symmetry_class"))
     end
-
-    u1 = LinkedEigenfunction(
-        [outer_eigenfunction(i) for i in boundaries(exterior)],
-        excluded_boundaries = [outer_excluded_boundary(i) for i in boundaries(exterior)],
-    )
-
-    # Expansions from the outer tip of the triangles
-    u2 = LinkedEigenfunction([
-        StandaloneLightningEigenfunction{T,fmpq}(
-            vertex(d, 2),
-            7 // 6 + d.rotation,
-            2 - d.original.angles[2],
-            l = parent(h // 2N),
-            even = even,
-        ) for d in interiors
-    ])
-    if even && reversed
-        order2 = 3 * 2
-    elseif even
-        order2 = 2
-    else
-        order2 = 3
-    end
-
-    # Expansions from the inner tips of the triangles
-    u3 = LinkedEigenfunction([
-        StandaloneLightningEigenfunction{T,fmpq}(
-            vertex(d, i),
-            ifelse(i == 1, 1 // 2, -1 // 6) + d.rotation,
-            2 - d.original.angles[i],
-            l = parent(h // 2N),
-            even = even && !reversed,
-            reversed = reversed && i == 3,
-        ) for d in interiors, i in [1, 3]
-    ][:])
-    if even && reversed
-        order3 = 3 * 3
-    elseif even
-        order3 = 2
-    else
-        order3 = 3
-    end
-
-    # Expansion from the center
-    u4 = StandaloneInteriorEigenfunction(domain, stride = 6; even)
-    order4 = ifelse(even, 1, 2)
-
-    # Interior expansions closer to outer boundaries
-    u5 = LinkedEigenfunction([
-        StandaloneInteriorEigenfunction(
-            parent(3 // 4) .*
-            SVector(cospi(fmpq(i // 3), parent), sinpi(fmpq(i // 3), parent)),
-            fmpq(i // 3),
-            stride = 6,
-            even = true,
-        ) for i = 0:5
-    ])
-    order5 = ifelse(even, 1, 2)
-
-    us = AbstractPlanarEigenfunction[u1, u2, u3]
-    orders = Int[order1, order2, order3]
-
-    if inner_expansion
-        push!(us, u4)
-        push!(orders, order4)
-    end
-    if outer_expansion
-        push!(us, u5)
-        push!(orders, order5)
-    end
-
-    us_to_boundary = fill(BitSet([1, 7, 9]), length(us))
-    even_boundaries = ifelse(even, Int[1, 9], Int[])
 
     u = CombinedEigenfunction(domain, us, orders; us_to_boundary, even_boundaries)
 
