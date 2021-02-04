@@ -263,6 +263,8 @@ d, h) = (27, 11, 6)` then they are
    63.2104
    63.7259
    63.7259
+   68.2629
+   68.2629
 ```
 """
 function example_domain_goal_v1(
