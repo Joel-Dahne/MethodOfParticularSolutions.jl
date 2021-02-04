@@ -85,9 +85,27 @@ struct StandaloneInteriorEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEige
     vertex::SVector{2,arb}
     orientation::T
     stride::Int
+    offset::Int
     even::Bool
     coefficients::Vector{arb}
     parent::ArbField
+
+    function StandaloneInteriorEigenfunction(
+        vertex::SVector{2,arb},
+        orientation::T = fmpq(0),
+        parent::ArbField = parent(first(vertex));
+        offset::Integer = 0,
+        stride::Integer = 1,
+        even::Bool = false,
+    ) where {T<:Union{Rational,fmpq,arb}}
+        if T == fmpq || T <: Rational
+            orientation = fmpq(orientation)
+            S = fmpq
+        else
+            S = arb
+        end
+        return new{S}(vertex, orientation, stride, offset, even, arb[], parent)
+    end
 end
 
 struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmpq,arb}} <:

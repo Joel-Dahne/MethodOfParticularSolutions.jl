@@ -1,26 +1,15 @@
-function StandaloneInteriorEigenfunction(
-    vertex::AbstractVector{arb},
-    orientation::T = fmpq(0),
-    parent::ArbField = parent(first(vertex));
-    stride::Integer = 1,
-    even = false,
-) where {T<:Union{Rational,fmpq,arb}}
-    if T == fmpq || T <: Rational
-        orientation = fmpq(orientation)
-    end
-    return StandaloneInteriorEigenfunction(vertex, orientation, stride, even, arb[], parent)
-end
-
 StandaloneInteriorEigenfunction(
     domain::AbstractPlanarDomain,
     orientation = fmpq(0);
     stride::Integer = 1,
+    offset::Integer = 1,
     even = false,
 ) = StandaloneInteriorEigenfunction(
     center(domain),
     orientation,
     domain.parent;
     stride,
+    offset,
     even,
 )
 
@@ -73,9 +62,9 @@ function (u::StandaloneInteriorEigenfunction)(
 
     r, θ = polar_from_cartesian(xy)
     if u.even
-        νs = u.stride * (ks.start-1:ks.stop-1)
+        νs = u.stride * (ks.start-1:ks.stop-1) .+ u.offset
     else
-        νs = u.stride * (div(ks.start, 2):div(ks.stop, 2))
+        νs = u.stride * (div(ks.start, 2):div(ks.stop, 2)) .+ u.offset
     end
     bessel_js = let sqrtλr = sqrt(λ) * r
         Dict(ν => bessel_j(u.parent(ν), sqrtλr) for ν in νs)
@@ -85,11 +74,11 @@ function (u::StandaloneInteriorEigenfunction)(
     for i in eachindex(ks)
         k = ks[i]
         if u.even
-            ν = u.stride * (k - 1)
+            ν = u.stride * (k - 1) + u.offset
 
             res[i] = bessel_js[ν] * cos(ν * θ)
         else
-            ν = u.stride * div(k, 2)
+            ν = u.stride * div(k, 2) + u.offset
 
             if k == 1
                 res[i] = bessel_js[ν]
