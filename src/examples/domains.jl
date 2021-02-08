@@ -325,7 +325,7 @@ function example_domain_goal_v1(
                     vertex(exterior, i),
                     i * (1 - θ) + θ * 1 // 2,
                     θ,
-                    ifelse(even, 2, 1),
+                    stride = ifelse(even, 2, 1),
                 )
             outer_excluded_boundary =
                 i -> BitSet([mod1(i - 1, length(boundaries(exterior))), i])
