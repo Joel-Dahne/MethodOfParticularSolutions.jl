@@ -556,8 +556,8 @@ function example_domain_goal_v1(
         even_boundaries = Int[2, 9]
     elseif symmetry_class == 3
         ####################################################################
-        is_even = i -> i == 1 || i == 4
-        is_reversed = i -> i == 3 || i == 6
+        is_odd = i -> i == 1 || i == 4
+        is_reversed = i -> i == 3 || i == 4 || i == 6
 
         if lightning
             outer_eigenfunction =
@@ -565,11 +565,11 @@ function example_domain_goal_v1(
                     vertex(exterior, i),
                     fmpq(mod(Rational(1 - θ // 2 + (i - 1) * (1 - θ)), 2)),
                     θ;
-                    even = is_even(i),
+                    odd = is_odd(i),
                     reversed = is_reversed(i),
                 )
             outer_excluded_boundary = i -> BitSet()
-            order11 = 2
+            order11 = 1
             order12 = 3
         else
             outer_eigenfunction =
@@ -577,7 +577,8 @@ function example_domain_goal_v1(
                     vertex(exterior, i),
                     i * (1 - θ) + θ * 1 // 2,
                     θ,
-                    stride = ifelse(is_even(i), 2, 1),
+                    stride = ifelse(is_odd(i), 2, 1),
+                    offset = ifelse(is_odd(i), 1, 0),
                     reversed = is_reversed(i),
                 )
             outer_excluded_boundary =
@@ -588,13 +589,13 @@ function example_domain_goal_v1(
 
         u11 = LinkedEigenfunction(
             [outer_eigenfunction(i) for i in (1, 4)],
-            [parent(1), parent(-1)],
+            [parent(1), parent(1)],
             excluded_boundaries = [outer_excluded_boundary(i) for i in (1, 4)],
         )
 
         u12 = LinkedEigenfunction(
             [outer_eigenfunction(i) for i in (2, 3, 5, 6)],
-            [parent(1), parent(-1), parent(-1), parent(1)],
+            [parent(1), parent(1), parent(-1), parent(-1)],
             excluded_boundaries = [outer_excluded_boundary(i) for i in (2, 3, 5, 6)],
         )
 
@@ -606,12 +607,13 @@ function example_domain_goal_v1(
                     7 // 6 + d.rotation,
                     2 - d.original.angles[2],
                     l = parent(h // 2N),
-                    even = is_even(i),
+                    odd = is_odd(i),
+                    reversed = i == 4,
                 ) for (i, d) in ((1, interiors[1]), (4, interiors[4]))
             ],
-            [parent(1), parent(-1)],
+            [parent(1), parent(1)],
         )
-        order21 = 2
+        order21 = 1
 
         u22 = LinkedEigenfunction(
             [
@@ -620,7 +622,7 @@ function example_domain_goal_v1(
                     7 // 6 + d.rotation,
                     2 - d.original.angles[2],
                     l = parent(h // 2N),
-                    even = is_even(i),
+                    odd = is_odd(i),
                     reversed = is_reversed(i),
                 )
                 for
@@ -631,7 +633,7 @@ function example_domain_goal_v1(
                     (6, interiors[6]),
                 )
             ],
-            [parent(1), parent(-1), parent(-1), parent(1)],
+            [parent(1), parent(1), parent(-1), parent(-1)],
         )
         order22 = 3
 
@@ -646,7 +648,7 @@ function example_domain_goal_v1(
                     reversed = i == 3,
                 ) for (j, d) in ((1, interiors[1]), (4, interiors[4])), i in [1, 3]
             ][:],
-            [parent(1), parent(-1), parent(1), parent(-1)],
+            [parent(1), parent(-1), parent(-1), parent(1)],
         )
         order31 = 3
 
@@ -667,7 +669,7 @@ function example_domain_goal_v1(
                     (6, interiors[6], 3),
                 )
             ],
-            [parent(1), parent(-1), parent(-1), parent(1)],
+            [parent(1), parent(1), parent(-1), parent(-1)],
         )
         order32 = 3
 
@@ -688,15 +690,16 @@ function example_domain_goal_v1(
                     (6, interiors[6], 1),
                 )
             ],
-            [parent(1), parent(-1), parent(-1), parent(1)],
+            [parent(1), parent(1), parent(-1), parent(-1)],
         )
         order33 = 3
 
         # Expansion from the center
-        u4 = StandaloneInteriorEigenfunction(domain, stride = 2, offset = 1; even)
+        u4 = StandaloneInteriorEigenfunction(domain, stride = 2, odd = true)
         order4 = 1
 
         us = AbstractPlanarEigenfunction[u11, u12, u21, u22, u31, u32, u33, u4]
+
         orders =
             Int[order11, order12, 3order21, 3order22, 3order31, 3order32, 3order33, order4]
 
