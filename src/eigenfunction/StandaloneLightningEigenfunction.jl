@@ -5,9 +5,10 @@ StandaloneLightningEigenfunction(
     l = 1,
     σ = 4,
     even::Bool = false,
+    odd::Bool = false,
     reversed::Bool = false,
 ) where {T<:Union{arb,fmpq}} =
-    StandaloneLightningEigenfunction{arb,T}(domain, i; outside, l, σ, even, reversed)
+    StandaloneLightningEigenfunction{arb,T}(domain, i; outside, l, σ, even, odd, reversed)
 
 function StandaloneLightningEigenfunction{T,S}(
     domain::Triangle{S},
@@ -16,6 +17,7 @@ function StandaloneLightningEigenfunction{T,S}(
     l = 1,
     σ = 4,
     even::Bool = false,
+    odd::Bool = false,
     reversed::Bool = false,
 ) where {T,S}
     θ = domain.angles[i]
@@ -40,6 +42,7 @@ function StandaloneLightningEigenfunction{T,S}(
         l,
         σ,
         even,
+        odd,
         reversed,
     )
 end
@@ -54,6 +57,7 @@ function StandaloneLightningEigenfunction(
     l::arb = domain.parent(1),
     σ::arb = domain.parent(4),
     even::Bool = false,
+    odd::Bool = false,
     reversed::Bool = false,
 ) where {T<:Union{arb,fmpq}}
     θ = angle(domain, i)
@@ -78,6 +82,7 @@ function StandaloneLightningEigenfunction(
         l,
         σ,
         even,
+        odd,
         reversed,
     )
 end
@@ -89,6 +94,7 @@ function StandaloneLightningEigenfunction{T,arb}(
     l = 1,
     σ = 4,
     even::Bool = false,
+    odd::Bool = false,
     reversed::Bool = false,
 ) where {T}
     θ = angle(domain, i)
@@ -112,6 +118,7 @@ function StandaloneLightningEigenfunction{T,arb}(
         l,
         σ,
         even,
+        odd,
         reversed,
     )
 end
@@ -123,9 +130,19 @@ function StandaloneLightningEigenfunction(
     l::arb = domain.parent(1),
     σ::arb = domain.parent(4),
     even::Bool = false,
+    odd::Bool = false,
     reversed::Bool = false,
 )
-    u = StandaloneLightningEigenfunction(domain.original, i; outside, l, σ, even, reversed)
+    u = StandaloneLightningEigenfunction(
+        domain.original,
+        i;
+        outside,
+        l,
+        σ,
+        even,
+        odd,
+        reversed,
+    )
     if typeof(u.orientation) == typeof(domain.rotation)
         orientation = u.orientation + domain.rotation
     else
@@ -144,6 +161,7 @@ function StandaloneLightningEigenfunction(
         l = u.l,
         σ = u.σ,
         even = u.even,
+        odd = u.odd,
         reversed = u.reversed,
     )
 
@@ -157,6 +175,7 @@ function StandaloneLightningEigenfunction{T,S}(
     l = 1,
     σ = 4,
     even::Bool = false,
+    odd::Bool = false,
     reversed::Bool = false,
 ) where {T,S}
     u = StandaloneLightningEigenfunction{T,S}(
@@ -166,6 +185,7 @@ function StandaloneLightningEigenfunction{T,S}(
         l,
         σ,
         even,
+        odd,
         reversed,
     )
     if typeof(u.orientation) == typeof(domain.rotation)
@@ -185,6 +205,7 @@ function StandaloneLightningEigenfunction{T,S}(
         u.l,
         u.σ,
         u.even,
+        u.odd,
         u.reversed,
     )
 
@@ -196,6 +217,7 @@ function Base.show(io::IO, u::StandaloneLightningEigenfunction{T}) where {T}
         io,
         "StandaloneLightningEigenfunction{$T}" *
         ifelse(u.even, " - even", "") *
+        ifelse(u.odd, " - odd", "") *
         ifelse(u.reversed, " - reversed", ""),
     )
     if !haskey(io, :compact) || !io[:compact]
@@ -337,6 +359,8 @@ function (u::StandaloneLightningEigenfunction{T,S})(
     i = 1
     if u.even
         charge_indices = (div(ks.start - 1, 2)+1):(div(ks.stop - 1, 2)+1)
+    elseif u.odd
+        charge_indices = ks
     else
         charge_indices = (div(ks.start - 1, 3)+1):(div(ks.stop - 1, 3)+1)
     end
@@ -382,6 +406,11 @@ function (u::StandaloneLightningEigenfunction{T,S})(
                 res[i+1] = b * c
                 i += 2
             end
+        elseif u.odd
+            # We only take one expansion from each charge in this
+            # case. So it's a lot simpler.
+            res[i] = b * s
+            i += 1
         else
             if charge_index == charge_indices.start == charge_indices.stop
                 # Special case when first and last charge are the same

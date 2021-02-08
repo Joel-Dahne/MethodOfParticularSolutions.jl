@@ -121,6 +121,7 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
     l::T
     σ::T
     even::Bool
+    odd::Bool
     reversed::Bool
     coefficients::Vector{T}
     parent::ArbField
@@ -133,9 +134,11 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
         l::arb = parent(1),
         σ::arb = parent(4),
         even::Bool = false,
+        odd::Bool = false,
         reversed::Bool = false,
     ) where {S<:Union{arb,fmpq}}
-        return new{arb,S}(vertex, orientation, θ, l, σ, even, reversed, arb[], parent)
+        even && odd && throw(ArgumentError("eigenfunction can't be both even and odd"))
+        return new{arb,S}(vertex, orientation, θ, l, σ, even, odd, reversed, arb[], parent)
     end
 
     function StandaloneLightningEigenfunction{arb,S}(
@@ -146,8 +149,10 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
         l = 1,
         σ = 4,
         even::Bool = false,
+        odd::Bool = false,
         reversed::Bool = false,
     ) where {S<:Union{arb,fmpq}}
+        even && odd && throw(ArgumentError("eigenfunction can't be both even and odd"))
         return new{arb,S}(
             vertex,
             orientation,
@@ -155,6 +160,7 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
             parent(l),
             parent(σ),
             even,
+            odd,
             reversed,
             arb[],
             parent,
@@ -168,8 +174,10 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
         l = one(T),
         σ = 4one(T),
         even::Bool = false,
+        odd::Bool = false,
         reversed::Bool = false,
     ) where {T<:AbstractFloat,S<:Union{arb,fmpq}}
+        even && odd && throw(ArgumentError("eigenfunction can't be both even and odd"))
         return new{T,S}(
             convert(SVector{2,T}, vertex),
             orientation,
@@ -177,6 +185,7 @@ struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmp
             convert(T, l),
             convert(T, σ),
             even,
+            odd,
             reversed,
             T[],
             ArbField(precision(T)),
