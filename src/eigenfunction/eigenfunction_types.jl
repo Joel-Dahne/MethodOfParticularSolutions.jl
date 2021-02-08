@@ -46,6 +46,7 @@ struct StandaloneVertexEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEigenf
     orientation::T
     θ::T
     stride::Int
+    offset::Int
     reversed::Bool
     coefficients::Vector{arb}
     parent::ArbField
@@ -55,6 +56,7 @@ struct StandaloneVertexEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEigenf
         orientation::T,
         θ::T;
         stride::Integer = 1,
+        offset::Integer = 0,
         reversed::Bool = false,
         parent::ArbField = parent(vertex[1]),
     ) where {T<:Union{Rational,arb,fmpq}}
@@ -64,7 +66,7 @@ struct StandaloneVertexEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEigenf
         else
             S = arb
         end
-        return new{S}(vertex, orientation, θ, stride, reversed, arb[], parent)
+        return new{S}(vertex, orientation, θ, stride, offset, reversed, arb[], parent)
     end
 end
 

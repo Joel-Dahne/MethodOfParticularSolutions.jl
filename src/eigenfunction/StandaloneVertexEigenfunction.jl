@@ -2,6 +2,7 @@ function StandaloneVertexEigenfunction(
     domain::Triangle{T},
     i::Integer;
     stride::Integer = 1,
+    offset::Integer = 0,
     reversed::Bool = false,
     outside = false,
 ) where {T<:Union{arb,fmpq}}
@@ -28,6 +29,7 @@ function StandaloneVertexEigenfunction(
         orientation,
         θ;
         stride,
+        offset,
         reversed,
         domain.parent,
     )
@@ -37,6 +39,7 @@ function StandaloneVertexEigenfunction(
     domain::TransformedDomain,
     i::Integer;
     stride::Integer = 1,
+    offset::Integer = 0,
     reversed::Bool = false,
     outside = false,
 )
@@ -48,6 +51,7 @@ function StandaloneVertexEigenfunction(
         u.orientation + domain.rotation,
         u.θ;
         stride,
+        offset,
         reversed,
         domain.parent,
     )
@@ -132,7 +136,7 @@ function (u::StandaloneVertexEigenfunction)(
     rsqrtλ = r * sqrt(λ)
     res = similar(ks, T)
     for i in eachindex(ks)
-        k = 1 + (ks[i] - 1) * u.stride
+        k = 1 + (ks[i] - 1) * u.stride + u.offset
         ν = nu(u, k)
 
         res[i] = bessel_j(ν, rsqrtλ) * sin(ν * θ)
