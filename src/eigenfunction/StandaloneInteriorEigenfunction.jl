@@ -4,6 +4,7 @@ StandaloneInteriorEigenfunction(
     stride::Integer = 1,
     offset::Integer = 1,
     even = false,
+    odd = false,
 ) = StandaloneInteriorEigenfunction(
     center(domain),
     orientation,
@@ -11,10 +12,16 @@ StandaloneInteriorEigenfunction(
     stride,
     offset,
     even,
+    odd,
 )
 
 function Base.show(io::IO, u::StandaloneInteriorEigenfunction)
-    println(io, "Standalone interior eigenfunction" * ifelse(u.even, " - even", ""))
+    println(
+        io,
+        "Standalone interior eigenfunction" *
+        ifelse(u.even, " - even", "") *
+        ifelse(u.odd, " - odd", ""),
+    )
     if !haskey(io, :compact) || !io[:compact]
         println(io, "vertex: $(u.vertex)")
         println(io, "orientation: $(u.orientation)")
@@ -63,6 +70,8 @@ function (u::StandaloneInteriorEigenfunction)(
     r, θ = polar_from_cartesian(xy)
     if u.even
         νs = u.stride * (ks.start-1:ks.stop-1) .+ u.offset
+    elseif u.odd
+        νs = u.stride * (ks.start-1:ks.stop-1) .+ 1 .+ u.offset
     else
         νs = u.stride * (div(ks.start, 2):div(ks.stop, 2)) .+ u.offset
     end
@@ -77,15 +86,17 @@ function (u::StandaloneInteriorEigenfunction)(
             ν = u.stride * (k - 1) + u.offset
 
             res[i] = bessel_js[ν] * cos(ν * θ)
+        elseif u.odd
+            ν = u.stride * (k - 1) + 1 + u.offset
+
+            res[i] = bessel_js[ν] * sin(ν * θ)
         else
             ν = u.stride * div(k, 2) + u.offset
 
-            if k == 1
-                res[i] = bessel_js[ν]
-            elseif iseven(k)
-                res[i] = bessel_js[ν] * sin(ν * θ)
-            else
+            if isodd(k)
                 res[i] = bessel_js[ν] * cos(ν * θ)
+            else
+                res[i] = bessel_js[ν] * sin(ν * θ)
             end
         end
     end

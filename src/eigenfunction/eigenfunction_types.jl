@@ -89,6 +89,7 @@ struct StandaloneInteriorEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEige
     stride::Int
     offset::Int
     even::Bool
+    odd::Bool
     coefficients::Vector{arb}
     parent::ArbField
 
@@ -99,14 +100,16 @@ struct StandaloneInteriorEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEige
         offset::Integer = 0,
         stride::Integer = 1,
         even::Bool = false,
+        odd::Bool = false,
     ) where {T<:Union{Rational,fmpq,arb}}
+        even && odd && throw(ArgumentError("eigenfunction can't be both even and odd"))
         if T == fmpq || T <: Rational
             orientation = fmpq(orientation)
             S = fmpq
         else
             S = arb
         end
-        return new{S}(vertex, orientation, stride, offset, even, arb[], parent)
+        return new{S}(vertex, orientation, stride, offset, even, odd, arb[], parent)
     end
 end
 
