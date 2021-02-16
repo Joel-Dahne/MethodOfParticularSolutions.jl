@@ -86,9 +86,9 @@ function bounded_by(
         iterations += 1
 
         if show_trace
-            @printf "%6d %11d %s\n" iterations length(intervals) string(getinterval(
-                max_value,
-            ))
+            @printf "%6d %11d %s\n" iterations length(intervals) string(
+                getinterval(max_value),
+            )
         end
 
         res = similar(intervals, arb)

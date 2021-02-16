@@ -2,7 +2,11 @@ function KrewerasEigenfunction(domain::SphericalTriangle)
     if domain.angles[1] != fmpq(2 // 3) ||
        domain.angles[2] != fmpq(2 // 3) ||
        domain.angles[3] != fmpq(2 // 3)
-        throw(ArgumentError("domain must be the Kreweras triangle with angles (2π/3, 2π/3, 2π/3)"))
+        throw(
+            ArgumentError(
+                "domain must be the Kreweras triangle with angles (2π/3, 2π/3, 2π/3)",
+            ),
+        )
     end
     KrewerasEigenfunction(domain, arb[])
 end

@@ -16,7 +16,11 @@ function coordinate_transformation(
     u::AbstractSphericalEigenfunction,
     xyz::AbstractVector{T},
 ) where {T<:Union{arb,arb_series}}
-    throw(ErrorException("coordinate_transform not implemented for eigenfunction of type $(typeof(u))"))
+    throw(
+        ErrorException(
+            "coordinate_transform not implemented for eigenfunction of type $(typeof(u))",
+        ),
+    )
 end
 
 function coordinate_transformation(
@@ -60,10 +64,12 @@ function (u::AbstractSphericalEigenfunction)(
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
-    throw(ErrorException(
-        "evaluation of basis function not implemented" *
-        " for eigenfunction of type $(typeof(u))",
-    ))
+    throw(
+        ErrorException(
+            "evaluation of basis function not implemented" *
+            " for eigenfunction of type $(typeof(u))",
+        ),
+    )
 end
 
 function (u::AbstractSphericalEigenfunction)(
@@ -74,10 +80,12 @@ function (u::AbstractSphericalEigenfunction)(
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
-    throw(ErrorException(
-        "evaluation of basis function not implemented" *
-        " for eigenfunction of type $(typeof(u))",
-    ))
+    throw(
+        ErrorException(
+            "evaluation of basis function not implemented" *
+            " for eigenfunction of type $(typeof(u))",
+        ),
+    )
 end
 
 function (u::AbstractSphericalEigenfunction)(

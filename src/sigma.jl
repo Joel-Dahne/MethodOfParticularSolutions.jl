@@ -118,10 +118,12 @@ function sigma_coefficients(
 
         # We create a copy of Q to be able to call svd! directly,
         # otherwise it prints a warning about alg keyword being ignored.
-        @timeit_debug "svd" v = svd!(LinearAlgebra.copy_oftype(
-            Q[1:num_boundary, :],
-            LinearAlgebra.eigtype(eltype(A)),
-        )).V[
+        @timeit_debug "svd" v = svd!(
+            LinearAlgebra.copy_oftype(
+                Q[1:num_boundary, :],
+                LinearAlgebra.eigtype(eltype(A)),
+            ),
+        ).V[
             :,
             end,
         ]

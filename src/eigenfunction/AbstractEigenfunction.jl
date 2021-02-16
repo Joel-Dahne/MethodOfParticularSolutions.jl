@@ -72,7 +72,9 @@ function (u::AbstractEigenfunction)(
     boundary = nothing,
     notransform::Bool = false,
 )
-    throw(ErrorException("evaluation not implemented for eigenfunction of type $(typeof(u))"))
+    throw(
+        ErrorException("evaluation not implemented for eigenfunction of type $(typeof(u))"),
+    )
 end
 
 function norm(

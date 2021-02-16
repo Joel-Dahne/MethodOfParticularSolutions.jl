@@ -7,15 +7,19 @@
     interior = interior_points(domain, ni)
 
     x =
-        Float64.(hcat(
-            [getindex.(boundary, 1); fill(NaN, max(0, ni - nb))],
-            [getindex.(interior, 1); fill(NaN, max(0, nb - ni))],
-        ))
+        Float64.(
+            hcat(
+                [getindex.(boundary, 1); fill(NaN, max(0, ni - nb))],
+                [getindex.(interior, 1); fill(NaN, max(0, nb - ni))],
+            ),
+        )
     y =
-        Float64.(hcat(
-            [getindex.(boundary, 2); fill(NaN, max(0, ni - nb))],
-            [getindex.(interior, 2); fill(NaN, max(0, nb - ni))],
-        ))
+        Float64.(
+            hcat(
+                [getindex.(boundary, 2); fill(NaN, max(0, ni - nb))],
+                [getindex.(interior, 2); fill(NaN, max(0, nb - ni))],
+            ),
+        )
 
     return x, y
 end

@@ -54,10 +54,9 @@ function mps!(
                 else
                     abs_error = state.metadata["x_upper"] - state.metadata["x_lower"]
                     rel_prec = -log2(abs_error / state.metadata["minimizer"])
-                    progress = Float64(max(
-                        (rel_prec - start_prec) / (optim_prec - start_prec),
-                        0,
-                    ))
+                    progress = Float64(
+                        max((rel_prec - start_prec) / (optim_prec - start_prec), 0),
+                    )
                 end
                 @info "Computing minimum of σ(λ)" progress = progress
                 false
@@ -173,7 +172,11 @@ function iteratemps(
     # Make sure that at least one method for computing the precision
     # to use for the minimization is specified
     if isnothing(optim_prec_final) && isnothing(optim_prec_step) && !optim_prec_adaptive
-        throw(ArgumentError("at least one method for determining precision must be specified"))
+        throw(
+            ArgumentError(
+                "at least one method for determining precision must be specified",
+            ),
+        )
     end
 
     # Setup function used for computing precision to which σ(λ) should

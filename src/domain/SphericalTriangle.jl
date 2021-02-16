@@ -320,9 +320,11 @@ function partitiontriangle(a, b, c; iterations::Int = 1)
     if iterations == 1
         return triangles
     else
-        return collect(Iterators.flatten([
-            partitiontriangle(i, j, k, iterations = iterations - 1)
-            for (i, j, k) in triangles
-        ]))
+        return collect(
+            Iterators.flatten([
+                partitiontriangle(i, j, k, iterations = iterations - 1) for
+                (i, j, k) in triangles
+            ]),
+        )
     end
 end

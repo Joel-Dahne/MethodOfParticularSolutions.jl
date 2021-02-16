@@ -2,7 +2,7 @@ StandaloneInteriorEigenfunction(
     domain::AbstractPlanarDomain,
     orientation = fmpq(0);
     stride::Integer = 1,
-    offset::Integer = 1,
+    offset::Integer = 0,
     even = false,
     odd = false,
 ) = StandaloneInteriorEigenfunction(

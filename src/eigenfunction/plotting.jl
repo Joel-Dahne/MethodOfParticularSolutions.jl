@@ -144,7 +144,9 @@ end
 
 @recipe function f(h::EigenfunctionPlot)
     if length(h.args) != 1 || !(typeof(h.args[1]) <: CombinedEigenfunction)
-        error("EigenfunctionPlots should be given a CombinedEigenfunction. Got: $(typeof(h.args))")
+        error(
+            "EigenfunctionPlots should be given a CombinedEigenfunction. Got: $(typeof(h.args))",
+        )
     end
     u = h.args[1]
 
@@ -170,10 +172,12 @@ end
        !(typeof(h.args[1]) <: AbstractDomain) ||
        !(typeof(h.args[2]) <: AbstractEigenfunction) ||
        !(typeof(h.args[3]) <: Union{Real,arb})
-        throw(ArgumentError(
-            "EigenfunctionHeatmap should be given a domain, an eigenfunction, an eigenvalue " *
-            "and x, y. Got: $(typeof(h.args))",
-        ))
+        throw(
+            ArgumentError(
+                "EigenfunctionHeatmap should be given a domain, an eigenfunction, an eigenvalue " *
+                "and x, y. Got: $(typeof(h.args))",
+            ),
+        )
     end
     if length(h.args) == 5
         domain, u, λ, xs, ys = h.args[1:5]

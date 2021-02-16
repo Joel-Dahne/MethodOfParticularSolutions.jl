@@ -15,9 +15,7 @@ function example_domain_H(parent = RealField(precision(BigFloat)))
             3 // 2,
         ])
     vertices = [
-        parent.(v)
-        for
-        v in [
+        parent.(v) for v in [
             (0, 0),
             (0, 1),
             (-1, 1),
@@ -68,18 +66,20 @@ function example_domain_ngon(
 
     if !lightning
         if linked
-            us = [LinkedEigenfunction(
-                [
-                    StandaloneVertexEigenfunction(
-                        vertex(domain, i),
-                        i * (1 - θ) + θ * 1 // 2,
-                        θ,
-                    ) for i in boundaries(domain)
-                ],
-                excluded_boundaries = [
-                    BitSet([mod1(i - 1, n), i]) for i in boundaries(domain)
-                ],
-            )]
+            us = [
+                LinkedEigenfunction(
+                    [
+                        StandaloneVertexEigenfunction(
+                            vertex(domain, i),
+                            i * (1 - θ) + θ * 1 // 2,
+                            θ,
+                        ) for i in boundaries(domain)
+                    ],
+                    excluded_boundaries = [
+                        BitSet([mod1(i - 1, n), i]) for i in boundaries(domain)
+                    ],
+                ),
+            ]
             us_to_boundary = fill(BitSet([1]), length(us))
         else
             us = [
@@ -194,8 +194,8 @@ function example_domain_ngon_in_ngon(
     if linked
         us = [
             LinkedEigenfunction([
-                StandaloneLightningEigenfunction{T,arb}(domain1, i; even)
-                for i in boundaries(domain1)
+                StandaloneLightningEigenfunction{T,arb}(domain1, i; even) for
+                i in boundaries(domain1)
             ]),
             LinkedEigenfunction([
                 StandaloneLightningEigenfunction{T,arb}(
@@ -222,8 +222,8 @@ function example_domain_ngon_in_ngon(
     else
         us = vcat(
             [
-                StandaloneLightningEigenfunction{T,arb}(domain1, i)
-                for i in boundaries(domain1)
+                StandaloneLightningEigenfunction{T,arb}(domain1, i) for
+                i in boundaries(domain1)
             ],
             [
                 StandaloneLightningEigenfunction{T,arb}(
@@ -363,16 +363,18 @@ function example_domain_goal_v1(
         end
 
         # Expansions from the inner tips of the triangles
-        u3 = LinkedEigenfunction([
-            StandaloneLightningEigenfunction{T,fmpq}(
-                vertex(d, i),
-                ifelse(i == 1, 1 // 2, -1 // 6) + d.rotation,
-                2 - d.original.angles[i],
-                l = parent(h // 2N),
-                even = even && !reversed,
-                reversed = reversed && i == 3,
-            ) for d in interiors, i in [1, 3]
-        ][:])
+        u3 = LinkedEigenfunction(
+            [
+                StandaloneLightningEigenfunction{T,fmpq}(
+                    vertex(d, i),
+                    ifelse(i == 1, 1 // 2, -1 // 6) + d.rotation,
+                    2 - d.original.angles[i],
+                    l = parent(h // 2N),
+                    even = even && !reversed,
+                    reversed = reversed && i == 3,
+                ) for d in interiors, i in [1, 3]
+            ][:],
+        )
         if even && reversed
             order3 = 3 * 3
         elseif even
@@ -479,9 +481,7 @@ function example_domain_goal_v1(
                     l = parent(h // 2N),
                     even = is_even(i),
                     reversed = is_reversed(i),
-                )
-                for
-                (i, d) in (
+                ) for (i, d) in (
                     (2, interiors[2]),
                     (3, interiors[3]),
                     (5, interiors[5]),
@@ -515,9 +515,7 @@ function example_domain_goal_v1(
                     2 - d.original.angles[i],
                     l = parent(h // 2N),
                     reversed = i == 3,
-                )
-                for
-                (j, d, i) in (
+                ) for (j, d, i) in (
                     (2, interiors[2], 1),
                     (3, interiors[3], 3),
                     (5, interiors[5], 1),
@@ -536,9 +534,7 @@ function example_domain_goal_v1(
                     2 - d.original.angles[i],
                     l = parent(h // 2N),
                     reversed = i == 3,
-                )
-                for
-                (j, d, i) in (
+                ) for (j, d, i) in (
                     (2, interiors[2], 3),
                     (3, interiors[3], 1),
                     (5, interiors[5], 3),
@@ -629,9 +625,7 @@ function example_domain_goal_v1(
                     l = parent(h // 2N),
                     odd = is_odd(i),
                     reversed = is_reversed(i),
-                )
-                for
-                (i, d) in (
+                ) for (i, d) in (
                     (2, interiors[2]),
                     (3, interiors[3]),
                     (5, interiors[5]),
@@ -665,9 +659,7 @@ function example_domain_goal_v1(
                     2 - d.original.angles[i],
                     l = parent(h // 2N),
                     reversed = i == 3,
-                )
-                for
-                (j, d, i) in (
+                ) for (j, d, i) in (
                     (2, interiors[2], 1),
                     (3, interiors[3], 3),
                     (5, interiors[5], 1),
@@ -686,9 +678,7 @@ function example_domain_goal_v1(
                     2 - d.original.angles[i],
                     l = parent(h // 2N),
                     reversed = i == 3,
-                )
-                for
-                (j, d, i) in (
+                ) for (j, d, i) in (
                     (2, interiors[2], 3),
                     (3, interiors[3], 1),
                     (5, interiors[5], 3),
@@ -809,28 +799,32 @@ function example_domain_goal_v2(
     ])
 
     # Expansions from the outer part of the interior polygons
-    u2 = LinkedEigenfunction([
-        StandaloneLightningEigenfunction{T,fmpq}(
-            vertex(d, i),
-            ifelse(i == 2, fmpq(4 // 3), fmpq(5 // 3)) + fmpq(d.rotation),
-            2 - d.original.angles[i],
-            l = parent(0.08),
-            even = even && !reversed,
-            reversed = reversed && i == 3,
-        ) for d in interiors, i in [2, 3]
-    ][:])
+    u2 = LinkedEigenfunction(
+        [
+            StandaloneLightningEigenfunction{T,fmpq}(
+                vertex(d, i),
+                ifelse(i == 2, fmpq(4 // 3), fmpq(5 // 3)) + fmpq(d.rotation),
+                2 - d.original.angles[i],
+                l = parent(0.08),
+                even = even && !reversed,
+                reversed = reversed && i == 3,
+            ) for d in interiors, i in [2, 3]
+        ][:],
+    )
 
     # Expansions from the inner part of the interior polygons
-    u3 = LinkedEigenfunction([
-        StandaloneLightningEigenfunction{T,fmpq}(
-            vertex(d, i),
-            ifelse(i == 1, fmpq(2 // 3), fmpq(0)) + fmpq(d.rotation),
-            2 - d.original.angles[i],
-            l = parent(0.08),
-            even = even && !reversed,
-            reversed = reversed && i == 4,
-        ) for d in interiors, i in [1, 4]
-    ][:])
+    u3 = LinkedEigenfunction(
+        [
+            StandaloneLightningEigenfunction{T,fmpq}(
+                vertex(d, i),
+                ifelse(i == 1, fmpq(2 // 3), fmpq(0)) + fmpq(d.rotation),
+                2 - d.original.angles[i],
+                l = parent(0.08),
+                even = even && !reversed,
+                reversed = reversed && i == 4,
+            ) for d in interiors, i in [1, 4]
+        ][:],
+    )
 
     # Expansion from the center
     u4 = StandaloneInteriorEigenfunction(domain, stride = 6; even)
