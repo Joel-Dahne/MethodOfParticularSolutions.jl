@@ -266,6 +266,11 @@ d, h) = (27, 11, 6)` then they are
    68.2629
    68.2629
 ```
+For the second eigenvalue the value
+```
+    63.20833838
+```
+might be slightly more accurate.
 """
 function example_domain_goal_v1(
     N::Integer = 27,
@@ -404,7 +409,7 @@ function example_domain_goal_v1(
             push!(orders, order5)
         end
 
-        us_to_boundary = fill(BitSet([1, 7, 9]), length(us))
+        us_to_boundary = fill(BitSet([1, 8, 9]), length(us))
         even_boundaries = ifelse(even, Int[1, 9], Int[])
     elseif symmetry_class == 2
         ####################################################################
@@ -552,7 +557,7 @@ function example_domain_goal_v1(
         orders =
             Int[order11, order12, 3order21, 3order22, 3order31, 3order32, 3order33, order4]
 
-        us_to_boundary = fill(BitSet([1, 2, 7, 9, 10, 11, 12]), length(us))
+        us_to_boundary = fill(BitSet([1, 2, 8, 9, 10, 11, 12]), length(us))
         even_boundaries = Int[2, 9]
     elseif symmetry_class == 3
         ####################################################################
@@ -703,7 +708,7 @@ function example_domain_goal_v1(
         orders =
             Int[order11, order12, 3order21, 3order22, 3order31, 3order32, 3order33, order4]
 
-        us_to_boundary = fill(BitSet([1, 2, 7, 9, 10, 11, 12]), length(us))
+        us_to_boundary = fill(BitSet([1, 2, 8, 9, 10, 11, 12]), length(us))
         even_boundaries = Int[2, 9]
     else
         throw(ArgumentError("symmetry_class should be 1 or 2, got $symmetry_class"))
