@@ -13,10 +13,13 @@ IntersectedDomain(exterior::AbstractPlanarDomain, interior::AbstractPlanarDomain
 
 function Base.show(io::IO, domain::IntersectedDomain)
     println(io, "Intersected domain")
-    println(io, "Exterior: $(domain.exterior)")
-    println(io, "Interiors:")
-    for d in domain.interiors
-        println(d)
+    if !get(io, :compact, false)
+        println(io, "Exterior: $(domain.exterior)")
+        println(io, "Interiors:")
+        recur_io = IOContext(io, :compact => true)
+        for d in domain.interiors
+            println(recur_io, d)
+        end
     end
 end
 
