@@ -384,7 +384,7 @@ function example_domain_goal_v1(
         end
 
         # Expansion from the center
-        u4 = StandaloneInteriorEigenfunction(domain, stride = 6; even)
+        u4 = StandaloneInteriorEigenfunction(SVector(domain.parent(0), domain.parent(0)), stride = 6; even)
         order4 = ifelse(even, 1, 2)
 
         # Interior expansions closer to outer boundaries
