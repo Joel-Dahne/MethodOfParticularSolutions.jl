@@ -5,14 +5,30 @@ function cartesian_from_polar(r, θ)
     return SVector(x, y)
 end
 
-function polar_from_cartesian(xy)
-    if eltype(xy) == arb && contains_zero(xy[2]) && !iszero(xy[2]) && !isnonnegative(xy[1])
-        r = sqrt(xy[1]^2 + xy[2]^2)
-        θ = atan(xy[2], -xy[1]) + parent(xy[1])(π)
-        return r, θ
-    end
+# TODO: tighter enclosures for wide intervals
+polar_from_cartesian(xy::AbstractVector) = (hypot(xy[1], xy[2]), atan(xy[2], xy[1]))
+
+function polar_from_cartesian(xy::AbstractVector{arb_series})
     r = sqrt(xy[1]^2 + xy[2]^2)
-    θ = atan(xy[2], xy[1])
+
+    if contains_zero(xy[2][0]) && !iszero(xy[2][0]) && !isnonnegative(xy[1][0])
+        θ = atan(xy[2], -xy[1]) + base_ring(xy[1].poly)(π)
+    else
+        θ = atan(xy[2], xy[1])
+    end
+
+    return r, θ
+end
+
+function polar_from_cartesian(xy::AbstractVector{arb})
+    r = hypot(xy[1], xy[2])
+
+    if contains_zero(xy[2]) && !iszero(xy[2]) && !isnonnegative(xy[1])
+        θ = atan(xy[2], -xy[1]) + parent(xy[1])(π)
+    else
+        θ = atan(xy[2], xy[1])
+    end
+
     return r, θ
 end
 
