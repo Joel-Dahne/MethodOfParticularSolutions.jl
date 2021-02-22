@@ -90,8 +90,6 @@ include("eigenfunction/LinkedEigenfunction.jl")
 include("eigenfunction/CombinedEigenfunction.jl")
 include("eigenfunction/plotting.jl")
 
-include("Payne/PayneEigenfunction.jl")
-
 include("sigma.jl")
 include("enclose.jl")
 include("mps.jl")
@@ -101,8 +99,5 @@ include("trace.jl")
 include("examples/triangles.jl")
 include("examples/denominators.jl")
 include("examples/domains.jl")
-
-include("Payne/validate_nodalline.jl")
-include("Payne/bounded_by.jl")
 
 end # module
