@@ -266,11 +266,8 @@ d, h) = (27, 11, 6)` then they are
    68.2629
    68.2629
 ```
-For the second eigenvalue the value
-```
-    63.20833838
-```
-might be slightly more accurate.
+For the second eigenvalue the value `63.2083359862688427940` might be
+slightly more accurate.
 """
 function example_domain_goal_v1(
     N::Integer = 27,
