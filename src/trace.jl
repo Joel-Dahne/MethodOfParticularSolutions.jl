@@ -19,7 +19,7 @@ function Base.show(io::IO, st::MPSState)
     @printf io "%4d    %4d    %9d    %8d    " st.N st.precision st.optim_prec ArbTools.rel_accuracy_bits(
         st.enclosure,
     )
-    @printf io "%.5f    %26s    %s\n" Float64(st.norm) ArbTools.format_arb(st.maximum, 5) string(
+    @printf io "%.5f    %26s    %s\n" Float64(st.norm) ArbTools.format_arb(st.maximum/st.norm, 5) string(
         st.enclosure,
     )
     return
@@ -27,7 +27,7 @@ end
 
 function Base.show(io::IO, tr::MPSTrace)
     @printf io "   N    Prec     Opt prec    Enc prec    "
-    @printf io "   Norm                       Maximum    Enclosure\n"
+    @printf io "   Norm                  Maximum/Norm    Enclosure\n"
     @printf io "----    ----     --------    --------    "
     @printf io "-------    --------------------------    ---------\n"
     for st in tr.states
