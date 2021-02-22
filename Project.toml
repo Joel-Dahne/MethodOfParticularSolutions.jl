@@ -1,7 +1,7 @@
 name = "MethodOfParticularSolutions"
 uuid = "8ef66b40-dd63-11e9-3096-196784f6a4ee"
 authors = ["Joel Dahne <joel@dahne.eu>"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 ArbTools = "3c5857ab-c5d3-4a72-9f97-b009bfc1bcb8"
