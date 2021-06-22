@@ -1,7 +1,6 @@
-using MethodOfParticularSolutions
-using Nemo
-using Test
-using Printf
+using MethodOfParticularSolutions, Nemo, Printf, Test
 
-include("sphericaltriangle.jl")
-include("lshape.jl")
+@testset "MethodOfParticularSolutions" begin
+    include("sphericaltriangle.jl")
+    include("lshape.jl")
+end
