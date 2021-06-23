@@ -26,8 +26,8 @@
     @test rad < goalradius
 
     if rad < goalradius
-        @printf "radius = %e < %e\n" rad goalradius
+        @printf "radius = %e < %e\n\n" rad goalradius
     else
-        @printf "radius = %e >= %e\n" rad goalradius
+        @printf "radius = %e >= %e\n\n" rad goalradius
     end
 end
