@@ -207,7 +207,7 @@ function (u::CombinedEigenfunction)(
 
     res_per_index = similar(u.us, Vector{T})
     for i in eachindex(u.us)
-        if i in indices
+        if i in indices && !isempty(ks_per_index[i])
             res_per_index[i] =
                 one(λ) .* u.us[i](
                     xy,
