@@ -1,58 +1,13 @@
-function example_domain_H(parent = RealField(precision(BigFloat)))
-    angles =
-        fmpq.([
-            3 // 2,
-            1 // 2,
-            1 // 2,
-            1 // 2,
-            1 // 2,
-            3 // 2,
-            3 // 2,
-            1 // 2,
-            1 // 2,
-            1 // 2,
-            1 // 2,
-            3 // 2,
-        ])
-    vertices = [
-        parent.(v) for v in [
-            (0, 0),
-            (0, 1),
-            (-1, 1),
-            (-1, -2),
-            (0, -2),
-            (0, -1),
-            (1, -1),
-            (1, -2),
-            (2, -2),
-            (2, 1),
-            (1, 1),
-            (1, 0),
-        ]
-    ]
+"""
+    example_domain_ngon(n, parent; lightning = false, linked = false)
 
-    domain = Polygon(angles, vertices, parent)
+Return a domain corresponding to an `n`-gon with radius 1 and a
+corresponding eigenfunction.
 
-    u1 = StandaloneVertexEigenfunction(vertex(domain, 1), fmpq(1 // 2), fmpq(3 // 2))
-    u2 = StandaloneVertexEigenfunction(vertex(domain, 6), fmpq(0), fmpq(3 // 2))
-    u3 = StandaloneVertexEigenfunction(vertex(domain, 7), fmpq(-1 // 2), fmpq(3 // 2))
-    u4 = StandaloneVertexEigenfunction(vertex(domain, 12), fmpq(1), fmpq(3 // 2))
-
-
-    u = CombinedEigenfunction(
-        domain,
-        [u1, u2, u3, u4],
-        us_to_boundary = [
-            setdiff(boundaries(domain), (12, 1)),
-            setdiff(boundaries(domain), (5, 6)),
-            setdiff(boundaries(domain), (6, 7)),
-            setdiff(boundaries(domain), (11, 12)),
-        ],
-    )
-
-    return domain, u
-end
-
+If `lightning` is true then the expansions at the vertices are
+lightning charges, otherwise the are vertex expansions. If `linked` is
+true then use the symmetry of the domain to reduce the complexity.
+"""
 function example_domain_ngon(
     n,
     parent = RealField(precision(BigFloat));
@@ -73,6 +28,7 @@ function example_domain_ngon(
                             vertex(domain, i),
                             i * (1 - θ) + θ * 1 // 2,
                             θ,
+                            stride = 2,
                         ) for i in boundaries(domain)
                     ],
                     excluded_boundaries = [
@@ -102,11 +58,12 @@ function example_domain_ngon(
                             vertex(domain, i),
                             i * (1 - θ) + θ * 1 // 2,
                             θ,
+                            even = true,
                         ) for i in boundaries(domain)
                     ],
                     ones(n),
                 ),
-                StandaloneInteriorEigenfunction(domain, stride = n),
+                StandaloneInteriorEigenfunction(domain, stride = n, even = true),
             ]
 
             us_to_boundary = fill(BitSet([1]), length(us))
@@ -126,7 +83,8 @@ function example_domain_ngon(
         end
     end
 
-    u = CombinedEigenfunction(domain, us, us_to_boundary = us_to_boundary)
+    even_boundaries = ifelse(linked, [1], [0])
+    u = CombinedEigenfunction(domain, us; us_to_boundary, even_boundaries)
 
     return domain, u
 end
@@ -390,7 +348,11 @@ function example_domain_goal_v1(
         end
 
         # Expansion from the center
-        u4 = StandaloneInteriorEigenfunction(SVector(domain.parent(0), domain.parent(0)), stride = 6; even)
+        u4 = StandaloneInteriorEigenfunction(
+            SVector(domain.parent(0), domain.parent(0)),
+            stride = 6;
+            even,
+        )
         order4 = ifelse(even, 1, 2)
 
         # Interior expansions closer to outer boundaries
