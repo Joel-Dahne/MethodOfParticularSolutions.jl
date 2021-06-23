@@ -130,7 +130,11 @@ function (u::StandaloneVertexEigenfunction)(
     # interval [0, 2π). Nemo doesn't implement mod2pi so we just do a
     # partial solution of adding 2π if it's below 0.
     if (T == arb && isnegative(θ)) || (T == arb_series && isnegative(θ[0]))
-        θ += 2parent(θ)(π)
+        if T == arb
+            θ += 2parent(θ)(π)
+        else
+            θ += 2base_ring(parent(θ.poly))(π)
+        end
     end
 
     rsqrtλ = r * sqrt(λ)
