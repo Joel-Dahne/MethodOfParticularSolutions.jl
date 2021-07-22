@@ -45,6 +45,26 @@ anglesdivπ(domain::Polygon) = [angledivπ(domain, i) for i in boundaries(domain
 vertex(domain::Polygon, i::Integer) = domain.vertices[i]
 vertices(domain::Polygon) = domain.vertices
 
+function orientation(domain::Polygon, i::Integer; reversed = false)
+    # Compute the orientation for the first vertex and then use the
+    # angles to get the remaining orientations. Currently we could
+    # compute the orientation directly, but this will be better if we
+    # switch to storing an exact orientation.
+    v = vertex(domain, 2) - vertex(domain, 1)
+    res = atan(v[2], v[1])
+
+    res += (i - 1) * domain.parent(π)
+    for j = 2:i
+        res -= angle(domain, j)
+    end
+
+    if reversed
+        res = 2domain.parent(π) - angle(domain, i) - res
+    end
+
+    return res
+end
+
 function area(domain::Polygon)
     # https://en.wikipedia.org/wiki/Polygon#Area
     A = domain.parent(0)

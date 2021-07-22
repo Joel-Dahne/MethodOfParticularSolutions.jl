@@ -66,10 +66,14 @@ boundaries(domain::TransformedDomain) = boundaries(domain.original)
 angle(domain::TransformedDomain, i::Integer) = angle(domain.original, i)
 angledivπ(domain::TransformedDomain, i::Integer) = angledivπ(domain.original, i)
 angles(domain::TransformedDomain) = angles(domain.original)
-angledivπ(domain::TransformedDomain) = angledivπ(domain.original)
+anglesdivπ(domain::TransformedDomain) = anglesdivπ(domain.original)
 
 vertex(domain::TransformedDomain, i::Integer) = domain.map(vertex(domain.original, i))
 vertices(domain::TransformedDomain) = domain.map.(vertices(domain.original))
+
+orientation(domain::TransformedDomain, i::Integer; reversed = false) =
+    orientation(domain.original, i; reversed) +
+    ifelse(reversed, -domain.rotation, domain.rotation)
 
 center(domain::TransformedDomain) = domain.map(center(domain.original))
 

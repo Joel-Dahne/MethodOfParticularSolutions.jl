@@ -109,6 +109,30 @@ Return all three vertices of the triangle.
 """
 vertices(domain::Triangle) = tuple((vertex(domain, i) for i in boundaries(domain))...)
 
+function orientation(domain::Triangle{T}, i::Integer; reversed = false) where {T}
+    if T == fmpq
+        π = fmpq(1)
+    else
+        π = domain.parent(pi)
+    end
+
+    if i == 1
+        res = T == fmpq ? fmpq(0) : domain.parent(0)
+    elseif i == 2
+        res = π - domain.angles[2]
+    elseif i == 3
+        res = π + domain.angles[1]
+    else
+        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
+    end
+
+    if reversed
+        return 2π - domain.angles[i] - res
+    else
+        return res
+    end
+end
+
 area(domain::Triangle) = vertex(domain, 3)[2] / 2
 
 """
