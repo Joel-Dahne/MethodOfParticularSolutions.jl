@@ -61,18 +61,20 @@ include("utilities.jl")
 include("special-functions.jl")
 
 # Include types for domains and eigenfunctions
-include("domain/domain_types.jl")
+include("domain/types.jl")
 include("eigenfunction/eigenfunction_types.jl")
 
 # Include methods for domains
 include("domain/AbstractDomain.jl")
-include("domain/SphericalTriangle.jl")
-include("domain/LShape.jl")
-include("domain/Triangle.jl")
-include("domain/Polygon.jl")
-include("domain/TransformedDomain.jl")
-include("domain/IntersectedDomain.jl")
-include("domain/plotting.jl")
+# Planar domains
+include("domain/spherical/SphericalTriangle.jl")
+# Spherical domains
+include("domain/planar/Triangle.jl")
+include("domain/planar/Polygon.jl")
+include("domain/planar/LShape.jl")
+include("domain/planar/TransformedDomain.jl")
+include("domain/planar/IntersectedDomain.jl")
+include("domain/planar/plotting.jl")
 
 # Include methods for eigenfunctions
 include("eigenfunction/AbstractEigenfunction.jl")
