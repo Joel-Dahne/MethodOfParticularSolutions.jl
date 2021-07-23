@@ -1,4 +1,5 @@
 @testset "IntersectedDomain" begin
+    has_rational_angles = MethodOfParticularSolutions.has_rational_angles
     angle = MethodOfParticularSolutions.angle
     angledivπ = MethodOfParticularSolutions.angledivπ
     anglesdivπ = MethodOfParticularSolutions.anglesdivπ
@@ -25,6 +26,8 @@
 
     for (exterior, interior, domain) in
         [(exterior1, interior1, domain1), (exterior2, interior2, domain2)]
+        @test has_rational_angles(domain) == ifelse(exterior isa Triangle{fmpq}, true, false)
+
         @test boundaries(domain) == 1:7
 
         @test all(

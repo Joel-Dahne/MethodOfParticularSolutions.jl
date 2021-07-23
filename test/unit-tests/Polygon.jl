@@ -1,4 +1,5 @@
 @testset "Polygon" begin
+    has_rational_angles = MethodOfParticularSolutions.has_rational_angles
     angle = MethodOfParticularSolutions.angle
     angledivπ = MethodOfParticularSolutions.angledivπ
     anglesdivπ = MethodOfParticularSolutions.anglesdivπ
@@ -14,6 +15,8 @@
     domain2 = Polygon(collect(angles(triangle2)), collect(vertices(triangle2)), parent)
 
     for (triangle, domain) in [(triangle1, domain1), (triangle2, domain2)]
+        @test has_rational_angles(domain) == ifelse(triangle isa Triangle{fmpq}, true, false)
+
         @test boundaries(domain) == boundaries(triangle)
 
         @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
@@ -27,7 +30,7 @@
         )
         @test isequal(vertices(domain), collect(vertices(triangle)))
 
-        if triangle isa Triangle{fmpq}
+        if has_rational_angles(domain)
             @test overlaps(
                 orientation(domain, 1),
                 parent(π) * parent(orientation(triangle, 1)),

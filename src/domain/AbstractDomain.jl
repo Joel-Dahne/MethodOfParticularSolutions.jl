@@ -1,4 +1,17 @@
 """
+    has_rational_angles(domain::AbstractDomain)
+
+Return `true` if the angles of `domain` are represented as rational
+multiples of `π`, return `false` otherwise.
+
+Notice that this only considers how the angles are represented, not
+the actual values. The domain could have angles which are rational
+multiples of `π` but are stored as floating points.
+"""
+has_rational_angles(::AbstractDomain{T,<:Union{Rational,fmpq}}) where {T} = true
+has_rational_angles(::AbstractDomain{T,<:Union{AbstractFloat,arb}}) where {T} = false
+
+"""
     boundaries(domain::AbstractDomain)
 
 Return an index set giving the boundaries of the domain.

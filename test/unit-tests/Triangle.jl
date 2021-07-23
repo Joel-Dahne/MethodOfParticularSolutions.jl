@@ -1,4 +1,5 @@
 @testset "Triangle" begin
+    has_rational_angles = MethodOfParticularSolutions.has_rational_angles
     angle = MethodOfParticularSolutions.angle
     angledivπ = MethodOfParticularSolutions.angledivπ
     anglesdivπ = MethodOfParticularSolutions.anglesdivπ
@@ -12,6 +13,8 @@
     domain2 = Triangle(parent(π) / 3, parent(π) / 4, parent)
 
     for domain in [domain1, domain2]
+        @test has_rational_angles(domain) == ifelse(domain isa Triangle{fmpq}, true, false)
+
         @test boundaries(domain) == 1:3
 
         @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
@@ -34,7 +37,7 @@
         @test Float64.(vertex(domain, 3)) ≈
               sinpi(1 // 4) / sinpi(5 // 12) * [cospi(1 // 3), sinpi(1 // 3)]
 
-        if domain isa Triangle{fmpq}
+        if has_rational_angles(domain)
             @test isequal(orientation(domain, 1), fmpq(0))
             @test isequal(orientation(domain, 2), fmpq(3 // 4))
             @test isequal(orientation(domain, 3), fmpq(1 // 3 + 1))
