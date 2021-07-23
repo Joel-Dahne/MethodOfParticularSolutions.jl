@@ -62,6 +62,8 @@ include("special-functions.jl")
 
 # Include types for domains and eigenfunctions
 include("domain/types.jl")
+include("domain/planar/types.jl")
+include("domain/spherical/types.jl")
 include("eigenfunction/eigenfunction_types.jl")
 
 # Include methods for domains
