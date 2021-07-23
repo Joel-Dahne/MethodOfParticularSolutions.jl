@@ -51,6 +51,13 @@ Return the angles for each vertex of the domain.
 angles(domain::AbstractDomain) = [angle(domain, i) for i in vertexindices(domain)]
 
 """
+    vertices(domain::AbstractDomain)
+
+Return all vertices of `domain`.
+"""
+vertices(domain::AbstractDomain) = [vertex(domain, i) for i in vertexindices(domain)]
+
+"""
     area(domain::AbstractDomain)
 
 Return the area of the domain.

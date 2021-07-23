@@ -49,13 +49,6 @@ function vertex(domain::Triangle{T}, i::Integer) where {T}
     end
 end
 
-"""
-    vertices(domain::Triangle)
-
-Return all three vertices of the triangle.
-"""
-vertices(domain::Triangle) = tuple((vertex(domain, i) for i in boundaries(domain))...)
-
 function orientation(domain::Triangle{T}, i::Integer; reversed = false) where {T}
     if T == fmpq
         π = fmpq(1)

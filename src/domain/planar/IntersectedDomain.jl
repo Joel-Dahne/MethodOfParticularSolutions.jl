@@ -81,9 +81,6 @@ function vertex(domain::IntersectedDomain, i::Integer)
     return vertex(d, j)
 end
 
-vertices(domain::IntersectedDomain) =
-    vcat(collect(vertices(domain.exterior)), collect.(vertices.(domain.interiors))...)
-
 function orientation(domain::IntersectedDomain, i::Integer; reversed = false)
     d, j = get_domain_and_boundary(domain, i)
     return orientation(d, j; reversed)

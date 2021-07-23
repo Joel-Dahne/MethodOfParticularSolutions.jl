@@ -67,7 +67,6 @@ boundaries(domain::TransformedDomain) = boundaries(domain.original)
 angle_raw(domain::TransformedDomain, i::Integer) = angle_raw(domain.original, i)
 
 vertex(domain::TransformedDomain, i::Integer) = domain.map(vertex(domain.original, i))
-vertices(domain::TransformedDomain) = domain.map.(vertices(domain.original))
 
 orientation(domain::TransformedDomain, i::Integer; reversed = false) =
     orientation(domain.original, i; reversed) +
