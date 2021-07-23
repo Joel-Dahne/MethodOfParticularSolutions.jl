@@ -1,4 +1,4 @@
-abstract type AbstractSphericalDomain <: AbstractDomain end
+abstract type AbstractSphericalDomain{S,T} <: AbstractDomain{S,T} end
 
 """
     SphericalTriangle((α::arb, β::arb, γ::arb)[, RR::ArbField = RealField(64)])
@@ -14,7 +14,7 @@ abstract type AbstractSphericalDomain <: AbstractDomain end
   boundaries are ordered by which vertex they are opposite of, so
   boundary 1 is opposite of vertex 1.
 """
-struct SphericalTriangle{T<:Union{fmpq,arb}} <: AbstractSphericalDomain
+struct SphericalTriangle{T<:Union{fmpq,arb}} <: AbstractSphericalDomain{arb,T}
     angles::Tuple{T,T,T}
     parent::ArbField
 end
