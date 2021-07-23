@@ -1,5 +1,6 @@
 @testset "Polygon" begin
     has_rational_angles = MethodOfParticularSolutions.has_rational_angles
+    angle_raw = MethodOfParticularSolutions.angle_raw
     angle = MethodOfParticularSolutions.angle
     angledivπ = MethodOfParticularSolutions.angledivπ
     anglesdivπ = MethodOfParticularSolutions.anglesdivπ
@@ -19,6 +20,10 @@
 
         @test vertexindices(domain) == vertexindices(triangle)
         @test boundaries(domain) == boundaries(triangle)
+
+        @test all(
+            isequal(angle_raw(domain, i), angle_raw(triangle, i)) for i in vertexindices(domain)
+        )
 
         @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
         @test all(

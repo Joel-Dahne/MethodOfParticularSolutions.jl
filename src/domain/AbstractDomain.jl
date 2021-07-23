@@ -26,6 +26,15 @@ Return an index set giving the boundaries of the domain.
 boundaries(domain::AbstractDomain)
 
 """
+    angle_raw(domain::AbstractDomain, i::Integer)
+
+Return the angle for vertex `i` of the `domain` in the form it is
+stored. That is, for domains with `has_rational_angles` is `true` it
+returns the rational form without first multiplying with `π`.
+"""
+angle_raw(domain::AbstractDomain, i::Integer)
+
+"""
     area(domain::AbstractDomain)
 
 Return the area of the domain.

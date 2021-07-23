@@ -1,5 +1,6 @@
 @testset "IntersectedDomain" begin
     has_rational_angles = MethodOfParticularSolutions.has_rational_angles
+    angle_raw = MethodOfParticularSolutions.angle_raw
     angle = MethodOfParticularSolutions.angle
     angledivπ = MethodOfParticularSolutions.angledivπ
     anglesdivπ = MethodOfParticularSolutions.anglesdivπ
@@ -30,6 +31,13 @@
 
         @test vertexindices(domain) == 1:7
         @test boundaries(domain) == 1:7
+
+        @test all(
+            isequal(angle_raw(domain, i), angle_raw(exterior, i)) for i in 1:3
+        )
+        @test all(
+            isequal(angle_raw(domain, i + 3), angle_raw(interior, i)) for i in 1:4
+        )
 
         @test all(
             isequal(vertex(domain, i), vertices(domain)[i]) for i in boundaries(domain)

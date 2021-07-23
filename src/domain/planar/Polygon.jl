@@ -34,6 +34,8 @@ end
 vertexindices(domain::Polygon) = 1:length(domain.angles)
 boundaries(domain::Polygon) = 1:length(domain.angles)
 
+angle_raw(domain::Polygon, i::Integer) = domain.angles[i]
+
 angle(domain::Polygon{fmpq}, i::Integer) = domain.parent(π) * domain.angles[i]
 angle(domain::Polygon{arb}, i::Integer) = domain.angles[i]
 
@@ -51,6 +53,8 @@ function orientation(domain::Polygon, i::Integer; reversed = false)
     # angles to get the remaining orientations. Currently we could
     # compute the orientation directly, but this will be better if we
     # switch to storing an exact orientation.
+    # FIXME: This will not be accurate if v[2] contains zero but is
+    # not exactly zero
     v = vertex(domain, 2) - vertex(domain, 1)
     res = atan(v[2], v[1])
 

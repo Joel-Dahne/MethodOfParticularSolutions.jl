@@ -71,6 +71,11 @@ function get_domain_and_boundary(domain::IntersectedDomain, i::Integer)
     throw(ArgumentError("attempt to get boundary $i from a $(typeof(domain))"))
 end
 
+function angle_raw(domain::IntersectedDomain, i::Integer)
+    d, j = get_domain_and_boundary(domain, i)
+    return angle_raw(d, j)
+end
+
 function vertex(domain::IntersectedDomain, i::Integer)
     d, j = get_domain_and_boundary(domain, i)
     return vertex(d, j)

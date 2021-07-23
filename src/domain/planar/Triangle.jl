@@ -21,6 +21,8 @@ end
 vertexindices(::Triangle) = 1:3
 boundaries(::Triangle) = 1:3
 
+angle_raw(domain::Triangle, i::Integer) = domain.angles[i]
+
 """
     angle(domain::Triangle, i::Integer)
 

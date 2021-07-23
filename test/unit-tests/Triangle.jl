@@ -1,5 +1,6 @@
 @testset "Triangle" begin
     has_rational_angles = MethodOfParticularSolutions.has_rational_angles
+    angle_raw = MethodOfParticularSolutions.angle_raw
     angle = MethodOfParticularSolutions.angle
     angledivπ = MethodOfParticularSolutions.angledivπ
     anglesdivπ = MethodOfParticularSolutions.anglesdivπ
@@ -17,6 +18,16 @@
 
         @test vertexindices(domain) == 1:3
         @test boundaries(domain) == 1:3
+
+        if has_rational_angles(domain)
+            @test isequal(angle_raw(domain, 1), fmpq(1 // 3))
+            @test isequal(angle_raw(domain, 2), fmpq(1 // 4))
+            @test isequal(angle_raw(domain, 3), fmpq(5 // 12))
+        else
+            @test Float64(angle_raw(domain, 1)) ≈ π / 3
+            @test Float64(angle_raw(domain, 2)) ≈ π / 4
+            @test Float64(angle_raw(domain, 3)) ≈ 5π / 12
+        end
 
         @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
         @test all(

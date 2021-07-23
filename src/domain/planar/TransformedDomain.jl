@@ -64,6 +64,7 @@ end
 vertexindices(domain::TransformedDomain) = vertexindices(domain.original)
 boundaries(domain::TransformedDomain) = boundaries(domain.original)
 
+angle_raw(domain::TransformedDomain, i::Integer) = angle_raw(domain.original, i)
 angle(domain::TransformedDomain, i::Integer) = angle(domain.original, i)
 angledivπ(domain::TransformedDomain, i::Integer) = angledivπ(domain.original, i)
 angles(domain::TransformedDomain) = angles(domain.original)
