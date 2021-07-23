@@ -36,13 +36,9 @@ boundaries(domain::Polygon) = 1:length(domain.angles)
 
 angle_raw(domain::Polygon, i::Integer) = domain.angles[i]
 
-angle(domain::Polygon{fmpq}, i::Integer) = domain.parent(π) * domain.angles[i]
-angle(domain::Polygon{arb}, i::Integer) = domain.angles[i]
-
 angledivπ(domain::Polygon{fmpq}, i::Integer) = domain.angles[i]
 angledivπ(domain::Polygon{arb}, i::Integer) = domain.angles[i] / domain.parent(π)
 
-angles(domain::Polygon) = [angle(domain, i) for i in boundaries(domain)]
 anglesdivπ(domain::Polygon) = [angledivπ(domain, i) for i in boundaries(domain)]
 
 vertex(domain::Polygon, i::Integer) = domain.vertices[i]

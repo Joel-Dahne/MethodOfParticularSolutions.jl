@@ -24,27 +24,6 @@ boundaries(::Triangle) = 1:3
 angle_raw(domain::Triangle, i::Integer) = domain.angles[i]
 
 """
-    angle(domain::Triangle, i::Integer)
-
-Return the angle for vertex `i` of the triangle.
-"""
-function angle(domain::Triangle{fmpq}, i::Integer)
-    if i ∈ boundaries(domain)
-        return domain.parent(π) * domain.angles[i]
-    else
-        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
-    end
-end
-
-function angle(domain::Triangle{arb}, i::Integer)
-    if i ∈ boundaries(domain)
-        return domain.angles[i]
-    else
-        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
-    end
-end
-
-"""
     angledivπ(domain::Triangle, i::Integer)
 
 Return the angle for vertex `i` of the triangle divided by `π`.
@@ -64,13 +43,6 @@ function angledivπ(domain::Triangle{arb}, i::Integer)
         throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
     end
 end
-
-"""
-    angles(domain::Triangle)
-
-Return the angles of the triangle.
-"""
-angles(domain::Triangle) = tuple((angle(domain, i) for i in boundaries(domain))...)
 
 """
     anglesdivπ(domain::Triangle)

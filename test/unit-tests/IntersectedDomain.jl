@@ -39,6 +39,14 @@
             isequal(angle_raw(domain, i + 3), angle_raw(interior, i)) for i in 1:4
         )
 
+        @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
+        @test all(
+            isequal(angle(domain, i), angle(exterior, i)) for i in 1:3
+        )
+        @test all(
+            isequal(angle(domain, i + 3), angle(interior, i)) for i in 1:4
+        )
+
         @test all(
             isequal(vertex(domain, i), vertices(domain)[i]) for i in boundaries(domain)
         )

@@ -35,6 +35,22 @@ returns the rational form without first multiplying with `π`.
 angle_raw(domain::AbstractDomain, i::Integer)
 
 """
+    angle(domain::AbstractDomain, i::Integer)
+
+Return the angle for vertex `i` of `domain`.
+"""
+angle(domain::AbstractDomain{arb,fmpq}, i::Integer) =
+    domain.parent(π) * angle_raw(domain, i)
+angle(domain::AbstractDomain{arb,arb}, i::Integer) = angle_raw(domain, i)
+
+"""
+    angles(domain::AbstractDomain)
+
+Return the angles for each vertex of the domain.
+"""
+angles(domain::AbstractDomain) = [angle(domain, i) for i in vertexindices(domain)]
+
+"""
     area(domain::AbstractDomain)
 
 Return the area of the domain.
