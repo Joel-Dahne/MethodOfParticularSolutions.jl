@@ -65,8 +65,6 @@ vertexindices(domain::TransformedDomain) = vertexindices(domain.original)
 boundaries(domain::TransformedDomain) = boundaries(domain.original)
 
 angle_raw(domain::TransformedDomain, i::Integer) = angle_raw(domain.original, i)
-angledivπ(domain::TransformedDomain, i::Integer) = angledivπ(domain.original, i)
-anglesdivπ(domain::TransformedDomain) = anglesdivπ(domain.original)
 
 vertex(domain::TransformedDomain, i::Integer) = domain.map(vertex(domain.original, i))
 vertices(domain::TransformedDomain) = domain.map.(vertices(domain.original))

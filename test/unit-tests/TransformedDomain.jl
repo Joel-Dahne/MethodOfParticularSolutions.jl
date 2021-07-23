@@ -2,8 +2,6 @@
     has_rational_angles = MethodOfParticularSolutions.has_rational_angles
     angle_raw = MethodOfParticularSolutions.angle_raw
     angle = MethodOfParticularSolutions.angle
-    angledivπ = MethodOfParticularSolutions.angledivπ
-    anglesdivπ = MethodOfParticularSolutions.anglesdivπ
     vertices = MethodOfParticularSolutions.vertices
     orientation = MethodOfParticularSolutions.orientation
     center = MethodOfParticularSolutions.center
@@ -19,19 +17,18 @@
     domain2 = TransformedDomain(triangle2, parent(π) * rotation, scaling, translation)
 
     for (triangle, domain) in [(triangle1, domain1), (triangle2, domain2)]
-        @test has_rational_angles(domain) == ifelse(triangle isa Triangle{fmpq}, true, false)
+        @test has_rational_angles(domain) ==
+              ifelse(triangle isa Triangle{fmpq}, true, false)
 
         @test vertexindices(domain) == vertexindices(triangle)
         @test boundaries(domain) == boundaries(triangle)
 
         @test all(
-            isequal(angle_raw(domain, i), angle_raw(triangle, i)) for i in vertexindices(domain)
+            isequal(angle_raw(domain, i), angle_raw(triangle, i)) for
+            i in vertexindices(domain)
         )
 
         @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
-        @test all(
-            isequal(angledivπ(domain, i), anglesdivπ(domain)[i]) for i in boundaries(domain)
-        )
         @test isequal(angles(domain), angles(triangle))
 
         @test all(

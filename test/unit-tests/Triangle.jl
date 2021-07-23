@@ -2,8 +2,6 @@
     has_rational_angles = MethodOfParticularSolutions.has_rational_angles
     angle_raw = MethodOfParticularSolutions.angle_raw
     angle = MethodOfParticularSolutions.angle
-    angledivπ = MethodOfParticularSolutions.angledivπ
-    anglesdivπ = MethodOfParticularSolutions.anglesdivπ
     vertices = MethodOfParticularSolutions.vertices
     orientation = MethodOfParticularSolutions.orientation
     center = MethodOfParticularSolutions.center
@@ -30,16 +28,7 @@
         end
 
         @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
-        @test all(
-            isequal(angledivπ(domain, i), anglesdivπ(domain)[i]) for i in boundaries(domain)
-        )
         @test all(isapprox.(Float64.(angles(domain)), [π / 3, π / 4, 5π / 12]))
-
-        if has_rational_angles(domain)
-            @test all(isequal.(anglesdivπ(domain), fmpq.([1 // 3, 1 // 4, 5 // 12])))
-        else
-            @test all(isapprox.(Float64.(anglesdivπ(domain)), [1 // 3, 1 // 4, 5 // 12]))
-        end
 
         @test all(
             isequal(vertex(domain, i), vertices(domain)[i]) for i in boundaries(domain)

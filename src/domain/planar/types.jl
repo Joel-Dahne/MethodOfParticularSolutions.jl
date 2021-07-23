@@ -71,7 +71,8 @@ end
 Represents a transformation of `domain` corresponding of a rotation,
 a uniform scaling and a translation (in that order).
 """
-struct TransformedDomain{T<:Union{fmpq,arb},U<:AbstractPlanarDomain} <: AbstractPlanarDomain{arb,T}
+struct TransformedDomain{T<:Union{fmpq,arb},U<:AbstractPlanarDomain} <:
+       AbstractPlanarDomain{arb,T}
     original::U
     rotation::T
     scaling::arb

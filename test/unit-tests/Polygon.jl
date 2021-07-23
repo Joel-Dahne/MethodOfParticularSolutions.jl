@@ -2,8 +2,6 @@
     has_rational_angles = MethodOfParticularSolutions.has_rational_angles
     angle_raw = MethodOfParticularSolutions.angle_raw
     angle = MethodOfParticularSolutions.angle
-    angledivπ = MethodOfParticularSolutions.angledivπ
-    anglesdivπ = MethodOfParticularSolutions.anglesdivπ
     vertices = MethodOfParticularSolutions.vertices
     orientation = MethodOfParticularSolutions.orientation
     center = MethodOfParticularSolutions.center
@@ -11,24 +9,27 @@
     parent = RealField(64)
 
     triangle1 = Triangle(fmpq(1 // 3), fmpq(1 // 4), parent)
-    domain1 = Polygon(collect(anglesdivπ(triangle1)), collect(vertices(triangle1)), parent)
+    domain1 = Polygon(
+        [angle_raw(triangle1, i) for i = 1:3],
+        collect(vertices(triangle1)),
+        parent,
+    )
     triangle2 = Triangle(parent(π) / 3, parent(π) / 4, parent)
     domain2 = Polygon(collect(angles(triangle2)), collect(vertices(triangle2)), parent)
 
     for (triangle, domain) in [(triangle1, domain1), (triangle2, domain2)]
-        @test has_rational_angles(domain) == ifelse(triangle isa Triangle{fmpq}, true, false)
+        @test has_rational_angles(domain) ==
+              ifelse(triangle isa Triangle{fmpq}, true, false)
 
         @test vertexindices(domain) == vertexindices(triangle)
         @test boundaries(domain) == boundaries(triangle)
 
         @test all(
-            isequal(angle_raw(domain, i), angle_raw(triangle, i)) for i in vertexindices(domain)
+            isequal(angle_raw(domain, i), angle_raw(triangle, i)) for
+            i in vertexindices(domain)
         )
 
         @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
-        @test all(
-            isequal(angledivπ(domain, i), anglesdivπ(domain)[i]) for i in boundaries(domain)
-        )
         @test isequal(angles(domain), collect(angles(triangle)))
 
         @test all(

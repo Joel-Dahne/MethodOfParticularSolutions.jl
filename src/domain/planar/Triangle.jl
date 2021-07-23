@@ -24,34 +24,6 @@ boundaries(::Triangle) = 1:3
 angle_raw(domain::Triangle, i::Integer) = domain.angles[i]
 
 """
-    angledivπ(domain::Triangle, i::Integer)
-
-Return the angle for vertex `i` of the triangle divided by `π`.
-"""
-function angledivπ(domain::Triangle{fmpq}, i::Integer)
-    if i ∈ boundaries(domain)
-        return domain.angles[i]
-    else
-        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
-    end
-end
-
-function angledivπ(domain::Triangle{arb}, i::Integer)
-    if i ∈ boundaries(domain)
-        return domain.angles[i] / domain.parent(π)
-    else
-        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
-    end
-end
-
-"""
-    anglesdivπ(domain::Triangle)
-
-Return the angles of the triangle divided by `π`.
-"""
-anglesdivπ(domain::Triangle) = tuple((angledivπ(domain, i) for i in boundaries(domain))...)
-
-"""
     vertex(domain::Triangle, i::Integer)
 
 Return the Cartesian coordinates of vertex `i` of the triangle.
@@ -67,9 +39,9 @@ function vertex(domain::Triangle{T}, i::Integer) where {T}
             s, c = sincos(angle(domain, 1))
         else
             x =
-                sinpi(angledivπ(domain, 2), domain.parent) /
-                sinpi(angledivπ(domain, 3), domain.parent)
-            s, c = sincospi(angledivπ(domain, 1), domain.parent)
+                sinpi(angle_raw(domain, 2), domain.parent) /
+                sinpi(angle_raw(domain, 3), domain.parent)
+            s, c = sincospi(angle_raw(domain, 1), domain.parent)
         end
         return SVector(c * x, s * x)
     else
