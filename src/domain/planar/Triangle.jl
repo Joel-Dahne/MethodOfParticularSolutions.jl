@@ -18,6 +18,7 @@ function Base.show(io::IO, domain::Triangle{arb})
     )
 end
 
+vertexindices(::Triangle) = 1:3
 boundaries(::Triangle) = 1:3
 
 """

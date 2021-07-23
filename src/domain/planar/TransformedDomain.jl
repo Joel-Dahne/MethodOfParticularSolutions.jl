@@ -61,6 +61,7 @@ function Base.getproperty(domain::TransformedDomain{T}, name::Symbol) where {T}
     end
 end
 
+vertexindices(domain::TransformedDomain) = vertexindices(domain.original)
 boundaries(domain::TransformedDomain) = boundaries(domain.original)
 
 angle(domain::TransformedDomain, i::Integer) = angle(domain.original, i)

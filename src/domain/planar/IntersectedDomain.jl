@@ -31,6 +31,16 @@ function Base.getproperty(domain::IntersectedDomain, name::Symbol)
     end
 end
 
+exterior_vertexindices(domain::IntersectedDomain) = vertexindices(domain.exterior)
+
+function interior_vertexindices(domain::IntersectedDomain)
+    vertexindices_exterior = vertexindices(domain.exterior)
+    vertexindices_interior = vertexindices.(domain.interiors)
+    return (1:sum(length.(vertexindices_interior))) .+ maximum(vertexindices_exterior)
+end
+
+vertexindices(domain::IntersectedDomain) =
+    1:(length(exterior_vertexindices(domain))+length(interior_vertexindices(domain)))
 
 exterior_boundaries(domain::IntersectedDomain) = boundaries(domain.exterior)
 

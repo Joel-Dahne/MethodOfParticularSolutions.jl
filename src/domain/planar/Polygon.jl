@@ -31,6 +31,7 @@ function Base.show(io::IO, domain::Polygon)
     )
 end
 
+vertexindices(domain::Polygon) = 1:length(domain.angles)
 boundaries(domain::Polygon) = 1:length(domain.angles)
 
 angle(domain::Polygon{fmpq}, i::Integer) = domain.parent(π) * domain.angles[i]

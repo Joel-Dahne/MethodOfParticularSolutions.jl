@@ -16,6 +16,7 @@ using Printf
 using RecipesBase
 
 export AbstractDomain,
+    vertexindices,
     boundaries,
     area,
     boundary_parameterization,

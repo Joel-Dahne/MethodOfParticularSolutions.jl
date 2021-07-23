@@ -12,6 +12,13 @@ has_rational_angles(::AbstractDomain{T,<:Union{Rational,fmpq}}) where {T} = true
 has_rational_angles(::AbstractDomain{T,<:Union{AbstractFloat,arb}}) where {T} = false
 
 """
+    vertexindices(domain::AbstractDomain)
+
+Return an index set giving the vertices of the domain.
+"""
+vertexindices(domain::AbstractDomain)
+
+"""
     boundaries(domain::AbstractDomain)
 
 Return an index set giving the boundaries of the domain.

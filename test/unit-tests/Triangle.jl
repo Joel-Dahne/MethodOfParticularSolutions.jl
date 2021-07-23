@@ -15,6 +15,7 @@
     for domain in [domain1, domain2]
         @test has_rational_angles(domain) == ifelse(domain isa Triangle{fmpq}, true, false)
 
+        @test vertexindices(domain) == 1:3
         @test boundaries(domain) == 1:3
 
         @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
@@ -23,7 +24,7 @@
         )
         @test all(isapprox.(Float64.(angles(domain)), [π / 3, π / 4, 5π / 12]))
 
-        if domain isa Triangle{fmpq}
+        if has_rational_angles(domain)
             @test all(isequal.(anglesdivπ(domain), fmpq.([1 // 3, 1 // 4, 5 // 12])))
         else
             @test all(isapprox.(Float64.(anglesdivπ(domain)), [1 // 3, 1 // 4, 5 // 12]))

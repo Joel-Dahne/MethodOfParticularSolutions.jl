@@ -17,6 +17,7 @@
     for (triangle, domain) in [(triangle1, domain1), (triangle2, domain2)]
         @test has_rational_angles(domain) == ifelse(triangle isa Triangle{fmpq}, true, false)
 
+        @test vertexindices(domain) == vertexindices(triangle)
         @test boundaries(domain) == boundaries(triangle)
 
         @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
