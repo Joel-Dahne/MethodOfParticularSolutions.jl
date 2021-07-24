@@ -3,6 +3,7 @@
     angle_raw = MethodOfParticularSolutions.angle_raw
     angle = MethodOfParticularSolutions.angle
     vertices = MethodOfParticularSolutions.vertices
+    orientation_raw = MethodOfParticularSolutions.orientation_raw
     orientation = MethodOfParticularSolutions.orientation
     center = MethodOfParticularSolutions.center
 
@@ -39,24 +40,31 @@
               sinpi(1 // 4) / sinpi(5 // 12) * [cospi(1 // 3), sinpi(1 // 3)]
 
         if has_rational_angles(domain)
-            @test isequal(orientation(domain, 1), fmpq(0))
-            @test isequal(orientation(domain, 2), fmpq(3 // 4))
-            @test isequal(orientation(domain, 3), fmpq(1 // 3 + 1))
-            @test isequal(orientation(domain, 1, reversed = true), fmpq(5 // 3))
-            @test isequal(orientation(domain, 2, reversed = true), fmpq(1))
+            @test isequal(orientation_raw(domain, 1), fmpq(0))
+            @test isequal(orientation_raw(domain, 2), fmpq(3 // 4))
+            @test isequal(orientation_raw(domain, 3), fmpq(1 // 3 + 1))
+            @test isequal(orientation_raw(domain, 1, reversed = true), fmpq(5 // 3))
+            @test isequal(orientation_raw(domain, 2, reversed = true), fmpq(1))
             @test isequal(
-                orientation(domain, 3, reversed = true),
+                orientation_raw(domain, 3, reversed = true),
                 fmpq(1 - 1 // 3 - 5 // 12),
             )
         else
-            @test Float64(orientation(domain, 1)) ≈ 0
-            @test Float64(orientation(domain, 2)) ≈ π * 3 // 4
-            @test Float64(orientation(domain, 3)) ≈ π * (1 // 3 + 1)
-            @test Float64(orientation(domain, 1, reversed = true)) ≈ π * 5 // 3
-            @test Float64(orientation(domain, 2, reversed = true)) ≈ π
-            @test Float64(orientation(domain, 3, reversed = true)) ≈
+            @test Float64(orientation_raw(domain, 1)) ≈ 0
+            @test Float64(orientation_raw(domain, 2)) ≈ π * 3 // 4
+            @test Float64(orientation_raw(domain, 3)) ≈ π * (1 // 3 + 1)
+            @test Float64(orientation_raw(domain, 1, reversed = true)) ≈ π * 5 // 3
+            @test Float64(orientation_raw(domain, 2, reversed = true)) ≈ π
+            @test Float64(orientation_raw(domain, 3, reversed = true)) ≈
                   π * (1 - 1 // 3 - 5 // 12)
         end
+
+        @test Float64(orientation(domain, 1)) ≈ 0
+        @test Float64(orientation(domain, 2)) ≈ π * 3 // 4
+        @test Float64(orientation(domain, 3)) ≈ π * (1 // 3 + 1)
+        @test Float64(orientation(domain, 1, reversed = true)) ≈ π * 5 // 3
+        @test Float64(orientation(domain, 2, reversed = true)) ≈ π
+        @test Float64(orientation(domain, 3, reversed = true)) ≈ π * (1 - 1 // 3 - 5 // 12)
 
         @test Float64(area(domain)) ≈ sqrt(3) / 2(1 + sqrt(3))
 

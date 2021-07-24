@@ -1,62 +1,59 @@
-function StandaloneVertexEigenfunction(
-    domain::Triangle{T},
+StandaloneVertexEigenfunction(
+    domain::AbstractPlanarDomain{S,T},
+    i::Integer;
+    stride::Integer = 1,
+    offset::Integer = 0,
+    reversed::Bool = false,
+    outside::Bool = false,
+) where {S,T} =
+    StandaloneVertexEigenfunction{S,T}(domain, i; stride, offset, reversed, outside)
+
+function StandaloneVertexEigenfunction{S,T}(
+    domain::AbstractPlanarDomain,
     i::Integer;
     stride::Integer = 1,
     offset::Integer = 0,
     reversed::Bool = false,
     outside = false,
-) where {T<:Union{arb,fmpq}}
-    i ∈ boundaries(domain) ||
-        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
+) where {S,T}
+    if T <: Union{Rational,fmpq} && !has_rational_angles(domain)
+        throw(
+            ErrorException(
+                "can't construct an eigenfunction with rational angles from a domain with non-rational angles",
+            ),
+        )
+    end
 
-    θ = domain.angles[i]
-
-    if i == 1
-        orientation = zero(θ)
-    elseif i == 2
-        orientation = ifelse(T == arb, domain.parent(π), 1) - θ
-    elseif i == 3
-        orientation = 2ifelse(T == arb, domain.parent(π), 1) - domain.angles[2] - θ
+    if T <: Union{AbstractFloat,arb} && has_rational_angles(domain)
+        θ = convert(T, angle(domain, i))
+        orient = convert(T, orientation(domain, i))
+    else
+        θ = convert(T, angle_raw(domain, i))
+        orient = convert(T, orientation_raw(domain, i))
     end
 
     if outside
-        orientation += θ
-        θ = ifelse(T == arb, 2domain.parent(π), 2) - θ
+        orient += θ
+        if has_rational_angles(domain)
+            θ = 2 - θ
+        else
+            if S == arb
+                θ = 2domain.parent(π) - θ
+            else
+                θ = 2convert(T, π) - θ
+            end
+        end
     end
 
     return StandaloneVertexEigenfunction(
         vertex(domain, i),
-        orientation,
+        orient,
         θ;
         stride,
         offset,
         reversed,
         domain.parent,
     )
-end
-
-function StandaloneVertexEigenfunction(
-    domain::TransformedDomain,
-    i::Integer;
-    stride::Integer = 1,
-    offset::Integer = 0,
-    reversed::Bool = false,
-    outside = false,
-)
-    u = StandaloneVertexEigenfunction(domain.original, i; stride, reversed, outside)
-    # FIXME: This only works if u.θ::arb or if u.θ and
-    # domain.orientation both are fmpq.
-    u = StandaloneVertexEigenfunction(
-        domain.map(u.vertex),
-        u.orientation + domain.rotation,
-        u.θ;
-        stride,
-        offset,
-        reversed,
-        domain.parent,
-    )
-
-    return u
 end
 
 function Base.show(io::IO, u::StandaloneVertexEigenfunction)
@@ -79,8 +76,10 @@ end
 
 Return `k*θ` as an `arb`, the parameter used for the Bessel function.
 """
-nu(u::StandaloneVertexEigenfunction{fmpq}, k::Integer = 1) = u.parent(k * inv(u.θ))
-nu(u::StandaloneVertexEigenfunction{arb}, k::Integer = 1) = u.parent(k * u.parent(π) / u.θ)
+nu(u::StandaloneVertexEigenfunction{T,fmpq}, k::Integer = 1) where {T} =
+    u.parent(k * inv(u.θ))
+nu(u::StandaloneVertexEigenfunction{T,arb}, k::Integer = 1) where {T} =
+    u.parent(k * u.parent(π) / u.θ)
 
 """
     coordinate_transformation(u::StandaloneVertexEigenfunction, xy::AbstractVector)
@@ -91,16 +90,16 @@ that `u.vertex` is put at the origin and rotated `u.orientation`
 clockwise.
 """
 function coordinate_transformation(
-    u::StandaloneVertexEigenfunction{T},
+    u::StandaloneVertexEigenfunction{T,S},
     xy::AbstractVector,
-) where {T<:Union{arb,fmpq}}
-    if T == fmpq
+) where {T,S}
+    if S == fmpq
         if u.reversed
             s, c = sincospi(-u.orientation - u.θ, u.parent)
         else
             s, c = sincospi(-u.orientation, u.parent)
         end
-    elseif T == arb
+    elseif S == arb
         s, c = sincos(-u.orientation)
     end
     M = SMatrix{2,2}(c, s, -s, c)

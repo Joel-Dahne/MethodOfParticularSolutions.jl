@@ -70,7 +70,6 @@ include("eigenfunction/eigenfunction_types.jl")
 # Include methods for domains
 include("domain/AbstractDomain.jl")
 # Planar domains
-include("domain/planar/AbstractPlanarDomain.jl")
 include("domain/planar/Triangle.jl")
 include("domain/planar/Polygon.jl")
 include("domain/planar/LShape.jl")

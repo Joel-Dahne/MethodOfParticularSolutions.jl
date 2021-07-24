@@ -41,32 +41,33 @@ end
 ### Planar eigenfunctions
 ###
 
-struct StandaloneVertexEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEigenfunction
-    vertex::SVector{2,arb}
-    orientation::T
-    θ::T
+struct StandaloneVertexEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmpq,arb}} <:
+       AbstractPlanarEigenfunction
+    vertex::SVector{2,T}
+    orientation::S
+    θ::S
     stride::Int
     offset::Int
     reversed::Bool
-    coefficients::Vector{arb}
+    coefficients::Vector{T}
     parent::ArbField
 
     function StandaloneVertexEigenfunction(
         vertex::SVector{2,arb},
-        orientation::T,
-        θ::T;
+        orientation::S,
+        θ::S;
         stride::Integer = 1,
         offset::Integer = 0,
         reversed::Bool = false,
         parent::ArbField = parent(vertex[1]),
-    ) where {T<:Union{Rational,arb,fmpq}}
-        if T == fmpq || T <: Rational
+    ) where {S<:Union{Rational,arb,fmpq}}
+        if S == fmpq || S <: Rational
             orientation = fmpq(orientation)
-            S = fmpq
+            U = fmpq
         else
-            S = arb
+            U = arb
         end
-        return new{S}(vertex, orientation, θ, stride, offset, reversed, arb[], parent)
+        return new{arb,U}(vertex, orientation, θ, stride, offset, reversed, arb[], parent)
     end
 end
 

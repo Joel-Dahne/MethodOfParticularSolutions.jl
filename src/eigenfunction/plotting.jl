@@ -1,7 +1,7 @@
-function eigenfunction_plotdata(u::StandaloneVertexEigenfunction{T}) where {T}
+function eigenfunction_plotdata(u::StandaloneVertexEigenfunction{T,S}) where {T,S}
     v = u.vertex
-    orientation = ifelse(T == arb, u.orientation, u.parent(u.orientation) * u.parent(π))
-    θ = ifelse(T == arb, u.θ, u.parent(u.θ) * u.parent(π))
+    orientation = ifelse(S == arb, u.orientation, u.parent(u.orientation) * u.parent(π))
+    θ = ifelse(S == arb, u.θ, u.parent(u.θ) * u.parent(π))
 
     vertex = (Float64[u.vertex[1]], Float64[u.vertex[2]])
     edges = begin

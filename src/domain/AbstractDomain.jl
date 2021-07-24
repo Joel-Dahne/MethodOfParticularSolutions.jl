@@ -51,6 +51,36 @@ Return the angles for each vertex of the domain.
 angles(domain::AbstractDomain) = [angle(domain, i) for i in vertexindices(domain)]
 
 """
+    orientation_raw(domain::AbstractDomain, i::Integer; reversed = false)
+
+Return the orientation of the vertex `i` of the domain in the form it
+is stored. That is, for domains with `has_rational_angles` is `true`
+it returns the rational form without first multiplying with `π`.
+
+The `reversed` argument works the same as for [`orientation`](@ref).
+
+See also [`angle_raw`](@ref).
+"""
+orientation_raw(domain::AbstractPlanarDomain, i::Integer; reversed = false)
+
+"""
+    orientation(domain::AbstractDomain, i::Integer; reversed = false)
+
+Return the orientation of the vertex `i` of the domain.
+
+For planar domains this is the angle when going in positive direction
+from the x-axis until hitting the outside boundary of the domain at
+the vertex.
+
+If `reversed = false` then instead compute the angle going in the
+negative direction.
+"""
+orientation(domain::AbstractDomain{arb,fmpq}, i::Integer; reversed = false) =
+    domain.parent(π) * orientation_raw(domain, i; reversed)
+orientation(domain::AbstractDomain{arb,arb}, i::Integer; reversed = false) =
+    orientation_raw(domain, i; reversed)
+
+"""
     vertices(domain::AbstractDomain)
 
 Return all vertices of `domain`.

@@ -39,7 +39,29 @@ angle_raw(domain::Polygon, i::Integer) = domain.angles[i]
 vertex(domain::Polygon, i::Integer) = domain.vertices[i]
 vertices(domain::Polygon) = domain.vertices
 
-function orientation(domain::Polygon, i::Integer; reversed = false)
+function orientation_raw(domain::Polygon{arb}, i::Integer; reversed = false)
+    # Compute the orientation for the first vertex and then use the
+    # angles to get the remaining orientations. Currently we could
+    # compute the orientation directly, but this will be better if we
+    # switch to storing an exact orientation.
+    # FIXME: This will not be accurate if v[2] contains zero but is
+    # not exactly zero
+    v = vertex(domain, 2) - vertex(domain, 1)
+    res = atan(v[2], v[1])
+
+    res += (i - 1) * domain.parent(π)
+    for j = 2:i
+        res -= angle(domain, j)
+    end
+
+    if reversed
+        res = 2domain.parent(π) - angle(domain, i) - res
+    end
+
+    return res
+end
+
+function orientation(domain::Polygon{fmpq}, i::Integer; reversed = false)
     # Compute the orientation for the first vertex and then use the
     # angles to get the remaining orientations. Currently we could
     # compute the orientation directly, but this will be better if we

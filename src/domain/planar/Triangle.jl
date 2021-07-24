@@ -49,7 +49,7 @@ function vertex(domain::Triangle{T}, i::Integer) where {T}
     end
 end
 
-function orientation(domain::Triangle{T}, i::Integer; reversed = false) where {T}
+function orientation_raw(domain::Triangle{T}, i::Integer; reversed = false) where {T}
     if T == fmpq
         π = fmpq(1)
     else
@@ -59,15 +59,15 @@ function orientation(domain::Triangle{T}, i::Integer; reversed = false) where {T
     if i == 1
         res = T == fmpq ? fmpq(0) : domain.parent(0)
     elseif i == 2
-        res = π - domain.angles[2]
+        res = π - angle_raw(domain, 2)
     elseif i == 3
-        res = π + domain.angles[1]
+        res = π + angle_raw(domain, 1)
     else
         throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
     end
 
     if reversed
-        return 2π - domain.angles[i] - res
+        return 2π - angle_raw(domain, i) - res
     else
         return res
     end

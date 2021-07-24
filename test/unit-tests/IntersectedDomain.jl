@@ -3,6 +3,7 @@
     angle_raw = MethodOfParticularSolutions.angle_raw
     angle = MethodOfParticularSolutions.angle
     vertices = MethodOfParticularSolutions.vertices
+    orientation_raw = MethodOfParticularSolutions.orientation_raw
     orientation = MethodOfParticularSolutions.orientation
     center = MethodOfParticularSolutions.center
 
@@ -44,20 +45,41 @@
         @test all(isequal(vertex(domain, i), vertex(exterior, i)) for i = 1:3)
         @test all(isequal(vertex(domain, i + 3), vertex(interior, i)) for i = 1:4)
 
+        @test all(
+            isequal(orientation_raw(domain, i), orientation_raw(exterior, i)) for i = 1:3
+        )
+        # TODO: Not implemented for rational polygons
+        #@test all(isequal(orientation_raw(domain, i + 3), orientation_raw(interior, i)) for i = 1:4)
+        @test all(
+            isequal(
+                orientation_raw(domain, i, reversed = true),
+                orientation_raw(exterior, i, reversed = true),
+            ) for i = 1:3
+        )
+        # TODO: Not implemented for rational polygons
+        #@test all(
+        #    isequal(
+        #        orientation_raw(domain, i + 3, reversed = true),
+        #        orientation_raw(interior, i, reversed = true),
+        #    ) for i = 1:4
+        #)
+
         @test all(isequal(orientation(domain, i), orientation(exterior, i)) for i = 1:3)
-        @test all(isequal(orientation(domain, i + 3), orientation(interior, i)) for i = 1:4)
+        # TODO: Not implemented for rational polygons
+        #@test all(isequal(orientation(domain, i + 3), orientation(interior, i)) for i = 1:4)
         @test all(
             isequal(
                 orientation(domain, i, reversed = true),
                 orientation(exterior, i, reversed = true),
             ) for i = 1:3
         )
-        @test all(
-            isequal(
-                orientation(domain, i + 3, reversed = true),
-                orientation(interior, i, reversed = true),
-            ) for i = 1:4
-        )
+        # TODO: Not implemented for rational polygons
+        #@test all(
+        #    isequal(
+        #        orientation(domain, i + 3, reversed = true),
+        #        orientation(interior, i, reversed = true),
+        #    ) for i = 1:4
+        #)
 
         @test isequal(area(domain), area(exterior) - area(interior))
 

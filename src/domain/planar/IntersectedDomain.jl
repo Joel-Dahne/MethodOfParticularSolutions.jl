@@ -81,9 +81,9 @@ function vertex(domain::IntersectedDomain, i::Integer)
     return vertex(d, j)
 end
 
-function orientation(domain::IntersectedDomain, i::Integer; reversed = false)
+function orientation_raw(domain::IntersectedDomain, i::Integer; reversed = false)
     d, j = get_domain_and_boundary(domain, i)
-    return orientation(d, j; reversed)
+    return orientation_raw(d, j; reversed)
 end
 
 center(domain::IntersectedDomain) = center(domain.exterior)

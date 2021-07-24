@@ -3,6 +3,7 @@
     angle_raw = MethodOfParticularSolutions.angle_raw
     angle = MethodOfParticularSolutions.angle
     vertices = MethodOfParticularSolutions.vertices
+    orientation_raw = MethodOfParticularSolutions.orientation_raw
     orientation = MethodOfParticularSolutions.orientation
     center = MethodOfParticularSolutions.center
 
@@ -46,45 +47,54 @@
         end
 
         if has_rational_angles(domain)
-            @test isequal(orientation(domain, 1), orientation(triangle, 1) + rotation)
-            @test isequal(orientation(domain, 2), orientation(triangle, 2) + rotation)
-            @test isequal(orientation(domain, 3), orientation(triangle, 3) + rotation)
             @test isequal(
-                orientation(domain, 1, reversed = true),
-                orientation(triangle, 1, reversed = true) - rotation,
+                orientation_raw(domain, 1),
+                orientation_raw(triangle, 1) + rotation,
             )
             @test isequal(
-                orientation(domain, 2, reversed = true),
-                orientation(triangle, 2, reversed = true) - rotation,
+                orientation_raw(domain, 2),
+                orientation_raw(triangle, 2) + rotation,
             )
             @test isequal(
-                orientation(domain, 3, reversed = true),
-                orientation(triangle, 3, reversed = true) - rotation,
+                orientation_raw(domain, 3),
+                orientation_raw(triangle, 3) + rotation,
+            )
+            @test isequal(
+                orientation_raw(domain, 1, reversed = true),
+                orientation_raw(triangle, 1, reversed = true) - rotation,
+            )
+            @test isequal(
+                orientation_raw(domain, 2, reversed = true),
+                orientation_raw(triangle, 2, reversed = true) - rotation,
+            )
+            @test isequal(
+                orientation_raw(domain, 3, reversed = true),
+                orientation_raw(triangle, 3, reversed = true) - rotation,
             )
         else
             @test overlaps(
-                orientation(domain, 1),
-                orientation(triangle, 1) + parent(π) * rotation,
+                orientation_raw(domain, 1),
+                orientation_raw(triangle, 1) + parent(π) * rotation,
             )
             @test overlaps(
-                orientation(domain, 2),
-                orientation(triangle, 2) + parent(π) * rotation,
+                orientation_raw(domain, 2),
+                orientation_raw(triangle, 2) + parent(π) * rotation,
             )
             @test overlaps(
-                orientation(domain, 3),
-                orientation(triangle, 3) + parent(π) * rotation,
+                orientation_raw(domain, 3),
+                orientation_raw(triangle, 3) + parent(π) * rotation,
             )
             @test overlaps(
-                orientation(domain, 1, reversed = true),
-                orientation(triangle, 1, reversed = true) - parent(π) * rotation,
+                orientation_raw(domain, 1, reversed = true),
+                orientation_raw(triangle, 1, reversed = true) - parent(π) * rotation,
             )
             @test overlaps(
-                orientation(domain, 2, reversed = true),
-                orientation(triangle, 2, reversed = true) - parent(π) * rotation,
+                orientation_raw(domain, 2, reversed = true),
+                orientation_raw(triangle, 2, reversed = true) - parent(π) * rotation,
             )
             @test overlaps(
-                orientation(domain, 3, reversed = true),
-                orientation(triangle, 3, reversed = true) - parent(π) * rotation,
+                orientation_raw(domain, 3, reversed = true),
+                orientation_raw(triangle, 3, reversed = true) - parent(π) * rotation,
             )
         end
 

@@ -68,8 +68,8 @@ angle_raw(domain::TransformedDomain, i::Integer) = angle_raw(domain.original, i)
 
 vertex(domain::TransformedDomain, i::Integer) = domain.map(vertex(domain.original, i))
 
-orientation(domain::TransformedDomain, i::Integer; reversed = false) =
-    orientation(domain.original, i; reversed) +
+orientation_raw(domain::TransformedDomain, i::Integer; reversed = false) =
+    orientation_raw(domain.original, i; reversed) +
     ifelse(reversed, -domain.rotation, domain.rotation)
 
 center(domain::TransformedDomain) = domain.map(center(domain.original))
