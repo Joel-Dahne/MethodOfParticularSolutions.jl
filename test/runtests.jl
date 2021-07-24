@@ -6,6 +6,9 @@ using MethodOfParticularSolutions, Nemo, Printf, Test
         include("unit-tests/Polygon.jl")
         include("unit-tests/TransformedDomain.jl")
         include("unit-tests/IntersectedDomain.jl")
+
+        include("unit-tests/StandaloneVertexEigenfunction.jl")
+        include("unit-tests/StandaloneLightningEigenfunction.jl")
     end
 
     @testset "end-to-end-tests" begin

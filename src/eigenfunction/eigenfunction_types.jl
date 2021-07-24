@@ -41,33 +41,51 @@ end
 ### Planar eigenfunctions
 ###
 
-struct StandaloneVertexEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmpq,arb}} <:
-       AbstractPlanarEigenfunction
-    vertex::SVector{2,T}
-    orientation::S
-    θ::S
+struct StandaloneVertexEigenfunction{
+    S<:Union{AbstractFloat,arb},
+    T<:Union{AbstractFloat,fmpq,Rational,arb},
+} <: AbstractPlanarEigenfunction
+    vertex::SVector{2,S}
+    orientation::T
+    θ::T
     stride::Int
     offset::Int
     reversed::Bool
-    coefficients::Vector{T}
-    parent::ArbField
+    coefficients::Vector{S}
+    parent::Union{ArbField,Nothing}
 
     function StandaloneVertexEigenfunction(
-        vertex::SVector{2,arb},
-        orientation::S,
-        θ::S;
+        vertex::AbstractVector{S},
+        orientation::T,
+        θ::T;
         stride::Integer = 1,
         offset::Integer = 0,
         reversed::Bool = false,
-        parent::ArbField = parent(vertex[1]),
-    ) where {S<:Union{Rational,arb,fmpq}}
-        if S == fmpq || S <: Rational
-            orientation = fmpq(orientation)
+        parent::Union{ArbField,Nothing} = eltype(vertex) == arb ? parent(vertex[1]) :
+                                          nothing,
+    ) where {S<:Union{AbstractFloat,arb},T<:Union{AbstractFloat,Rational,arb,fmpq}}
+        # Prefer fmpq over Rational if S is arb
+        if S == arb && T <: Rational
             U = fmpq
+            orientation = fmpq(orientation)
+            θ = fmpq(θ)
         else
-            U = arb
+            U = T
         end
-        return new{arb,U}(vertex, orientation, θ, stride, offset, reversed, arb[], parent)
+        return new{S,U}(vertex, orientation, θ, stride, offset, reversed, [], parent)
+    end
+
+    function StandaloneVertexEigenfunction{S,T}(
+        vertex::AbstractVector,
+        orientation::T,
+        θ::T;
+        stride::Integer = 1,
+        offset::Integer = 0,
+        reversed::Bool = false,
+        parent::Union{ArbField,Nothing} = eltype(vertex) == arb ? parent(vertex[1]) :
+                                          nothing,
+    ) where {S,T}
+        return new{S,T}(vertex, orientation, θ, stride, offset, reversed, [], parent)
     end
 end
 
@@ -114,83 +132,74 @@ struct StandaloneInteriorEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEige
     end
 end
 
-struct StandaloneLightningEigenfunction{T<:Union{AbstractFloat,arb},S<:Union{fmpq,arb}} <:
-       AbstractPlanarEigenfunction
-    vertex::SVector{2,T}
-    orientation::S
-    θ::S
-    l::T
-    σ::T
+struct StandaloneLightningEigenfunction{
+    S<:Union{AbstractFloat,arb},
+    T<:Union{AbstractFloat,arb,Rational,fmpq},
+} <: AbstractPlanarEigenfunction
+    vertex::SVector{2,S}
+    orientation::T
+    θ::T
+    l::S
+    σ::S
     even::Bool
     odd::Bool
     reversed::Bool
-    coefficients::Vector{T}
-    parent::ArbField
+    coefficients::Vector{S}
+    parent::Union{ArbField,Nothing}
 
     function StandaloneLightningEigenfunction(
-        vertex::SVector{2,arb},
-        orientation::S,
-        θ::S,
-        parent::ArbField = parent(vertex[1]);
-        l::arb = parent(1),
-        σ::arb = parent(4),
-        even::Bool = false,
-        odd::Bool = false,
-        reversed::Bool = false,
-    ) where {S<:Union{arb,fmpq}}
-        even && odd && throw(ArgumentError("eigenfunction can't be both even and odd"))
-        return new{arb,S}(vertex, orientation, θ, l, σ, even, odd, reversed, arb[], parent)
-    end
-
-    function StandaloneLightningEigenfunction{arb,S}(
-        vertex::SVector{2,arb},
-        orientation::S,
-        θ::S,
-        parent::ArbField = parent(vertex[1]);
+        vertex::AbstractVector{S},
+        orientation::T,
+        θ::T;
         l = 1,
         σ = 4,
         even::Bool = false,
         odd::Bool = false,
         reversed::Bool = false,
-    ) where {S<:Union{arb,fmpq}}
+        parent::Union{ArbField,Nothing} = eltype(vertex) == arb ? parent(vertex[1]) :
+                                          nothing,
+    ) where {S<:Union{AbstractFloat,arb},T<:Union{AbstractFloat,Rational,arb,fmpq}}
         even && odd && throw(ArgumentError("eigenfunction can't be both even and odd"))
-        return new{arb,S}(
-            vertex,
-            orientation,
-            θ,
-            parent(l),
-            parent(σ),
-            even,
-            odd,
-            reversed,
-            arb[],
-            parent,
-        )
+
+        # Prefer fmpq over Rational if S is arb
+        if S == arb && T <: Rational
+            U = fmpq
+            orientation = fmpq(orientation)
+            θ = fmpq(θ)
+        else
+            U = T
+        end
+
+        # convert(arb, x) doesn't work
+        if S == arb
+            l = parent(l)
+            σ = parent(σ)
+        end
+
+        return new{S,U}(vertex, orientation, θ, l, σ, even, odd, reversed, [], parent)
     end
 
-    function StandaloneLightningEigenfunction{T,S}(
+    function StandaloneLightningEigenfunction{S,T}(
         vertex::AbstractVector,
-        orientation::S,
-        θ::S;
-        l = one(T),
-        σ = 4one(T),
+        orientation::T,
+        θ::T;
+        l = 1,
+        σ = 4,
         even::Bool = false,
         odd::Bool = false,
         reversed::Bool = false,
-    ) where {T<:AbstractFloat,S<:Union{arb,fmpq}}
+        parent::Union{ArbField,Nothing} = eltype(vertex) == arb ? parent(vertex[1]) :
+                                          nothing,
+    ) where {S,T}
         even && odd && throw(ArgumentError("eigenfunction can't be both even and odd"))
-        return new{T,S}(
-            convert(SVector{2,T}, vertex),
-            orientation,
-            θ,
-            convert(T, l),
-            convert(T, σ),
-            even,
-            odd,
-            reversed,
-            T[],
-            ArbField(precision(T)),
-        )
+
+        # convert(arb, x) doesn't work
+        if S == arb
+            l = parent(l)
+            σ = parent(σ)
+        end
+
+        return new{S,T}(vertex, orientation, θ, l, σ, even, odd, reversed, [], parent)
     end
 end
 

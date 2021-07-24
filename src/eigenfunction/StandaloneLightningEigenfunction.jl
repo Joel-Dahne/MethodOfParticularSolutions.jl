@@ -32,8 +32,14 @@ function StandaloneLightningEigenfunction{S,T}(
         θ = convert(T, angle(domain, i))
         orient = convert(T, orientation(domain, i))
     else
-        θ = convert(T, angle_raw(domain, i))
-        orient = convert(T, orientation_raw(domain, i))
+        # convert(Rational{U}, x::fmpq) only works when U is BigInt
+        if T <: Rational && angle_raw(domain, i) isa fmpq
+            θ = convert(T, convert(Rational{BigInt}, angle_raw(domain, i)))
+            orient = convert(T, convert(Rational{BigInt}, orientation_raw(domain, i)))
+        else
+            θ = convert(T, angle_raw(domain, i))
+            orient = convert(T, orientation_raw(domain, i))
+        end
     end
 
     if outside
