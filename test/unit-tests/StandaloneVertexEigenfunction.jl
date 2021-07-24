@@ -6,6 +6,7 @@
     coordinate_transformation = MethodOfParticularSolutions.coordinate_transformation
 
     parent = RealField(64)
+    series = x -> arb_series(ArbPolyRing(parent, :x)(parent.(x)))
 
     u1 = StandaloneVertexEigenfunction([1.0, 2.0], 1 // 2, 2 // 3)
     u2 = StandaloneVertexEigenfunction{Float64,Rational{Int}}([1.0, 2.0], 1 // 2, 2 // 3)
@@ -23,6 +24,8 @@
         @test nu(u, 3)::Float64 == 9 // 2
 
         @test coordinate_transformation(u, [1, 3])::AbstractVector{Float64} == [1, 0]
+
+        @test u([1, 1], 1, 1:2)::Vector{Float64} ≈ [-0.24029783912342725, 0]
     end
 
     u1 = StandaloneVertexEigenfunction([1.0, 2.0], π / 2, 2π / 3)
@@ -41,6 +44,8 @@
         @test nu(u, 3)::Float64 ≈ 9 / 2
 
         @test coordinate_transformation(u, [1, 3])::AbstractVector{Float64} ≈ [1, 0]
+
+        @test u([1, 1], 1, 1:2)::Vector{Float64} ≈ [-0.24029783912342725, 0]
     end
 
     u1 = StandaloneVertexEigenfunction(parent.([1.0, 2.0]), 1 // 2, 2 // 3)
@@ -68,6 +73,9 @@
                 [parent(1), parent(0)],
             ),
         )
+
+        @test Float64.(u([1, 1], 1, 1:2)::Vector{arb}) ≈ [-0.24029783912342725, 0]
+        @test u([series([1]), series([1])], 1, 1:2) isa Vector{arb_series}
     end
 
     u1 = StandaloneVertexEigenfunction(parent.([1.0, 2.0]), parent(π) / 2, 2parent(π) / 3)
@@ -95,6 +103,9 @@
                 [parent(1), parent(0)],
             ),
         )
+
+        @test Float64.(u([1, 1], 1, 1:2)::Vector{arb}) ≈ [-0.24029783912342725, 0]
+        @test u([series([1]), series([1])], 1, 1:2) isa Vector{arb_series}
     end
 
     domain1 = Triangle(fmpq(1 // 3), fmpq(1 // 4), parent)
@@ -125,6 +136,10 @@
         @test Float64.(
             coordinate_transformation(u, vertex(domain, 3))::AbstractVector{arb},
         ) ≈ [cospi(1 / 6) / sinpi(5 / 12), 0]
+
+        @test Float64.(u([0.1, 0.1], 1, 1:2)::Vector{arb}) ≈
+              [0.0007197702171518307, -3.3141808172927214e-8]
+        @test u([series([1]), series([1])], 1, 1:2) isa Vector{arb_series}
 
         if has_rational_angles(domain)
             u = StandaloneVertexEigenfunction{Float64,Rational{Int}}(domain, 2)
@@ -157,5 +172,8 @@
             u,
             Float64.(vertex(domain, 3)),
         )::AbstractVector{Float64} ≈ [cospi(1 / 6) / sinpi(5 / 12), 0]
+
+        @test u([0.1, 0.1], 1, 1:2)::Vector{Float64} ≈
+              [0.0007197702171518307, -3.3141808172927214e-8]
     end
 end

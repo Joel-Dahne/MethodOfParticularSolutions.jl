@@ -133,33 +133,54 @@ function coordinate_transformation(
     end
 end
 
-function (u::StandaloneVertexEigenfunction)(
-    xy::AbstractVector{T},
-    λ::arb,
+function (u::StandaloneVertexEigenfunction{S,T})(
+    xy::AbstractVector,
+    λ::Union{Real,arb},
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
-) where {T<:Union{arb,arb_series}}
+) where {S,T}
+    # Promote to common type. Neither arb nor arb_series supports
+    # promote so these we handle separately.
+    if S == arb
+        if eltype(xy) == arb_series
+            U = arb_series
+            xy = convert(SVector{2,arb_series}, xy)
+        else
+            U = arb
+            xy = convert(SVector{2,arb}, u.parent.(xy))
+        end
+        λ = u.parent(λ)
+    else
+        U = promote_type(S, eltype(xy), typeof(λ))
+        xy = convert(SVector{2,U}, xy)
+        # TODO: Here we will eventually have to handle ArbSeries
+        # differently
+        λ = convert(U, λ)
+    end
+
     if !notransform
         xy = coordinate_transformation(u, xy)
     end
 
     r, θ = polar_from_cartesian(xy)
 
-    # TODO: We have to choose a branch to work on. This does depend on
-    # the domain but for now we only implement the one with θ on the
-    # interval [0, 2π). Nemo doesn't implement mod2pi so we just do a
-    # partial solution of adding 2π if it's below 0.
-    if (T == arb && isnegative(θ)) || (T == arb_series && isnegative(θ[0]))
-        if T == arb
+    # TODO: We have to choose a branch to work on in θ. This does
+    # depend on the domain but for now we only implement the one with
+    # θ on the interval [0, 2π). Nemo doesn't implement mod2pi so we
+    # just do a partial solution of adding 2π if it's below 0.
+    if (U == arb_series && θ[0] < 0) || (U != arb_series && θ < 0)
+        if U == arb_series
+            θ += 2base_ring(parent(θ.poly))(π)
+        elseif U == arb
             θ += 2parent(θ)(π)
         else
-            θ += 2base_ring(parent(θ.poly))(π)
+            θ += 2convert(U, π)
         end
     end
 
     rsqrtλ = r * sqrt(λ)
-    res = similar(ks, T)
+    res = similar(ks, U)
     for i in eachindex(ks)
         k = 1 + (ks[i] - 1) * u.stride + u.offset
         ν = nu(u, k)
