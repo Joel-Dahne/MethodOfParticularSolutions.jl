@@ -78,13 +78,24 @@ function set_eigenfunction!(u::StandaloneVertexEigenfunction, coefficients::Vect
 end
 
 """
-    nu(u::StandaloneVertexEigenfunction, k::Integer)
+    nu(u::StandaloneVertexEigenfunction{S,T}, k::Integer)
 
-Return `k*θ` as an `arb`, the parameter used for the Bessel function.
+Return `k / (angle(u, k) / π)` converted to type `S`. This is the
+parameter used for the Bessel function.
 """
-nu(u::StandaloneVertexEigenfunction{T,fmpq}, k::Integer = 1) where {T} =
+nu(
+    u::StandaloneVertexEigenfunction{S,<:Rational},
+    k::Integer = 1,
+) where {S<:AbstractFloat} = convert(S, k / u.θ)
+# Cant convert fmpq to S in general
+nu(u::StandaloneVertexEigenfunction{S,fmpq}, k::Integer = 1) where {S<:AbstractFloat} =
+    convert(S, convert(Rational{BigInt}, k * inv(u.θ)))
+nu(u::StandaloneVertexEigenfunction{S,T}, k::Integer = 1) where {S<:AbstractFloat,T} =
+    convert(S, k * (π / u.θ))
+# Use parent for converting to arb
+nu(u::StandaloneVertexEigenfunction{arb,<:Union{Rational,fmpq}}, k::Integer = 1) =
     u.parent(k * inv(u.θ))
-nu(u::StandaloneVertexEigenfunction{T,arb}, k::Integer = 1) where {T} =
+nu(u::StandaloneVertexEigenfunction{arb,T}, k::Integer = 1) where {T} =
     u.parent(k * u.parent(π) / u.θ)
 
 """
@@ -94,22 +105,27 @@ Takes a 2-element vector `xy` representing a point in the plane in
 Cartesian coordinates and makes a (affine) change of coordinates so
 that `u.vertex` is put at the origin and rotated `u.orientation`
 clockwise.
+
+If `u.reversed = true` then it is instead rotated `u.orientation +
+u.θ` and also flips the sign of the `y`-axis.
 """
 function coordinate_transformation(
-    u::StandaloneVertexEigenfunction{T,S},
+    u::StandaloneVertexEigenfunction{S,T},
     xy::AbstractVector,
-) where {T,S}
-    if S == fmpq
-        if u.reversed
-            s, c = sincospi(-u.orientation - u.θ, u.parent)
-        else
-            s, c = sincospi(-u.orientation, u.parent)
-        end
-    elseif S == arb
-        s, c = sincos(-u.orientation)
+) where {S,T}
+    angle = u.reversed ? u.orientation + u.θ : u.orientation
+
+    if T == fmpq
+        s, c = sincospi(-angle, u.parent)
+    elseif T <: Rational
+        s, c = sincospi(convert(S, -angle))
+    else
+        s, c = sincos(-angle)
     end
+
     M = SMatrix{2,2}(c, s, -s, c)
-    res = M * (xy .- u.vertex)
+    res = M * (xy - u.vertex)
+
     if u.reversed
         return SVector(res[1], -res[2])
     else
@@ -157,7 +173,4 @@ end
 # TODO: Figure out how to handle this
 set_domain!(u::StandaloneVertexEigenfunction, ::AbstractDomain) = u
 
-# TODO: Figure out how to handle this
 recompute!(u::StandaloneVertexEigenfunction) = u
-
-# Have a function that computes u from the domain?
