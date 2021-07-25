@@ -9,6 +9,14 @@ function Base.show(io::IO, u::LShapeEigenfunction)
     end
 end
 
+function Base.getproperty(u::LShapeEigenfunction, name::Symbol)
+    if name == :parent
+        return u.domain.parent
+    else
+        return getfield(u, name)
+    end
+end
+
 active_boundaries(::LShape, ::LShapeEigenfunction) = 1:4
 
 function (u::LShapeEigenfunction)(
@@ -22,7 +30,7 @@ function (u::LShapeEigenfunction)(
     for i in eachindex(ks)
         k = 1 + (ks[i] - 1) * u.stride
 
-        ν = u.domain.parent(2k // 3)
+        ν = u.parent(2k // 3)
 
         res[i] = bessel_j(ν, rsqrtλ) * sin(ν * θ)
     end

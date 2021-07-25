@@ -85,7 +85,6 @@ include("domain/spherical/SphericalTriangle.jl")
 include("eigenfunction/AbstractEigenfunction.jl")
 # Planar eigenfunctions
 include("eigenfunction/planar/AbstractPlanarEigenfunction.jl")
-include("eigenfunction/planar/AbstractStandalonePlanarEigenfunction.jl")
 include("eigenfunction/planar/StandaloneVertexEigenfunction.jl")
 include("eigenfunction/planar/StandaloneInteriorEigenfunction.jl")
 include("eigenfunction/planar/StandaloneLightningEigenfunction.jl")

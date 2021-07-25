@@ -1,3 +1,11 @@
+function Base.getproperty(u::AbstractSphericalEigenfunction, name::Symbol)
+    if name == :parent
+        return u.domain.parent
+    else
+        return getfield(u, name)
+    end
+end
+
 function active_boundaries(domain::SphericalTriangle, u::AbstractSphericalEigenfunction)
     return 1:3
 end

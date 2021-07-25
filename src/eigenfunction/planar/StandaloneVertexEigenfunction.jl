@@ -179,6 +179,3 @@ function (u::StandaloneVertexEigenfunction{S,T})(
 
     return res
 end
-
-# TODO: Figure out how to handle this
-set_domain!(u::StandaloneVertexEigenfunction, ::AbstractDomain) = u

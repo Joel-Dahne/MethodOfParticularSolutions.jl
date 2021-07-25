@@ -1,3 +1,11 @@
+function Base.getproperty(u::LinkedEigenfunction, name::Symbol)
+    if name == :parent
+        return first(u.us).parent
+    else
+        return getfield(u, name)
+    end
+end
+
 function Base.show(io::IO, u::LinkedEigenfunction)
     println(io, "$(length(u.us)) linked $(eltype(u.us))")
     if !haskey(io, :compact) || !io[:compact]
@@ -38,9 +46,9 @@ function (u::LinkedEigenfunction{S,T})(
         if eltype(xy) == arb_series
             xy = convert(SVector{2,arb_series}, xy)
         else
-            xy = convert(SVector{2,arb}, first(u.us).parent.(xy))
+            xy = convert(SVector{2,arb}, u.parent.(xy))
         end
-        λ = first(u.us).parent(λ)
+        λ = u.parent(λ)
     else
         xy = convert(SVector{2,S}, xy)
         λ = convert(S, λ)

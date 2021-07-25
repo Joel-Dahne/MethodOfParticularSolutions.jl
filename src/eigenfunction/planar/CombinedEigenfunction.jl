@@ -66,6 +66,14 @@ function CombinedEigenfunction(
     return CombinedEigenfunction(domain, us, boundary_to_us, BitSet(), orders)
 end
 
+function Base.getproperty(u::CombinedEigenfunction, name::Symbol)
+    if name == :parent
+        return u.domain.parent
+    else
+        return getfield(u, name)
+    end
+end
+
 function Base.show(io::IO, ::MIME"text/plain", u::CombinedEigenfunction)
     print(
         io,
@@ -174,7 +182,7 @@ function (u::CombinedEigenfunction)(
     i, j = basis_function(u, k)
     if !isnothing(boundary) && !(i ∈ u.boundary_to_us[boundary])
         if T == arb
-            return u.domain.parent(0)
+            return u.parent(0)
         else
             return 0 * xy[1]
         end
@@ -237,7 +245,7 @@ function (u::CombinedEigenfunction)(
         indices = u.boundary_to_us[boundary]
     end
 
-    res = u.domain.parent(0)
+    res = u.parent(0)
     for i in indices
         res += u.us[i](xy, λ, boundary = boundary, notransform = notransform)
         if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))

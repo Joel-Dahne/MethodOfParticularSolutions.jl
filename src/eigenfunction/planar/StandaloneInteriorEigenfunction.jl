@@ -137,6 +137,3 @@ function (u::StandaloneInteriorEigenfunction{S,T})(
 
     return res
 end
-
-# TODO: Figure out how to handle this
-set_domain!(u::StandaloneInteriorEigenfunction, ::AbstractDomain) = u

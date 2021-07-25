@@ -299,6 +299,3 @@ function (u::StandaloneLightningEigenfunction{S,T})(
 
     return res
 end
-
-# TODO: Figure out how to handle this
-set_domain!(u::StandaloneLightningEigenfunction, ::AbstractDomain) = u
