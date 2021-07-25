@@ -2,7 +2,7 @@ abstract type AbstractPlanarEigenfunction <: AbstractEigenfunction end
 
 abstract type AbstractStandalonePlanarEigenfunction{
     S<:Union{AbstractFloat,arb},
-    T<:Union{AbstractFloat, arb, Rational, fmpq},
+    T<:Union{AbstractFloat,arb,Rational,fmpq},
 } <: AbstractPlanarEigenfunction end
 
 struct StandaloneVertexEigenfunction{S,T} <: AbstractStandalonePlanarEigenfunction{S,T}
@@ -63,33 +63,52 @@ The values of `ν` that are used are 0, `stride`, `2stride`,
 
 If `even` is true then use only the function with `cos(j*θ)`.
 """
-struct StandaloneInteriorEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEigenfunction
-    vertex::SVector{2,arb}
+struct StandaloneInteriorEigenfunction{S,T} <: AbstractStandalonePlanarEigenfunction{S,T}
+    vertex::SVector{2,S}
     orientation::T
     stride::Int
     offset::Int
     even::Bool
     odd::Bool
-    coefficients::Vector{arb}
-    parent::ArbField
+    coefficients::Vector{S}
+    parent::Union{ArbField,Nothing}
 
     function StandaloneInteriorEigenfunction(
-        vertex::SVector{2,arb},
-        orientation::T = fmpq(0),
-        parent::ArbField = parent(first(vertex));
+        vertex::AbstractVector{S},
+        orientation::T = zero(ifelse(eltype(vertex) == arb, fmpq, Rational{Int}));
         offset::Integer = 0,
         stride::Integer = 1,
         even::Bool = false,
         odd::Bool = false,
-    ) where {T<:Union{Rational,fmpq,arb}}
+        parent::Union{ArbField,Nothing} = eltype(vertex) == arb ? parent(vertex[1]) :
+                                          nothing,
+    ) where {S<:Union{AbstractFloat,arb},T<:Union{AbstractFloat,Rational,arb,fmpq}}
         even && odd && throw(ArgumentError("eigenfunction can't be both even and odd"))
-        if T == fmpq || T <: Rational
+
+        # Prefer fmpq over Rational if S is arb
+        if S == arb && T <: Rational
+            U = fmpq
             orientation = fmpq(orientation)
-            S = fmpq
         else
-            S = arb
+            U = T
         end
-        return new{S}(vertex, orientation, stride, offset, even, odd, arb[], parent)
+
+        return new{S,U}(vertex, orientation, stride, offset, even, odd, arb[], parent)
+    end
+
+    function StandaloneInteriorEigenfunction{S,T}(
+        vertex::AbstractVector,
+        orientation::T = zero(T);
+        offset::Integer = 0,
+        stride::Integer = 1,
+        even::Bool = false,
+        odd::Bool = false,
+        parent::Union{ArbField,Nothing} = eltype(vertex) == arb ? parent(vertex[1]) :
+                                          nothing,
+    ) where {S,T}
+        even && odd && throw(ArgumentError("eigenfunction can't be both even and odd"))
+
+        return new{S,T}(vertex, orientation, stride, offset, even, odd, [], parent)
     end
 end
 

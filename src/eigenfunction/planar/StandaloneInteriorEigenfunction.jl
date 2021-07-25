@@ -1,18 +1,35 @@
 StandaloneInteriorEigenfunction(
-    domain::AbstractPlanarDomain,
-    orientation = fmpq(0);
+    domain::AbstractPlanarDomain{S,T},
+    orientation = T == arb ? domain.parent(0) : zero(T);
     stride::Integer = 1,
     offset::Integer = 0,
     even = false,
     odd = false,
-) = StandaloneInteriorEigenfunction(
+) where {S,T} = StandaloneInteriorEigenfunction(
     center(domain),
-    orientation,
-    domain.parent;
+    T == arb ? domain.parent(orientation) : convert(T, orientation);
     stride,
     offset,
     even,
     odd,
+    domain.parent,
+)
+
+StandaloneInteriorEigenfunction{S,T}(
+    domain::AbstractPlanarDomain,
+    orientation = zero(T);
+    stride::Integer = 1,
+    offset::Integer = 0,
+    even = false,
+    odd = false,
+) where {S,T} = StandaloneInteriorEigenfunction{S,T}(
+    center(domain),
+    convert(T, orientation);
+    stride,
+    offset,
+    even,
+    odd,
+    domain.parent,
 )
 
 function Base.show(io::IO, u::StandaloneInteriorEigenfunction)
@@ -29,9 +46,15 @@ function Base.show(io::IO, u::StandaloneInteriorEigenfunction)
     end
 end
 
-function set_eigenfunction!(u::StandaloneInteriorEigenfunction, coefficients::Vector)
+function set_eigenfunction!(u::StandaloneInteriorEigenfunction{arb}, coefficients::Vector)
     resize!(u.coefficients, length(coefficients))
     copy!(u.coefficients, u.parent.(coefficients))
+    return u
+end
+
+function set_eigenfunction!(u::StandaloneInteriorEigenfunction, coefficients::Vector)
+    resize!(u.coefficients, length(coefficients))
+    copy!(u.coefficients, coefficients)
     return u
 end
 
@@ -40,35 +63,53 @@ end
 
 Takes a 2-element vector `xy` representing a point in the plane in
 Cartesian coordinates and makes a (affine) change of coordinates so
-that `u.vertex` is put at the origin.
+that `u.vertex` is put at the origin and rotated `u.orientation`
+clockwise.
 """
 function coordinate_transformation(
-    u::StandaloneInteriorEigenfunction{T},
+    u::StandaloneInteriorEigenfunction{S,T},
     xy::AbstractVector,
-) where {T}
-    iszero(u.orientation) && return xy .- u.vertex
+) where {S,T}
+    iszero(u.orientation) && return xy - u.vertex
 
     if T == fmpq
-        s, c = sincospi(u.orientation, u.parent)
-    elseif T == arb
-        s, c = sincos(u.orientation)
+        s, c = convert.(S, sincospi(-u.orientation, u.parent))
+    elseif T <: Rational
+        s, c = sincospi(convert(S, -u.orientation))
+    else
+        s, c = sincos(-u.orientation)
     end
+
     M = SMatrix{2,2}(c, s, -s, c)
-    return M * (xy .- u.vertex)
+    return M * (xy - u.vertex)
 end
 
-function (u::StandaloneInteriorEigenfunction)(
-    xy::AbstractVector{T},
-    λ::arb,
+function (u::StandaloneInteriorEigenfunction{S,T})(
+    xy::AbstractVector,
+    λ::Union{Real,arb},
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
-) where {T<:Union{arb,arb_series}}
+) where {S,T}
+    # Convert input to type S. One exception is of xy is of type arb_series
+    if S == arb
+        if eltype(xy) == arb_series
+            xy = convert(SVector{2,arb_series}, xy)
+        else
+            xy = convert(SVector{2,arb}, u.parent.(xy))
+        end
+        λ = u.parent(λ)
+    else
+        xy = convert(SVector{2,S}, xy)
+        λ = convert(S, λ)
+    end
+
     if !notransform
         xy = coordinate_transformation(u, xy)
     end
 
     r, θ = polar_from_cartesian(xy)
+
     if u.even
         νs = u.stride * (ks.start-1:ks.stop-1) .+ u.offset
     elseif u.odd
@@ -77,10 +118,14 @@ function (u::StandaloneInteriorEigenfunction)(
         νs = u.stride * (div(ks.start, 2):div(ks.stop, 2)) .+ u.offset
     end
     bessel_js = let sqrtλr = sqrt(λ) * r
-        Dict(ν => bessel_j(u.parent(ν), sqrtλr) for ν in νs)
+        if S == arb
+            Dict(ν => bessel_j(u.parent(ν), sqrtλr) for ν in νs)
+        else
+            Dict(ν => bessel_j(convert(S, ν), sqrtλr) for ν in νs)
+        end
     end
 
-    res = similar(ks, T)
+    res = similar(ks, eltype(xy))
     for i in eachindex(ks)
         k = ks[i]
         if u.even

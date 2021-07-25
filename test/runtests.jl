@@ -8,6 +8,7 @@ using ArbTools, MethodOfParticularSolutions, Nemo, Printf, Test
         include("unit-tests/IntersectedDomain.jl")
 
         include("unit-tests/StandaloneVertexEigenfunction.jl")
+        include("unit-tests/StandaloneInteriorEigenfunction.jl")
         include("unit-tests/StandaloneLightningEigenfunction.jl")
     end
 
