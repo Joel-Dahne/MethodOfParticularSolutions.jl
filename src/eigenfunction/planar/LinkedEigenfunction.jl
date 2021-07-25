@@ -17,11 +17,6 @@ function set_domain!(u::LinkedEigenfunction, domain::AbstractDomain)
     return u
 end
 
-function recompute!(u::LinkedEigenfunction)
-    foreach(recompute!, u.us)
-    return u
-end
-
 function set_eigenfunction!(u::LinkedEigenfunction, coefficients::Vector)
     foreach(v -> set_eigenfunction!(v, coefficients), u.us)
     return u

@@ -94,13 +94,6 @@ function set_domain!(u::CombinedEigenfunction, domain::AbstractDomain)
     return u
 end
 
-function recompute!(u::CombinedEigenfunction)
-    for v in u.us
-        recompute!(v)
-    end
-    return u
-end
-
 function active_boundaries(domain::AbstractPlanarDomain, u::CombinedEigenfunction)
     if domain === u.domain
         return findall(!isempty, u.boundary_to_us)

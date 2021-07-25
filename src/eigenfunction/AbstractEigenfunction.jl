@@ -27,13 +27,16 @@ end
 
 """
     recompute!(u::AbstractEigenfunction)
-> Recompute the values for the eigenfunction. This method in unsafe in
-  the way that it overwrites previous values and therefore only
-  handles default options.
+
+Recompute the values for the eigenfunction.
+
+Some type of eigenfunctions have precomputed values which might need
+to be recomputed if the precision is increased, then this method can
+be used. However this is mostly older versions of eigenfunctions. This
+method in unsafe in the way that it overwrites previous values and
+therefore only handles default options.
 """
-function recompute!(u::AbstractEigenfunction)
-    u
-end
+recompute!(u::AbstractEigenfunction) = u
 
 """
     active_boundaries(domain::AbstractDomain, u::AbstractEigenfunction)

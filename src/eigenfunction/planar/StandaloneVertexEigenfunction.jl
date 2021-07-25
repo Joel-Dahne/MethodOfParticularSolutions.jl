@@ -182,5 +182,3 @@ end
 
 # TODO: Figure out how to handle this
 set_domain!(u::StandaloneVertexEigenfunction, ::AbstractDomain) = u
-
-recompute!(u::StandaloneVertexEigenfunction) = u

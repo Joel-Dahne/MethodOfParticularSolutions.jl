@@ -302,5 +302,3 @@ end
 
 # TODO: Figure out how to handle this
 set_domain!(u::StandaloneLightningEigenfunction, ::AbstractDomain) = u
-
-recompute!(u::StandaloneLightningEigenfunction) = u

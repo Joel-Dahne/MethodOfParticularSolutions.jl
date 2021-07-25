@@ -140,6 +140,3 @@ end
 
 # TODO: Figure out how to handle this
 set_domain!(u::StandaloneInteriorEigenfunction, ::AbstractDomain) = u
-
-# TODO: Figure out how to handle this
-recompute!(u::StandaloneInteriorEigenfunction) = u
