@@ -10,6 +10,7 @@ using ArbTools, MethodOfParticularSolutions, Nemo, Printf, Test
         include("unit-tests/StandaloneVertexEigenfunction.jl")
         include("unit-tests/StandaloneInteriorEigenfunction.jl")
         include("unit-tests/StandaloneLightningEigenfunction.jl")
+        include("unit-tests/LinkedEigenfunction.jl")
     end
 
     @testset "end-to-end-tests" begin

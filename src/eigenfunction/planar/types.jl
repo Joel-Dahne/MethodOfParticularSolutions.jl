@@ -177,24 +177,37 @@ struct StandaloneLightningEigenfunction{S,T} <: AbstractStandalonePlanarEigenfun
     end
 end
 
-struct LinkedEigenfunction{T<:AbstractPlanarEigenfunction} <:
-       AbstractPlanarEigenfunction{arb,fmpq}
-    us::Vector{T}
-    extra_coefficients::Vector{arb}
+struct LinkedEigenfunction{S,T,U<:AbstractPlanarEigenfunction{S,T}} <:
+       AbstractPlanarEigenfunction{S,T}
+    us::Vector{U}
+    extra_coefficients::Vector{S}
     excluded_boundaries::Vector{BitSet}
 
-    function LinkedEigenfunction(
-        us::Vector{T},
-        extra_coefficients::Vector = ones(length(us));
-        excluded_boundaries::Vector = fill(BitSet(), length(us)),
-    ) where {T<:AbstractPlanarEigenfunction}
+    LinkedEigenfunction(
+        us::AbstractVector{U},
+        extra_coefficients::AbstractVector = ones(length(us));
+        excluded_boundaries::AbstractVector = fill(BitSet(), length(us)),
+    ) where {S,T,U<:AbstractPlanarEigenfunction{S,T}} =
+        LinkedEigenfunction{S,T,U}(us, extra_coefficients; excluded_boundaries)
+
+
+    function LinkedEigenfunction{S,T,U}(
+        us::AbstractVector{U},
+        extra_coefficients::AbstractVector = ones(length(us));
+        excluded_boundaries::AbstractVector = fill(BitSet(), length(us)),
+    ) where {S,T,U}
         isempty(us) && throw(ArgumentError("us must not be empty"))
-        length(us) == length(extra_coefficients) ||
-            throw(ArgumentError("us and extra_coefficients must have the same size"))
+        length(us) == length(extra_coefficients) == length(excluded_boundaries) || throw(
+            ArgumentError(
+                "us, extra_coefficients and extra_boundaries must all have the same size",
+            ),
+        )
 
-        extra_coefficients = first(us).parent.(extra_coefficients)
+        if S == arb
+            extra_coefficients = first(us).parent.(extra_coefficients)
+        end
 
-        return new{T}(us, extra_coefficients, excluded_boundaries)
+        return new{S,T,U}(us, extra_coefficients, excluded_boundaries)
     end
 end
 
