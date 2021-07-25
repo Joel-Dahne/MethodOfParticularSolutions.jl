@@ -1,9 +1,11 @@
 abstract type AbstractPlanarEigenfunction <: AbstractEigenfunction end
 
-struct StandaloneVertexEigenfunction{
+abstract type AbstractStandalonePlanarEigenfunction{
     S<:Union{AbstractFloat,arb},
-    T<:Union{AbstractFloat,fmpq,Rational,arb},
-} <: AbstractPlanarEigenfunction
+    T<:Union{AbstractFloat, arb, Rational, fmpq},
+} <: AbstractPlanarEigenfunction end
+
+struct StandaloneVertexEigenfunction{S,T} <: AbstractStandalonePlanarEigenfunction{S,T}
     vertex::SVector{2,S}
     orientation::T
     θ::T
@@ -91,10 +93,7 @@ struct StandaloneInteriorEigenfunction{T<:Union{fmpq,arb}} <: AbstractPlanarEige
     end
 end
 
-struct StandaloneLightningEigenfunction{
-    S<:Union{AbstractFloat,arb},
-    T<:Union{AbstractFloat,arb,Rational,fmpq},
-} <: AbstractPlanarEigenfunction
+struct StandaloneLightningEigenfunction{S,T} <: AbstractStandalonePlanarEigenfunction{S,T}
     vertex::SVector{2,S}
     orientation::T
     θ::T
