@@ -46,10 +46,7 @@
     end
 
     u1 = StandaloneInteriorEigenfunction(parent.([1.0, 2.0]), 1 // 2)
-    u2 = StandaloneInteriorEigenfunction{arb,fmpq}(
-        parent.([1.0, 2.0]),
-        fmpq(1 // 2),
-    )
+    u2 = StandaloneInteriorEigenfunction{arb,fmpq}(parent.([1.0, 2.0]), fmpq(1 // 2))
     for u in [u1, u2]
         @test u isa StandaloneInteriorEigenfunction{arb,fmpq}
         @test u.vertex == [1, 2]
@@ -74,10 +71,7 @@
     end
 
     u1 = StandaloneInteriorEigenfunction(parent.([1.0, 2.0]), parent(π) / 2)
-    u2 = StandaloneInteriorEigenfunction{arb,arb}(
-        parent.([1.0, 2.0]),
-        parent(π) / 2,
-    )
+    u2 = StandaloneInteriorEigenfunction{arb,arb}(parent.([1.0, 2.0]), parent(π) / 2)
     for u in [u1, u2]
         @test u isa StandaloneInteriorEigenfunction{arb,arb}
         @test u.vertex == [1, 2]
@@ -121,12 +115,11 @@
 
         @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
-        @test Float64.(
-            coordinate_transformation(u, center(domain))::AbstractVector{arb},
-        ) ≈ [0, 0]
+        @test Float64.(coordinate_transformation(u, center(domain))::AbstractVector{arb},) ≈
+              [0, 0]
 
         @test Float64.(u([0.1, 0.1], 1, 1:2)::Vector{arb}) ≈
-            [0.9656340100141073, -0.0547032144426457]
+              [0.9656340100141073, -0.0547032144426457]
         @test u([series([1]), series([1])], 1, 1:2) isa Vector{arb_series}
 
         if has_rational_angles(domain)
@@ -152,6 +145,6 @@
         )::AbstractVector{Float64} ≈ [0, 0]
 
         @test u([0.1, 0.1], 1, 1:2)::Vector{Float64} ≈
-            [0.9656340100141073, -0.0547032144426457]
+              [0.9656340100141073, -0.0547032144426457]
     end
 end
