@@ -126,7 +126,7 @@ function coordinate_transformation(
     angle = u.reversed ? u.orientation + u.θ : u.orientation
 
     if T == fmpq
-        s, c = sincospi(-angle, u.parent)
+        s, c = convert.(S, sincospi(-angle, u.parent))
     elseif T <: Rational
         s, c = sincospi(convert(S, -angle))
     else
@@ -150,23 +150,17 @@ function (u::StandaloneVertexEigenfunction{S,T})(
     boundary = nothing,
     notransform::Bool = false,
 ) where {S,T}
-    # Promote to common type. Neither arb nor arb_series supports
-    # promote so these we handle separately.
+    # Convert input to type S. One exception is of xy is of type arb_series
     if S == arb
         if eltype(xy) == arb_series
-            U = arb_series
             xy = convert(SVector{2,arb_series}, xy)
         else
-            U = arb
             xy = convert(SVector{2,arb}, u.parent.(xy))
         end
         λ = u.parent(λ)
     else
-        U = promote_type(S, eltype(xy), typeof(λ))
-        xy = convert(SVector{2,U}, xy)
-        # TODO: Here we will eventually have to handle ArbSeries
-        # differently
-        λ = convert(U, λ)
+        xy = convert(SVector{2,S}, xy)
+        λ = convert(S, λ)
     end
 
     if !notransform
@@ -179,18 +173,18 @@ function (u::StandaloneVertexEigenfunction{S,T})(
     # depend on the domain but for now we only implement the one with
     # θ on the interval [0, 2π). Nemo doesn't implement mod2pi so we
     # just do a partial solution of adding 2π if it's below 0.
-    if (U == arb_series && θ[0] < 0) || (U != arb_series && θ < 0)
-        if U == arb_series
+    if (typeof(θ) == arb_series && θ[0] < 0) || (typeof(θ) != arb_series && θ < 0)
+        if typeof(θ) == arb_series
             θ += 2base_ring(parent(θ.poly))(π)
-        elseif U == arb
+        elseif typeof(θ) == arb
             θ += 2parent(θ)(π)
         else
-            θ += 2convert(U, π)
+            θ += 2oftype(θ, π)
         end
     end
 
     rsqrtλ = r * sqrt(λ)
-    res = similar(ks, U)
+    res = similar(ks, eltype(xy))
     for i in eachindex(ks)
         k = 1 + (ks[i] - 1) * u.stride + u.offset
         ν = nu(u, k)

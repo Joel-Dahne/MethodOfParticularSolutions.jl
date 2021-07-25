@@ -107,25 +107,20 @@ that `u.vertex` is put at the origin and rotated `u.orientation + u.θ/2`
 clockwise.
 """
 function coordinate_transformation(
-    u::StandaloneLightningEigenfunction{T,S},
+    u::StandaloneLightningEigenfunction{S,T},
     xy::AbstractVector,
-) where {T,S}
-    if S == fmpq
-        s, c = sincospi(-u.orientation - u.θ // 2, u.parent)
-    elseif S == arb
+) where {S,T}
+    if T == fmpq
+        s, c = convert.(S, sincospi(-u.orientation - u.θ // 2, u.parent))
+    elseif T <: Rational
+        s, c = sincospi(convert(T, -u.orientation - u.θ // 2))
+    else
         s, c = sincos(-u.orientation - u.θ / 2)
     end
 
-    s, c = convert.(T, (s, c))
-
-    if eltype(xy) == arb_series
-        xy = convert(SVector{2,arb_series}, xy)
-    else
-        xy = convert(SVector{2,T}, xy)
-    end
-
     M = SMatrix{2,2}(c, s, -s, c)
-    res = M * (xy .- u.vertex)
+    res = M * (xy - u.vertex)
+
     if u.reversed
         return SVector(res[1], -res[2])
     else
@@ -167,17 +162,19 @@ lie on the negative part of the x-axis. If `standard_coordinates` is
 true then return them in the standard coordinate system instead.
 """
 function charge(
-    u::StandaloneLightningEigenfunction{T,S},
+    u::StandaloneLightningEigenfunction{S,T},
     i::Integer,
     n::Integer,
     standard_coordinates = false,
-) where {T,S<:Union{arb,fmpq}}
+) where {S,T}
     d = chargedistance(u, i, n)
     if standard_coordinates
-        if S == fmpq
-            s, c = sincospi(u.orientation + u.θ // 2, u.parent)
+        if T == fmpq
+            s, c = sincospi(-u.orientation - u.θ // 2, u.parent)
+        elseif T <: Rational
+            s, c = sincospi(convert(T, -u.orientation - u.θ // 2))
         else
-            s, c = sincos(u.orientation + u.θ / 2)
+            s, c = sincos(-u.orientation - u.θ / 2)
         end
 
         return u.vertex - d .* SVector{2,T}(c, s)
@@ -186,33 +183,32 @@ function charge(
     end
 end
 
-function (u::StandaloneLightningEigenfunction{T,S})(
+function (u::StandaloneLightningEigenfunction{S,T})(
     xy::AbstractVector,
-    λ::Union{arb,Real},
+    λ::Union{Real,arb},
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
-) where {T,S}
-    if T == arb && eltype(xy) == arb_series
-        xy = SVector{2,arb_series}(xy[1], xy[2])
-        λ = u.parent(λ)
-    elseif T == arb
-        xy = SVector{2,arb}(u.parent(xy[1]), u.parent(xy[2]))
+) where {S,T}
+    # Promote to common type. Neither arb nor arb_series supports
+    # promote so these we handle separately.
+    if S == arb
+        if eltype(xy) == arb_series
+            xy = convert(SVector{2,arb_series}, xy)
+        else
+            xy = convert(SVector{2,arb}, u.parent.(xy))
+        end
         λ = u.parent(λ)
     else
-        xy = convert(SVector{2,T}, xy)
-        λ = convert(T, λ)
+        xy = convert(SVector{2,S}, xy)
+        λ = convert(S, λ)
     end
 
     if !notransform
         xy = coordinate_transformation(u, xy)
     end
 
-    if T == arb && eltype(xy) == arb_series
-        res = similar(ks, arb_series)
-    else
-        res = similar(ks, T)
-    end
+    res = similar(ks, eltype(xy))
     i = 1
     if u.even
         charge_indices = (div(ks.start - 1, 2)+1):(div(ks.stop - 1, 2)+1)
@@ -322,5 +318,4 @@ end
 # TODO: Figure out how to handle this
 set_domain!(u::StandaloneLightningEigenfunction, ::AbstractDomain) = u
 
-# TODO: Figure out how to handle this
 recompute!(u::StandaloneLightningEigenfunction) = u
