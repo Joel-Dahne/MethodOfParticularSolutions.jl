@@ -1,9 +1,6 @@
-abstract type AbstractPlanarEigenfunction <: AbstractEigenfunction end
+abstract type AbstractPlanarEigenfunction{S,T} <: AbstractEigenfunction{S,T} end
 
-abstract type AbstractStandalonePlanarEigenfunction{
-    S<:Union{AbstractFloat,arb},
-    T<:Union{AbstractFloat,arb,Rational,fmpq},
-} <: AbstractPlanarEigenfunction end
+abstract type AbstractStandalonePlanarEigenfunction{S,T} <: AbstractPlanarEigenfunction{S,T} end
 
 struct StandaloneVertexEigenfunction{S,T} <: AbstractStandalonePlanarEigenfunction{S,T}
     vertex::SVector{2,S}
@@ -180,7 +177,8 @@ struct StandaloneLightningEigenfunction{S,T} <: AbstractStandalonePlanarEigenfun
     end
 end
 
-struct LinkedEigenfunction{T<:AbstractPlanarEigenfunction} <: AbstractPlanarEigenfunction
+struct LinkedEigenfunction{T<:AbstractPlanarEigenfunction} <:
+       AbstractPlanarEigenfunction{arb,fmpq}
     us::Vector{T}
     extra_coefficients::Vector{arb}
     excluded_boundaries::Vector{BitSet}
@@ -200,7 +198,7 @@ struct LinkedEigenfunction{T<:AbstractPlanarEigenfunction} <: AbstractPlanarEige
     end
 end
 
-mutable struct CombinedEigenfunction <: AbstractPlanarEigenfunction
+mutable struct CombinedEigenfunction <: AbstractPlanarEigenfunction{arb,fmpq}
     domain::AbstractPlanarDomain
     us::Vector{<:AbstractPlanarEigenfunction}
     boundary_to_us::OrderedDict{Int,BitSet}
@@ -208,7 +206,7 @@ mutable struct CombinedEigenfunction <: AbstractPlanarEigenfunction
     orders::Vector{Int}
 end
 
-mutable struct LShapeEigenfunction <: AbstractPlanarEigenfunction
+mutable struct LShapeEigenfunction <: AbstractPlanarEigenfunction{arb,fmpq}
     domain::LShape
     stride::Int
     coefficients::Vector{arb}
