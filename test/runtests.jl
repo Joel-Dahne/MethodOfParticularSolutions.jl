@@ -1,4 +1,4 @@
-using MethodOfParticularSolutions, Nemo, Printf, Test
+using ArbTools, MethodOfParticularSolutions, Nemo, Printf, Test
 
 @testset "MethodOfParticularSolutions" begin
     @testset "unit-tests" begin
