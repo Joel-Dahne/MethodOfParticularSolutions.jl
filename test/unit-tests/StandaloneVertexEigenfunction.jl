@@ -21,6 +21,8 @@
         @test isempty(u.coefficients)
         @test isnothing(u.parent)
 
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
+
         @test nu(u, 3)::Float64 == 9 // 2
 
         @test coordinate_transformation(u, [1, 3])::AbstractVector{Float64} == [1, 0]
@@ -40,6 +42,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test isnothing(u.parent)
+
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
         @test nu(u, 3)::Float64 ≈ 9 / 2
 
@@ -64,6 +68,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == parent
+
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
         @test nu(u, 3)::arb == 9 // 2
 
@@ -94,6 +100,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == parent
+
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
         @test Float64(nu(u, 3)::arb) ≈ 9 / 2
 
@@ -126,6 +134,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == domain.parent
+
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
         if has_rational_angles(domain)
             @test nu(u, 3)::arb == 12
@@ -161,6 +171,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == domain.parent
+
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
         if has_rational_angles(domain)
             @test nu(u, 3)::Float64 == 12

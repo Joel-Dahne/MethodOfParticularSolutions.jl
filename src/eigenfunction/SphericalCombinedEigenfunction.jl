@@ -126,6 +126,7 @@ function set_eigenfunction!(u::SphericalCombinedEigenfunction, coefficients::Vec
     for i = 1:length(u.us)
         set_eigenfunction!(u.us[i], coefficients[is.==i])
     end
+    return u
 end
 
 function (u::SphericalCombinedEigenfunction)(

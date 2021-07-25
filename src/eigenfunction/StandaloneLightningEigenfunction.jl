@@ -86,6 +86,7 @@ end
 function set_eigenfunction!(u::StandaloneLightningEigenfunction{arb}, coefficients::Vector)
     resize!(u.coefficients, length(coefficients))
     copy!(u.coefficients, u.parent.(coefficients))
+    return u
 end
 
 function set_eigenfunction!(
@@ -94,6 +95,7 @@ function set_eigenfunction!(
 ) where {T}
     resize!(u.coefficients, length(coefficients))
     copy!(u.coefficients, coefficients)
+    return u
 end
 
 """

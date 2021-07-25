@@ -72,9 +72,19 @@ function Base.show(io::IO, u::StandaloneVertexEigenfunction)
     end
 end
 
-function set_eigenfunction!(u::StandaloneVertexEigenfunction, coefficients::Vector)
+function set_eigenfunction!(u::StandaloneVertexEigenfunction{arb}, coefficients::Vector)
     resize!(u.coefficients, length(coefficients))
     copy!(u.coefficients, u.parent.(coefficients))
+    return u
+end
+
+function set_eigenfunction!(
+    u::StandaloneVertexEigenfunction{T},
+    coefficients::Vector,
+) where {T}
+    resize!(u.coefficients, length(coefficients))
+    copy!(u.coefficients, coefficients)
+    return u
 end
 
 """

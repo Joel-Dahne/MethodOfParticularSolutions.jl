@@ -13,6 +13,7 @@ end
 function set_eigenfunction!(u::AbstractEigenfunction, coefficients::Vector)
     resize!(u.coefficients, length(coefficients))
     copy!(u.coefficients, u.domain.parent.(coefficients))
+    return u
 end
 
 """

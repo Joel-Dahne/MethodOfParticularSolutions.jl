@@ -32,6 +32,7 @@ end
 function set_eigenfunction!(u::StandaloneInteriorEigenfunction, coefficients::Vector)
     resize!(u.coefficients, length(coefficients))
     copy!(u.coefficients, u.parent.(coefficients))
+    return u
 end
 
 """

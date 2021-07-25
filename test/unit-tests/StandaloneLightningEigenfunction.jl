@@ -19,6 +19,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test isnothing(u.parent)
+
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
     end
 
     u1 = StandaloneLightningEigenfunction([1.0, 2.0], π / 2, 2π / 3)
@@ -35,6 +37,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test isnothing(u.parent)
+
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
     end
 
     u1 = StandaloneLightningEigenfunction(parent.([1.0, 2.0]), 1 // 2, 2 // 3)
@@ -55,6 +59,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == parent
+
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
     end
 
     u1 = StandaloneLightningEigenfunction(
@@ -79,6 +85,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == parent
+
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
     end
 
     domain1 = Triangle(fmpq(1 // 3), fmpq(1 // 4), parent)
@@ -102,6 +110,8 @@
         @test isempty(u.coefficients)
         @test u.parent == domain.parent
 
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
+
         if has_rational_angles(domain)
             u = StandaloneLightningEigenfunction{Float64,Rational{Int}}(domain, 2)
             @test u isa StandaloneLightningEigenfunction{Float64,Rational{Int}}
@@ -124,5 +134,7 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == domain.parent
+
+        @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
     end
 end
