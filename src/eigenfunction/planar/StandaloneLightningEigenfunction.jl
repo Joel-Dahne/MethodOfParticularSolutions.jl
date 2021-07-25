@@ -83,21 +83,6 @@ function Base.show(io::IO, u::StandaloneLightningEigenfunction{T}) where {T}
     end
 end
 
-function set_eigenfunction!(u::StandaloneLightningEigenfunction{arb}, coefficients::Vector)
-    resize!(u.coefficients, length(coefficients))
-    copy!(u.coefficients, u.parent.(coefficients))
-    return u
-end
-
-function set_eigenfunction!(
-    u::StandaloneLightningEigenfunction{T},
-    coefficients::Vector,
-) where {T}
-    resize!(u.coefficients, length(coefficients))
-    copy!(u.coefficients, coefficients)
-    return u
-end
-
 """
     coordinate_transformation(u::StandaloneLightningEigenfunction, xy::AbstractVector)
 

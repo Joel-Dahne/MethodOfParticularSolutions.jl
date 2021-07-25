@@ -46,18 +46,6 @@ function Base.show(io::IO, u::StandaloneInteriorEigenfunction)
     end
 end
 
-function set_eigenfunction!(u::StandaloneInteriorEigenfunction{arb}, coefficients::Vector)
-    resize!(u.coefficients, length(coefficients))
-    copy!(u.coefficients, u.parent.(coefficients))
-    return u
-end
-
-function set_eigenfunction!(u::StandaloneInteriorEigenfunction, coefficients::Vector)
-    resize!(u.coefficients, length(coefficients))
-    copy!(u.coefficients, coefficients)
-    return u
-end
-
 """
     coordinate_transformation(u::StandaloneInteriorEigenfunction, xy::AbstractVector)
 
