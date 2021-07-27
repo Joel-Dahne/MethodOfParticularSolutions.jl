@@ -1,70 +1,26 @@
-function CombinedEigenfunction(
+CombinedEigenfunction(
+    domain::AbstractPlanarDomain{S,T},
+    us::Vector{<:AbstractPlanarEigenfunction},
+    orders::Vector{<:Integer} = ones(Int, length(us));
+    even_boundaries = BitSet(),
+    us_to_boundary = [active_boundaries(domain, u) for u in us],
+) where {S,T} =
+    CombinedEigenfunction{S,T}(domain, us, orders; even_boundaries, us_to_boundary)
+
+function CombinedEigenfunction{S,T}(
     domain::AbstractPlanarDomain,
     us::Vector{<:AbstractPlanarEigenfunction},
-    orders::Vector{Int} = ones(Int, length(us));
-    us_to_boundary = [active_boundaries(domain, u) for u in us],
+    orders::Vector{<:Integer} = ones(Int, length(us));
     even_boundaries = BitSet(),
-)
+    us_to_boundary = [active_boundaries(domain, u) for u in us],
+) where {S,T}
     boundary_to_us = OrderedDict(
         i => BitSet(findall(B -> i ∈ B, us_to_boundary)) for i in boundaries(domain)
     )
 
-    return CombinedEigenfunction(
-        domain,
-        us,
-        boundary_to_us,
-        BitSet(even_boundaries),
-        orders,
-    )
+    return CombinedEigenfunction{S,T}(domain, us, orders, even_boundaries, boundary_to_us)
 end
 
-function CombinedEigenfunction(
-    domain::IntersectedDomain,
-    orders::Vector{Int} = ones(Int, length(boundaries(domain))),
-)
-    boundary_to_us = OrderedDict(i => BitSet() for i in boundaries(domain))
-    us = AbstractPlanarEigenfunction[]
-
-    for i in exterior_boundaries(domain)
-        # TODO: Handle other types
-        @assert typeof(domain.exterior) <: Triangle ||
-                typeof(domain.exterior) <: TransformedDomain{<:Triangle}
-
-        v = StandaloneVertexEigenfunction(domain.exterior, i)
-        push!(us, v)
-        idx = length(us)
-        push!(boundary_to_us[i], idx)
-        for j in interior_boundaries(domain)
-            push!(boundary_to_us[j], idx)
-        end
-    end
-
-    for i in interior_boundaries(domain)
-        _, ip = get_domain_and_boundary(domain, i)
-        # TODO: Handle other types
-        @assert typeof(domain.exterior) <: Triangle ||
-                typeof(domain.exterior) <: TransformedDomain{<:Triangle}
-
-        v = StandaloneVertexEigenfunction(domain.interior, ip, outside = true)
-        push!(us, v)
-
-        idx = length(us)
-        push!(boundary_to_us[i], length(us))
-        for j in exterior_boundaries(domain)
-            push!(boundary_to_us[j], idx)
-        end
-    end
-
-    # TODO: Add interior eigenfunction
-    v = StandaloneInteriorEigenfunction(domain)
-    push!(us, v)
-    idx = length(us)
-    for j in boundaries(domain)
-        push!(boundary_to_us[j], idx)
-    end
-
-    return CombinedEigenfunction(domain, us, boundary_to_us, BitSet(), orders)
-end
 
 function Base.getproperty(u::CombinedEigenfunction, name::Symbol)
     if name == :parent
@@ -148,7 +104,15 @@ eigenfunctions, i.e. the eigenfunction `u.us[i]` should take the range
 given by the `i`th element in this vector.
 """
 function basis_function(u::CombinedEigenfunction, ks::UnitRange{Int})
-    ks.start == 1 || throw(ArgumentError("ks must start with 1, got ks = $ks"))
+    if ks.start > 1
+        res1 = basis_function(u, 1:ks.start-1)
+        res2 = basis_function(u, 1:ks.stop)
+
+        return [r1.stop+1:r2.stop for (r1, r2) in zip(res1, res2)]
+    end
+
+    ks.start == 1 ||
+        throw(ArgumentError("ks must start with a positive number, got ks = $ks"))
     ks.stop == 0 && return fill(1:0, length(u.us))
 
     A = [0; cumsum(u.orders)]
@@ -172,85 +136,56 @@ function set_eigenfunction!(u::CombinedEigenfunction, coefficients::Vector)
     return u
 end
 
-function (u::CombinedEigenfunction)(
-    xy::AbstractVector{T},
-    λ::arb,
-    k::Integer;
-    boundary = nothing,
-    notransform::Bool = false,
-) where {T<:Union{arb,arb_series}}
-    i, j = basis_function(u, k)
-    if !isnothing(boundary) && !(i ∈ u.boundary_to_us[boundary])
-        if T == arb
-            return u.parent(0)
-        else
-            return 0 * xy[1]
-        end
-    end
-
-    return u.us[i](xy, λ, j, boundary = boundary, notransform = notransform)
-end
-
-function (u::CombinedEigenfunction)(
-    xy::AbstractVector{T},
-    λ::arb,
+function (u::CombinedEigenfunction{S,T})(
+    xy::AbstractVector,
+    λ,
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
-) where {T<:Union{arb,arb_series}}
-    if isnothing(boundary)
-        indices = eachindex(u.us)
+) where {S,T}
+    # The individual eigenfunctions do not necessarily have a common
+    # type and the conversion here might be redone for each
+    # eigenfunction. Still we opt for an explicit conversion here to
+    # give a more uniform behaviour.
+    if S == arb
+        if eltype(xy) == arb_series
+            xy = convert(SVector{2,arb_series}, xy)
+        else
+            xy = convert(SVector{2,arb}, u.parent.(xy))
+        end
+        λ = u.parent(λ)
     else
-        indices = u.boundary_to_us[boundary]
+        xy = convert(SVector{2,S}, xy)
+        λ = convert(S, λ)
     end
 
-    ks_per_index = basis_function(u, ks)
+    indices = isnothing(boundary) ? eachindex(u.us) : u.boundary_to_us[boundary]
 
-    res_per_index = similar(u.us, Vector{T})
+    ks_per_index = basis_function(u, ks)
+    res_per_index = similar(u.us, Vector{eltype(xy)})
+
     for i in eachindex(u.us)
-        if i in indices && !isempty(ks_per_index[i])
-            res_per_index[i] =
-                one(λ) .* u.us[i](
-                    xy,
-                    λ,
-                    ks_per_index[i],
-                    boundary = boundary,
-                    notransform = notransform,
-                )
+        if i ∈ indices && !isempty(ks_per_index[i])
+            res_tmp = u.us[i](xy, λ, ks_per_index[i]; boundary, notransform)
+            # We don't have to handle arb_series specially here. The
+            # only way res_tmp could contain arb_series is if xy
+            # contains arb_series, in which case the else statement
+            # works.
+            if eltype(eltype(res_per_index)) == arb
+                res_per_index[i] = u.parent.(res_tmp)
+            else
+                res_per_index[i] = res_tmp
+            end
         else
-            z = T == arb ? zero(λ) : 0 * xy[1]
-            res_per_index[i] = fill(z, length(ks_per_index[i]))
+            res_per_index[i] = [zero(first(xy)) for _ in eachindex(ks)]
         end
     end
 
     # TODO: This can be done more efficiently
-    res = similar(ks, T)
+    res = similar(ks, eltype(xy))
     for i in eachindex(ks)
         j, l = basis_function(u, ks[i])
         res[i] = res_per_index[j][l]
-    end
-
-    return res
-end
-
-function (u::CombinedEigenfunction)(
-    xy::AbstractVector{T},
-    λ::arb;
-    boundary = nothing,
-    notransform::Bool = false,
-) where {T<:Union{arb,arb_series}}
-    if isnothing(boundary)
-        indices = eachindex(u.us)
-    else
-        indices = u.boundary_to_us[boundary]
-    end
-
-    res = u.parent(0)
-    for i in indices
-        res += u.us[i](xy, λ, boundary = boundary, notransform = notransform)
-        if (T == arb && !isfinite(res)) || (T == arb_series && !isfinite(res[end]))
-            return res
-        end
     end
 
     return res

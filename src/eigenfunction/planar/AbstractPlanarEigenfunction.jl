@@ -30,7 +30,7 @@ function (u::AbstractPlanarEigenfunction) end
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
-) = u(xy, λ, k:k; boundary, notransform)
+) = only(u(xy, λ, k:k; boundary, notransform))
 
 function (u::AbstractPlanarEigenfunction{S,T})(
     xy::AbstractVector,

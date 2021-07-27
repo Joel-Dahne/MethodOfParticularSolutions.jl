@@ -211,12 +211,31 @@ struct LinkedEigenfunction{S,T,U<:AbstractPlanarEigenfunction{S,T}} <:
     end
 end
 
-mutable struct CombinedEigenfunction <: AbstractPlanarEigenfunction{arb,fmpq}
+mutable struct CombinedEigenfunction{S,T} <: AbstractPlanarEigenfunction{S,T}
     domain::AbstractPlanarDomain
     us::Vector{<:AbstractPlanarEigenfunction}
-    boundary_to_us::OrderedDict{Int,BitSet}
-    even_boundaries::BitSet
     orders::Vector{Int}
+    even_boundaries::BitSet
+    boundary_to_us::OrderedDict{Int,BitSet}
+
+    function CombinedEigenfunction{S,T}(
+        domain,
+        us,
+        orders,
+        even_boundaries,
+        boundary_to_us,
+    ) where {S,T}
+        length(us) == length(orders) ||
+            throw(ArgumentError("us and orders must have the same length"))
+
+        Set(boundaries(domain)) == Set(keys(boundary_to_us)) || throw(
+            ArgumentError(
+                "boundary_to_us needs to have as keys the boundaries of the domain",
+            ),
+        )
+
+        return new{S,T}(domain, us, orders, BitSet(even_boundaries), boundary_to_us)
+    end
 end
 
 mutable struct LShapeEigenfunction <: AbstractPlanarEigenfunction{arb,fmpq}

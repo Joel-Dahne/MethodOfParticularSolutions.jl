@@ -11,6 +11,7 @@ using ArbTools, MethodOfParticularSolutions, Nemo, Printf, Test
         include("unit-tests/StandaloneInteriorEigenfunction.jl")
         include("unit-tests/StandaloneLightningEigenfunction.jl")
         include("unit-tests/LinkedEigenfunction.jl")
+        include("unit-tests/CombinedEigenfunction.jl")
     end
 
     @testset "end-to-end-tests" begin
