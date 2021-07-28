@@ -83,11 +83,13 @@ end
 
 function (u::SphericalVertexEigenfunction)(
     xyz::AbstractVector{T},
-    λ::arb,
+    λ,
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
+
     if !isnothing(boundary) && boundary != u.vertex
         if T == arb
             return u.domain.parent(0)
@@ -111,11 +113,13 @@ end
 function (u::SphericalVertexEigenfunction)(
     θ::T,
     ϕ::T,
-    λ::arb,
+    λ,
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
+
     if !isnothing(boundary) && boundary != u.vertex
         if T == arb
             return u.domain.parent(0)

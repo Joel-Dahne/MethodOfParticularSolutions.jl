@@ -57,11 +57,13 @@ end
 
 function (u::SphericalInteriorEigenfunction)(
     xyz::AbstractVector{T},
-    λ::arb,
+    λ,
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
+
     k = 1 + (k - 1) * u.stride
 
     ν::arb = -0.5 + sqrt(0.25 + λ)
@@ -85,11 +87,13 @@ end
 function (u::SphericalInteriorEigenfunction)(
     θ::T,
     ϕ::T,
-    λ::arb,
+    λ,
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
+
     k = 1 + (k - 1) * u.stride
 
     ν::arb = -0.5 + sqrt(0.25 + λ)

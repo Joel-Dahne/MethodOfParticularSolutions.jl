@@ -21,10 +21,11 @@ active_boundaries(::LShape, ::LShapeEigenfunction) = 1:4
 
 function (u::LShapeEigenfunction)(
     (r, θ)::Tuple{T,T},
-    λ::arb,
+    λ,
     ks::UnitRange{Int};
     boundary = nothing,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
     rsqrtλ = r * sqrt(λ)
     res = similar(ks, T)
     for i in eachindex(ks)
@@ -40,7 +41,7 @@ end
 
 function (u::LShapeEigenfunction)(
     (r, θ)::Tuple{T,T},
-    λ::arb;
+    λ;
     boundary = nothing,
 ) where {T<:Union{arb,arb_series}}
     coeffs = coefficients(u)

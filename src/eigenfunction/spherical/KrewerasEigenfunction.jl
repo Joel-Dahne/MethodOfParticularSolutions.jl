@@ -29,11 +29,13 @@ end
 
 function (u::KrewerasEigenfunction)(
     xyz::AbstractVector{T},
-    λ::arb,
+    λ,
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
+
     ν::arb = -0.5 + sqrt(0.25 + λ)
     if k % 2 == 1
         μ::arb = u.domain.parent(-k * inv(u.domain.angles[1]))
@@ -77,10 +79,12 @@ end
 
 function (u::KrewerasEigenfunction)(
     xyz::AbstractVector{T},
-    λ::arb;
+    λ;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
+
     res = u.domain.parent(0)
 
     for k = 1:length(u.coefficients)

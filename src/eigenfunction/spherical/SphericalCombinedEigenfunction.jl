@@ -131,7 +131,7 @@ end
 
 function (u::SphericalCombinedEigenfunction)(
     xyz::AbstractVector{T},
-    λ::arb,
+    λ,
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
@@ -143,7 +143,7 @@ end
 function (u::SphericalCombinedEigenfunction)(
     θ::T,
     ϕ::T,
-    λ::arb,
+    λ,
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
@@ -154,11 +154,13 @@ end
 
 function (u::SphericalCombinedEigenfunction)(
     xyz::AbstractVector{T},
-    λ::arb,
+    λ,
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
+
     ks_per_index = basis_function(u, ks)
 
     res_per_index = similar(u.us, Vector{T})
@@ -180,11 +182,13 @@ end
 function (u::SphericalCombinedEigenfunction)(
     θ::T,
     ϕ::T,
-    λ::arb,
+    λ,
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
+
     ks_per_index = basis_function(u, ks)
 
     res_per_index = similar(u.us, Vector{T})
@@ -211,10 +215,12 @@ end
 
 function (u::SphericalCombinedEigenfunction)(
     xyz::AbstractVector{T},
-    λ::arb;
+    λ;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
+
     res = u.domain.parent(0)
 
     for v in u.us
@@ -230,10 +236,12 @@ end
 function (u::SphericalCombinedEigenfunction)(
     θ::T,
     ϕ::T,
-    λ::arb;
+    λ;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
+    λ = u.parent(λ)
+
     res = u.domain.parent(0)
 
     for v in u.us

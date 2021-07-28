@@ -67,7 +67,7 @@ end
 """
 function (u::AbstractSphericalEigenfunction)(
     xyz::AbstractVector{T},
-    λ::arb,
+    λ,
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
@@ -83,7 +83,7 @@ end
 function (u::AbstractSphericalEigenfunction)(
     θ::T,
     ϕ::T,
-    λ::arb,
+    λ,
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
@@ -98,7 +98,7 @@ end
 
 function (u::AbstractSphericalEigenfunction)(
     (θ, ϕ)::Union{Tuple{T,T},NamedTuple{(:θ, :ϕ),Tuple{T,T}}},
-    λ::arb,
+    λ,
     k::Integer;
     boundary = nothing,
     notransform::Bool = false,
@@ -108,7 +108,7 @@ end
 
 function (u::AbstractSphericalEigenfunction)(
     xyz::AbstractVector{T},
-    λ::arb,
+    λ,
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
@@ -128,7 +128,7 @@ end
 function (u::AbstractSphericalEigenfunction)(
     θ::T,
     ϕ::T,
-    λ::arb,
+    λ,
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
@@ -147,7 +147,7 @@ end
 
 function (u::AbstractSphericalEigenfunction)(
     (θ, ϕ)::Union{Tuple{T,T},NamedTuple{(:θ, :ϕ),Tuple{T,T}}},
-    λ::arb,
+    λ,
     ks::UnitRange{Int};
     boundary = nothing,
     notransform::Bool = false,
@@ -176,7 +176,7 @@ end
 """
 function (u::AbstractSphericalEigenfunction)(
     xyz::AbstractVector{T},
-    λ::arb;
+    λ;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
@@ -199,7 +199,7 @@ end
 function (u::AbstractSphericalEigenfunction)(
     θ::T,
     ϕ::T,
-    λ::arb;
+    λ;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
@@ -221,7 +221,7 @@ end
 
 function (u::AbstractSphericalEigenfunction)(
     (θ, ϕ)::Union{Tuple{T,T},NamedTuple{(:θ, :ϕ),Tuple{T,T}}},
-    λ::arb;
+    λ;
     boundary = nothing,
     notransform::Bool = false,
 ) where {T<:Union{arb,arb_series}}
