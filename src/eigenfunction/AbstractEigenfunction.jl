@@ -1,4 +1,17 @@
 """
+    has_rational_angles(u::AbstractEigenfunction)
+
+Return `true` if the angles of `u` are represented as rational
+multiples of `π`, return `false` otherwise.
+
+Notice that this only considers how the angles are represented, not
+the actual values. The domain could have angles which are rational
+multiples of `π` but are stored as floating points.
+"""
+has_rational_angles(::AbstractEigenfunction{T,<:Union{Rational,fmpq}}) where {T} = true
+has_rational_angles(::AbstractEigenfunction{T,<:Union{AbstractFloat,arb}}) where {T} = false
+
+"""
     coefficients(u::AbstractEigenfunction)
 
 Return the coefficients of the eigenfunction.

@@ -21,6 +21,8 @@
         @test isempty(u.coefficients)
         @test isnothing(u.parent)
 
+        @test has_rational_angles(u)
+
         @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
         @test nu(u, 3)::Float64 == 9 // 2
@@ -42,6 +44,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test isnothing(u.parent)
+
+        @test !has_rational_angles(u)
 
         @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
@@ -68,6 +72,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == parent
+
+        @test has_rational_angles(u)
 
         @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
@@ -100,6 +106,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == parent
+
+        @test !has_rational_angles(u)
 
         @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
@@ -134,6 +142,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == domain.parent
+
+        @test has_rational_angles(u) == has_rational_angles(domain)
 
         @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
@@ -171,6 +181,8 @@
         @test u.reversed == false
         @test isempty(u.coefficients)
         @test u.parent == domain.parent
+
+        @test has_rational_angles(u) == has_rational_angles(domain)
 
         @test coefficients(set_eigenfunction!(u, [1, 2, 3])) == [1, 2, 3]
 
