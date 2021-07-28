@@ -10,6 +10,7 @@ using GenericSVD
 using Optim
 using OrderedCollections
 import SpecialFunctions
+import SpecialFunctions: besselj, besselj0, besselj1, bessely, bessely0, bessely1
 
 using TimerOutputs
 using Printf
@@ -59,7 +60,6 @@ export AbstractDomain,
 include("arb.jl")
 include("arb_series.jl")
 include("utilities.jl")
-include("special-functions.jl")
 
 # Include types for domains and eigenfunctions
 include("domain/types.jl")

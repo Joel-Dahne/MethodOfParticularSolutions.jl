@@ -50,10 +50,10 @@ end
 """"
     StandaloneInteriorEigenfunction(vertex, orientation, parent; stride = 1, even = false)
 
-An eigenfunction consisting of the functions `bessel_j(ν,
-r*√λ)*sin(ν*θ)` and `bessel_j(ν, ν*√λ)*cos(j*θ)` for `ν` = 0, 1, 2,
-... Here `r` and `θ` are polar coordinates around `vertex` take so
-that `θ = 0` at the given orientation.
+An eigenfunction consisting of the functions `besselj(ν,
+r*√λ)*sin(ν*θ)` and `besselj(ν, ν*√λ)*cos(j*θ)` for `ν` = 0, 1, 2, ...
+Here `r` and `θ` are polar coordinates around `vertex` take so that `θ
+= 0` at the given orientation.
 
 The values of `ν` that are used are 0, `stride`, `2stride`,
 `3stride`,...

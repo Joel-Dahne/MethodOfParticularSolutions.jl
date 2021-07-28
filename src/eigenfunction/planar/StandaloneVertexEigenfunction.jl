@@ -174,7 +174,7 @@ function (u::StandaloneVertexEigenfunction{S,T})(
         k = 1 + (ks[i] - 1) * u.stride + u.offset
         ν = nu(u, k)
 
-        res[i] = bessel_j(ν, rsqrtλ) * sin(ν * θ)
+        res[i] = besselj(ν, rsqrtλ) * sin(ν * θ)
     end
 
     return res

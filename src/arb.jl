@@ -41,7 +41,7 @@ function legendre_p_safe(ν::arb, μ::arb, z::arb)
     return res
 end
 
-function bessel_j(ν::arb, z::arb)
+function SpecialFunctions.besselj(ν::arb, z::arb)
     res = parent(z)()
     ccall(
         (:arb_hypgeom_bessel_j, Nemo.libarb),
@@ -55,7 +55,35 @@ function bessel_j(ν::arb, z::arb)
     return res
 end
 
-function bessel_y(ν::arb, z::arb)
+function SpecialFunctions.besselj0(z::arb)
+    res = parent(z)(0)
+    ccall(
+        (:arb_hypgeom_bessel_j, Nemo.libarb),
+        Nothing,
+        (Ref{arb}, Ref{arb}, Ref{arb}, Clong),
+        res,
+        res,
+        z,
+        parent(z).prec,
+    )
+    return res
+end
+
+function SpecialFunctions.besselj1(z::arb)
+    res = parent(z)(1)
+    ccall(
+        (:arb_hypgeom_bessel_j, Nemo.libarb),
+        Nothing,
+        (Ref{arb}, Ref{arb}, Ref{arb}, Clong),
+        res,
+        res,
+        z,
+        parent(z).prec,
+    )
+    return res
+end
+
+function SpecialFunctions.bessely(ν::arb, z::arb)
     res = parent(z)()
     ccall(
         (:arb_hypgeom_bessel_y, Nemo.libarb),
@@ -63,6 +91,34 @@ function bessel_y(ν::arb, z::arb)
         (Ref{arb}, Ref{arb}, Ref{arb}, Clong),
         res,
         ν,
+        z,
+        parent(z).prec,
+    )
+    return res
+end
+
+function SpecialFunctions.bessely0(z::arb)
+    res = parent(z)(0)
+    ccall(
+        (:arb_hypgeom_bessel_y, Nemo.libarb),
+        Nothing,
+        (Ref{arb}, Ref{arb}, Ref{arb}, Clong),
+        res,
+        res,
+        z,
+        parent(z).prec,
+    )
+    return res
+end
+
+function SpecialFunctions.bessely1(z::arb)
+    res = parent(z)(1)
+    ccall(
+        (:arb_hypgeom_bessel_y, Nemo.libarb),
+        Nothing,
+        (Ref{arb}, Ref{arb}, Ref{arb}, Clong),
+        res,
+        res,
         z,
         parent(z).prec,
     )

@@ -209,14 +209,14 @@ function (u::StandaloneLightningEigenfunction{S,T})(
         r, θ = polar_from_cartesian(xy_local)
 
         rsqrtλ = r * sqrt(λ)
-        b = bessel_y(one(λ), rsqrtλ)
+        b = bessely1(rsqrtλ)
         s, c = sincos(θ)
 
         if u.even
             if charge_index == charge_indices.start == charge_indices.stop
                 # Special case when first and last charge are the same
                 if mod1(ks.start, 2) == 1
-                    res[i] = bessel_y(zero(λ), rsqrtλ)
+                    res[i] = bessely0(rsqrtλ)
                     i += 1
                 end
                 if mod1(ks.stop, 2) == 2
@@ -226,21 +226,21 @@ function (u::StandaloneLightningEigenfunction{S,T})(
             elseif charge_index == charge_indices.start
                 # Might not want all terms from the first charge
                 if mod1(ks.start, 2) == 1
-                    res[i] = bessel_y(zero(λ), rsqrtλ)
+                    res[i] = bessely0(rsqrtλ)
                     i += 1
                 end
                 res[i] = b * c
                 i += 1
             elseif charge_index == charge_indices.stop
                 # Might not want all terms from the last charge
-                res[i] = bessel_y(zero(λ), rsqrtλ)
+                res[i] = bessely0(rsqrtλ)
                 i += 1
                 if mod1(ks.stop, 2) == 2
                     res[i] = b * c
                     i += 1
                 end
             else
-                res[i] = bessel_y(zero(λ), rsqrtλ)
+                res[i] = bessely0(rsqrtλ)
                 res[i+1] = b * c
                 i += 2
             end
@@ -253,7 +253,7 @@ function (u::StandaloneLightningEigenfunction{S,T})(
             if charge_index == charge_indices.start == charge_indices.stop
                 # Special case when first and last charge are the same
                 if mod1(ks.start, 3) == 1
-                    res[i] = bessel_y(zero(λ), rsqrtλ)
+                    res[i] = bessely0(rsqrtλ)
                     i += 1
                 end
                 if mod1(ks.start, 3) <= 2 && mod1(ks.stop, 3) >= 2
@@ -267,7 +267,7 @@ function (u::StandaloneLightningEigenfunction{S,T})(
             elseif charge_index == charge_indices.start
                 # Might not want all terms from the first charge
                 if mod1(ks.start, 3) == 1
-                    res[i] = bessel_y(zero(λ), rsqrtλ)
+                    res[i] = bessely0(rsqrtλ)
                     i += 1
                 end
                 if mod1(ks.start, 3) <= 2
@@ -278,7 +278,7 @@ function (u::StandaloneLightningEigenfunction{S,T})(
                 i += 1
             elseif charge_index == charge_indices.stop
                 # Might not want all terms from the last charge
-                res[i] = bessel_y(zero(λ), rsqrtλ)
+                res[i] = bessely0(rsqrtλ)
                 i += 1
                 if mod1(ks.stop, 3) >= 2
                     res[i] = b * s
@@ -289,7 +289,7 @@ function (u::StandaloneLightningEigenfunction{S,T})(
                     i += 1
                 end
             else
-                res[i] = bessel_y(zero(λ), rsqrtλ)
+                res[i] = bessely0(rsqrtλ)
                 res[i+1] = b * s
                 res[i+2] = b * c
                 i += 3

@@ -1,19 +1,19 @@
 Base.zero(x::arb_series) = arb_series(x.poly.parent(0), x.length)
 
 """
-    bessel_j(ν::arb, z::arb_series[, n = length(z)])
+    besselj(ν::arb, z::arb_series[, n = length(z)])
 
 > Compute the Taylor series of the Bessel function.
 
 It's computed using a recursive formula for the Taylor coefficients
 of the Bessel functions and then composing it with `z`.
 """
-function bessel_j(ν::arb, z::arb_series, n = length(z))
+function SpecialFunctions.besselj(ν::arb, z::arb_series, n = length(z))
     res = arb_series(parent(z.poly)(), n)
 
     if n > 0
         x = z[0]
-        a0 = bessel_j(ν, x)
+        a0 = besselj(ν, x)
         res[0] = a0
 
         if !isfinite(a0)
@@ -21,7 +21,7 @@ function bessel_j(ν::arb, z::arb_series, n = length(z))
         end
 
         if n > 1
-            a1 = 1 // 2 * (bessel_j(ν - 1, x) - bessel_j(ν + 1, x))
+            a1 = 1 // 2 * (besselj(ν - 1, x) - besselj(ν + 1, x))
             res[1] = a1
 
             if !isfinite(a0)
@@ -29,7 +29,7 @@ function bessel_j(ν::arb, z::arb_series, n = length(z))
             end
 
             if n > 2
-                a2 = 1 // 8 * (bessel_j(ν - 2, x) + bessel_j(ν + 2, x) - 2a0)
+                a2 = 1 // 8 * (besselj(ν - 2, x) + besselj(ν + 2, x) - 2a0)
                 res[2] = a2
 
 
@@ -38,7 +38,7 @@ function bessel_j(ν::arb, z::arb_series, n = length(z))
                 end
 
                 if n > 3
-                    a3 = 1 // 48 * (bessel_j(ν - 3, x) - bessel_j(ν + 3, x) - 6a1)
+                    a3 = 1 // 48 * (besselj(ν - 3, x) - besselj(ν + 3, x) - 6a1)
                     res[3] = a3
 
 
@@ -72,22 +72,25 @@ function bessel_j(ν::arb, z::arb_series, n = length(z))
     return Nemo.compose(res, z_tmp, n)
 end
 
+SpecialFunctions.besselj0(z::arb_series) = besselj(base_ring(z.poly)(0), z)
+SpecialFunctions.besselj1(z::arb_series) = besselj(base_ring(z.poly)(1), z)
+
 """
-    bessel_y(ν::arb, z::arb_series[, n = length(z)])
+    bessely(ν::arb, z::arb_series[, n = length(z)])
 
 Compute the Taylor series of the Bessel function.
 
 It's computed using a recursive formula for the Taylor coefficients of
 the Bessel functions and then composing it with `z`. Note that since
-both `bessel_j` and `bessel_y` satisfy the same differential equation
+both `besselj` and `bessely` satisfy the same differential equation
 the recursive formula is the same.
 """
-function bessel_y(ν::arb, z::arb_series, n = length(z))
+function SpecialFunctions.bessely(ν::arb, z::arb_series, n = length(z))
     res = arb_series(parent(z.poly)(), n)
 
     if n > 0
         x = z[0]
-        a0 = bessel_y(ν, x)
+        a0 = bessely(ν, x)
         res[0] = a0
 
         if !isfinite(a0)
@@ -95,7 +98,7 @@ function bessel_y(ν::arb, z::arb_series, n = length(z))
         end
 
         if n > 1
-            a1 = 1 // 2 * (bessel_y(ν - 1, x) - bessel_y(ν + 1, x))
+            a1 = 1 // 2 * (bessely(ν - 1, x) - bessely(ν + 1, x))
             res[1] = a1
 
             if !isfinite(a0)
@@ -103,7 +106,7 @@ function bessel_y(ν::arb, z::arb_series, n = length(z))
             end
 
             if n > 2
-                a2 = 1 // 8 * (bessel_y(ν - 2, x) + bessel_y(ν + 2, x) - 2a0)
+                a2 = 1 // 8 * (bessely(ν - 2, x) + bessely(ν + 2, x) - 2a0)
                 res[2] = a2
 
 
@@ -112,7 +115,7 @@ function bessel_y(ν::arb, z::arb_series, n = length(z))
                 end
 
                 if n > 3
-                    a3 = 1 // 48 * (bessel_y(ν - 3, x) - bessel_y(ν + 3, x) - 6a1)
+                    a3 = 1 // 48 * (bessely(ν - 3, x) - bessely(ν + 3, x) - 6a1)
                     res[3] = a3
 
 
@@ -145,6 +148,9 @@ function bessel_y(ν::arb, z::arb_series, n = length(z))
 
     return Nemo.compose(res, z_tmp, n)
 end
+
+SpecialFunctions.bessely0(z::arb_series) = bessely(base_ring(z.poly)(0), z)
+SpecialFunctions.bessely1(z::arb_series) = bessely(base_ring(z.poly)(1), z)
 
 """
     legendre_p(ν::arb_series, μ::arb, z::arb[, n = length(ν)])

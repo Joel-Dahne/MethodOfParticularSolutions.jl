@@ -33,7 +33,7 @@ function (u::LShapeEigenfunction)(
 
         ν = u.parent(2k // 3)
 
-        res[i] = bessel_j(ν, rsqrtλ) * sin(ν * θ)
+        res[i] = besselj(ν, rsqrtλ) * sin(ν * θ)
     end
 
     return res
@@ -70,7 +70,7 @@ function norm(domain::LShape, u::LShapeEigenfunction, λ::arb)
                 return CC(NaN)
             end
 
-            CC(c2 * r * bessel_j(ν, sqrt(λ) * r)^2)
+            CC(c2 * r * besselj(ν, sqrt(λ) * r)^2)
         end
         y = Nemo.integrate(CC, f, a, b)
         r_integral += real(y)

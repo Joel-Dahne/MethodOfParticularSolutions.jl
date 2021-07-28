@@ -105,11 +105,11 @@ function (u::StandaloneInteriorEigenfunction{S,T})(
     else
         νs = u.stride * (div(ks.start, 2):div(ks.stop, 2)) .+ u.offset
     end
-    bessel_js = let sqrtλr = sqrt(λ) * r
+    besseljs = let sqrtλr = sqrt(λ) * r
         if S == arb
-            Dict(ν => bessel_j(u.parent(ν), sqrtλr) for ν in νs)
+            Dict(ν => besselj(u.parent(ν), sqrtλr) for ν in νs)
         else
-            Dict(ν => bessel_j(convert(S, ν), sqrtλr) for ν in νs)
+            Dict(ν => besselj(convert(S, ν), sqrtλr) for ν in νs)
         end
     end
 
@@ -119,18 +119,18 @@ function (u::StandaloneInteriorEigenfunction{S,T})(
         if u.even
             ν = u.stride * (k - 1) + u.offset
 
-            res[i] = bessel_js[ν] * cos(ν * θ)
+            res[i] = besseljs[ν] * cos(ν * θ)
         elseif u.odd
             ν = u.stride * (k - 1) + 1 + u.offset
 
-            res[i] = bessel_js[ν] * sin(ν * θ)
+            res[i] = besseljs[ν] * sin(ν * θ)
         else
             ν = u.stride * div(k, 2) + u.offset
 
             if isodd(k)
-                res[i] = bessel_js[ν] * cos(ν * θ)
+                res[i] = besseljs[ν] * cos(ν * θ)
             else
-                res[i] = bessel_js[ν] * sin(ν * θ)
+                res[i] = besseljs[ν] * sin(ν * θ)
             end
         end
     end
