@@ -26,14 +26,8 @@ function sigma_matrix(
     end
 
     @timeit_debug "matrix" begin
-        # Currently eigenfunctions only allow evaluation with arbs, so
-        # convert λ to an arb
-        λ = domain.parent(λ)
-
         A = Array{float(T)}(undef, num_boundary + num_interior, N)
 
-        # TODO: Allow evaluation on ranges of indices, to be able to
-        # reuse computations similar to several basis functions.
         Threads.@threads for i = 1:num_boundary
             A[i, :] = u(boundary[i], λ, 1:N, boundary = boundary_index[i])
         end
