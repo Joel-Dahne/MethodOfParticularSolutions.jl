@@ -1,64 +1,80 @@
-function eigenfunction_plotdata(u::StandaloneVertexEigenfunction{T,S}) where {T,S}
-    v = u.vertex
-    orientation = ifelse(S == arb, u.orientation, u.parent(u.orientation) * u.parent(π))
-    θ = ifelse(S == arb, u.θ, u.parent(u.θ) * u.parent(π))
+function eigenfunction_plotdata(u::StandaloneVertexEigenfunction)
+    v = convert(SVector{2,Float64}, u.vertex)
+    if has_rational_angles(u)
+        # We need Rational here since fmpq doesn't convert directly to
+        # Float64
+        orientation = π * convert(Float64, Rational(u.orientation))
+        θ = π * convert(Float64, Rational(u.θ))
+    else
+        orientation = convert(Float64, u.orientation)
+        θ = convert(Float64, u.θ)
+    end
 
-    vertex = (Float64[u.vertex[1]], Float64[u.vertex[2]])
+    vertex = ([v[1]], [v[2]])
     edges = begin
-        s1, c1 = sincos(orientation)
-        v1 = v + 0.1 * SVector(c1, s1)
-        s2, c2 = sincos(orientation + θ)
-        v2 = v + 0.1 * SVector(c2, s2)
-        (Float64[v1[1], u.vertex[1], v2[1]], Float64[v1[2], u.vertex[2], v2[2]])
+        v1 = v + 0.1 * [cos(orientation), sin(orientation)]
+        v2 = v + 0.1 * [cos((orientation + θ)), sin((orientation + θ))]
+        ([v1[1], v[1], v2[1]], [v1[2], v[2], v2[2]])
     end
     arc = begin
         res = [
-            v + 0.1 * SVector(cos(orientation + t * θ), sin(orientation + t * θ))
+            v + 0.1 * [cos(orientation + t * θ), sin(orientation + t * θ)]
             for t in range(0, 1, length = 20)
         ]
-        (Float64.(getindex.(res, 1)), Float64.(getindex.(res, 2)))
+        (getindex.(res, 1), getindex.(res, 2))
     end
 
     return vertex, edges, arc
 end
 
-function eigenfunction_plotdata(u::StandaloneInteriorEigenfunction{T}) where {T}
-    vertex = (Float64[u.vertex[1]], Float64[u.vertex[2]])
+function eigenfunction_plotdata(u::StandaloneInteriorEigenfunction)
+    v = convert(SVector{2,Float64}, u.vertex)
+    if has_rational_angles(u)
+        # We need Rational here since fmpq doesn't convert directly to
+        # Float64
+        orientation = π * convert(Float64, Rational(u.orientation))
+    else
+        orientation = convert(Float64, u.orientation)
+    end
+
+    vertex = ([v[1]], [v[2]])
     edge = begin
-        orientation = ifelse(T == arb, u.orientation, u.parent(u.orientation) * u.parent(π))
-        s, c = sincos(orientation)
-        v = u.vertex + 0.1 * SVector(c, s)
-        (Float64[u.vertex[1], v[1]], Float64[u.vertex[2], v[2]])
+        w = v + 0.1 * [cos(orientation), sin(orientation)]
+        ([v[1], w[1]], [v[2], w[2]])
     end
     arc = begin
-        res = [u.vertex + 0.1 * SVector(cos(θ), sin(θ)) for θ in range(0, 2π, length = 50)]
-        (Float64.(getindex.(res, 1)), Float64.(getindex.(res, 2)))
+        res = [v + 0.1 * [cos(θ), sin(θ)] for θ in range(0, 2π, length = 50)]
+        (getindex.(res, 1), getindex.(res, 2))
     end
 
     return vertex, edge, arc
 end
 
-function eigenfunction_plotdata(u::StandaloneLightningEigenfunction{T,S}) where {T,S}
-    v = u.vertex
-    orientation = ifelse(S == arb, u.orientation, u.parent(u.orientation) * u.parent(π))
-    θ = ifelse(S == arb, u.θ, u.parent(u.θ) * u.parent(π))
+function eigenfunction_plotdata(u::StandaloneLightningEigenfunction)
+    v = convert(SVector{2,Float64}, u.vertex)
+    if has_rational_angles(u)
+        # We need Rational here since fmpq doesn't convert directly to
+        # Float64
+        orientation = π * convert(Float64, Rational(u.orientation))
+        θ = π * convert(Float64, Rational(u.θ))
+    else
+        orientation = convert(Float64, u.orientation)
+        θ = convert(Float64, u.θ)
+    end
 
-    vertex = (Float64[u.vertex[1]], Float64[u.vertex[2]])
+    vertex = ([v[1]], [v[2]])
     edges = begin
-        s1, c1 = sincos(orientation)
-        v1 = v + 0.1 * SVector(c1, s1)
-        s2, c2 = sincos(orientation + θ)
-        v2 = v + 0.1 * SVector(c2, s2)
-        (Float64[v1[1], u.vertex[1], v2[1]], Float64[v1[2], u.vertex[2], v2[2]])
+        v1 = v + 0.1 * [cos(orientation), sin(orientation)]
+        v2 = v + 0.1 * [cos((orientation + θ)), sin((orientation + θ))]
+        ([v1[1], v[1], v2[1]], [v1[2], v[2], v2[2]])
     end
     arc = begin
         res = [
-            v + 0.1 * SVector(cos(orientation + t * θ), sin(orientation + t * θ))
+            v + 0.1 * [cos(orientation + t * θ), sin(orientation + t * θ)]
             for t in range(0, 1, length = 20)
         ]
-        (Float64.(getindex.(res, 1)), Float64.(getindex.(res, 2)))
+        (getindex.(res, 1), getindex.(res, 2))
     end
-
     charges = begin
         n = div(length(coefficients(u)) - 1, 3) + 1
         cs = [charge(u, i, n, true) for i = 1:n]
@@ -195,15 +211,13 @@ end
         ys = range(extrema(Float64.(collect(getindex.(vs, 2))))..., length = ys)
     end
 
-    pts = SVector.(domain.parent.(xs'), domain.parent.(ys))
+    pts = SVector.(xs', ys)
     res = similar(pts, Float64)
-    let λ = domain.parent(λ)
-        Threads.@threads for i in eachindex(pts)
-            if include_exterior || pts[i] ∈ domain
-                res[i] = ifelse(absolute_value, abs, identity)(u(pts[i], λ))
-            else
-                res[i] = 0
-            end
+    Threads.@threads for i in eachindex(pts)
+        if include_exterior || pts[i] ∈ domain
+            res[i] = ifelse(absolute_value, abs, identity)(u(pts[i], λ))
+        else
+            res[i] = 0
         end
     end
 
