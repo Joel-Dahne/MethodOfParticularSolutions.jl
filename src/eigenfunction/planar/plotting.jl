@@ -18,8 +18,8 @@ function eigenfunction_plotdata(u::StandaloneVertexEigenfunction)
     end
     arc = begin
         res = [
-            v + 0.1 * [cos(orientation + t * θ), sin(orientation + t * θ)]
-            for t in range(0, 1, length = 20)
+            v + 0.1 * [cos(orientation + t * θ), sin(orientation + t * θ)] for
+            t in range(0, 1, length = 20)
         ]
         (getindex.(res, 1), getindex.(res, 2))
     end
@@ -70,8 +70,8 @@ function eigenfunction_plotdata(u::StandaloneLightningEigenfunction)
     end
     arc = begin
         res = [
-            v + 0.1 * [cos(orientation + t * θ), sin(orientation + t * θ)]
-            for t in range(0, 1, length = 20)
+            v + 0.1 * [cos(orientation + t * θ), sin(orientation + t * θ)] for
+            t in range(0, 1, length = 20)
         ]
         (getindex.(res, 1), getindex.(res, 2))
     end
