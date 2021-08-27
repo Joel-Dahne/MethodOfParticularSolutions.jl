@@ -95,8 +95,8 @@
         @test u([series([1]), series([1])], 1, 1:2) isa Vector{arb_series}
     end
 
-    domain1 = Triangle(fmpq(1 // 3), fmpq(1 // 4), parent)
-    domain2 = Triangle(parent(π) / 3, parent(π) / 4, parent)
+    domain1 = Triangle(fmpq(1 // 3), fmpq(1 // 4); parent)
+    domain2 = Triangle(parent(π) / 3, parent(π) / 4; parent)
 
     for domain in [domain1, domain2]
         u = StandaloneInteriorEigenfunction(domain)

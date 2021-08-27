@@ -1,5 +1,5 @@
-function Triangle{T}(domain::Triangle{T}, parent::ArbField) where {T<:Union{arb,fmpq}}
-    Triangle(domain.angles[1], domain.angles[2], parent)
+function Triangle{T}(domain::Triangle{T}; parent::ArbField) where {T<:Union{arb,fmpq}}
+    Triangle(domain.angles[1], domain.angles[2]; parent)
 end
 
 function Base.show(io::IO, domain::Triangle{fmpq})

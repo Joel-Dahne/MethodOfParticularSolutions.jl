@@ -17,7 +17,7 @@ function example_domain_ngon(
     θ = fmpq((n - 2) // n)
     angles = fill(θ, n)
     vertices = [(cos(θ), sin(θ)) for θ in (2parent(π) / n) .* (0:n-1)]
-    domain = Polygon(angles, vertices, parent)
+    domain = Polygon(angles, vertices; parent)
 
     if !lightning
         if linked
@@ -90,7 +90,7 @@ function example_domain_ngon(
 end
 
 function example_domain_triangle_in_triangle(parent = RealField(precision(BigFloat)))
-    domain1 = Triangle(fmpq(1 // 3), fmpq(1 // 3), parent)
+    domain1 = Triangle(fmpq(1 // 3), fmpq(1 // 3); parent)
     domain2 = TransformedDomain(
         Triangle(fmpq(1 // 3), fmpq(1 // 3), parent),
         fmpq(0),
@@ -135,7 +135,7 @@ function example_domain_ngon_in_ngon(
     θ1 = fmpq((n1 - 2) // n1)
     angles1 = fill(θ1, n1)
     vertices1 = [(cos(θ), sin(θ)) for θ in (2parent(π) / n1) .* (0:n1-1)]
-    domain1 = Polygon(angles1, vertices1, parent)
+    domain1 = Polygon(angles1, vertices1; parent)
 
     θ2 = fmpq((n2 - 2) // n2)
     angles2 = fill(θ2, n2)
@@ -255,7 +255,7 @@ function example_domain_goal_v1(
     θ = fmpq((n - 2) // n)
     angles = fill(θ, n)
     vertices = [(cospi(θ, parent), sinpi(θ, parent)) for θ in fmpq(2 // n) .* (0:n-1)]
-    exterior = Polygon(angles, vertices, parent)
+    exterior = Polygon(angles, vertices; parent)
 
     # The interior domains are triangles
     @assert mod(h, 3) == 0
@@ -268,7 +268,7 @@ function example_domain_goal_v1(
     interior_angles = [1 // 3, 1 // 3, 1 // 3]
 
     interiors = [
-        TransformedDomain(Polygon(interior_angles, points, parent), i // 3, 1, [0, 0])
+        TransformedDomain(Polygon(interior_angles, points; parent), i // 3, 1, [0, 0])
         for i = 0:5
     ]
 

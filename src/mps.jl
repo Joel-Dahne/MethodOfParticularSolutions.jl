@@ -248,8 +248,8 @@ function iteratemps(
             new_prec = max(53, optim_prec + extra_prec) # Always use at least 53 bits
 
             ### Update the domain and eigenfunction with the new precision ###
-            RR = RealField(new_prec)
-            domain = typeof(domain)(domain, RR)
+            parent = RealField(new_prec)
+            domain = typeof(domain)(domain; parent)
             set_domain!(us[i], domain)
             if recompute
                 recompute!(us[i])
@@ -276,7 +276,7 @@ function iteratemps(
                         λ, optim_res = λ
                     end
 
-                    λ = RR(λ)
+                    λ = parent(λ)
                 end
 
                 @timeit_debug "enclosure" begin

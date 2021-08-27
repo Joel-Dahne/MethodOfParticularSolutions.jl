@@ -1,14 +1,14 @@
 function Polygon{T}(
-    domain::Polygon{T},
+    domain::Polygon{T};
     parent::ArbField = domain.parent,
 ) where {T<:Union{arb,fmpq}}
-    return Polygon(copy(domain.angles), copy(domain.vertices), parent)
+    return Polygon(copy(domain.angles), copy(domain.vertices); parent)
 end
 
 
 function Polygon(
     angles::AbstractVector{T},
-    vertices::AbstractVector,
+    vertices::AbstractVector;
     parent::ArbField,
 ) where {T}
     @assert length(angles) == length(vertices)
@@ -20,7 +20,7 @@ function Polygon(
         angles = parent.(angles)
     end
     vertices = [SVector{2,arb}(parent.(vertex)) for vertex in vertices]
-    return Polygon{S}(angles, vertices, parent)
+    return Polygon{S}(angles, vertices; parent)
 end
 
 

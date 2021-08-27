@@ -12,9 +12,9 @@
     rotation = 1 // 3
     scaling = 2
     translation = [1, 2]
-    triangle1 = Triangle(fmpq(1 // 3), fmpq(1 // 4), parent)
+    triangle1 = Triangle(fmpq(1 // 3), fmpq(1 // 4); parent)
     domain1 = TransformedDomain(triangle1, rotation, scaling, translation)
-    triangle2 = Triangle(parent(π) / 3, parent(π) / 4, parent)
+    triangle2 = Triangle(parent(π) / 3, parent(π) / 4; parent)
     domain2 = TransformedDomain(triangle2, parent(π) * rotation, scaling, translation)
 
     for (triangle, domain) in [(triangle1, domain1), (triangle2, domain2)]

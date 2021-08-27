@@ -32,7 +32,7 @@ function triangle(i::Integer, parent::ArbField = RealField(64); withinterior = t
             r,
         )
 
-    domain = SphericalTriangle(fmpq.(angles[i]), parent)
+    domain = SphericalTriangle(fmpq.(angles[i]); parent)
 
     if i in 1:6
         stride = i in [4, 6] ? 2 : 1

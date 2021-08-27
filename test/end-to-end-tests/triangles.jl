@@ -4,7 +4,7 @@
     )
 
     # Take an equilateral triangle
-    triangle = Triangle(fmpq(1 // 3), fmpq(1 // 3), RealField(64))
+    triangle = Triangle(fmpq(1 // 3), fmpq(1 // 3), parent = RealField(64))
 
     # Take two different kind of eigenfunctions
     u1 = CombinedEigenfunction(

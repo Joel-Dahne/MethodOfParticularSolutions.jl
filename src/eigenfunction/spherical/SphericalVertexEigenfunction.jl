@@ -152,7 +152,7 @@ function norm(domain::SphericalTriangle, u::SphericalVertexEigenfunction, λ::ar
     # Create a new domain which has the vertex we are expanding from
     # on the north pole.
     domain = SphericalTriangle(
-        domain.angles[[u.vertex, mod1(u.vertex + 1, 3), mod1(u.vertex + 2, 3)]],
+        domain.angles[[u.vertex, mod1(u.vertex + 1, 3), mod1(u.vertex + 2, 3)]];
         domain.parent,
     )
     b = CC(theta_bound(domain))

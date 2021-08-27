@@ -9,11 +9,11 @@
 
     parent = RealField(64)
 
-    triangle1 = Triangle(fmpq(1 // 3), fmpq(1 // 4), parent)
+    triangle1 = Triangle(fmpq(1 // 3), fmpq(1 // 4); parent)
     domain1 =
-        Polygon([angle_raw(triangle1, i) for i = 1:3], collect(vertices(triangle1)), parent)
-    triangle2 = Triangle(parent(π) / 3, parent(π) / 4, parent)
-    domain2 = Polygon(collect(angles(triangle2)), collect(vertices(triangle2)), parent)
+        Polygon([angle_raw(triangle1, i) for i = 1:3], collect(vertices(triangle1)); parent)
+    triangle2 = Triangle(parent(π) / 3, parent(π) / 4; parent)
+    domain2 = Polygon(collect(angles(triangle2)), collect(vertices(triangle2)); parent)
 
     for (triangle, domain) in [(triangle1, domain1), (triangle2, domain2)]
         @test has_rational_angles(domain) ==

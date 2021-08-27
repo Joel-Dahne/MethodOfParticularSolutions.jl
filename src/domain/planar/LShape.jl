@@ -1,4 +1,4 @@
-function LShape(domain::LShape, parent::ArbField)
+function LShape(domain::LShape; parent::ArbField)
     LShape(parent)
 end
 

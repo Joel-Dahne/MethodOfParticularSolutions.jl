@@ -9,8 +9,8 @@
 
     parent = RealField(64)
 
-    domain1 = Triangle(fmpq(1 // 3), fmpq(1 // 4), parent)
-    domain2 = Triangle(parent(π) / 3, parent(π) / 4, parent)
+    domain1 = Triangle(fmpq(1 // 3), fmpq(1 // 4); parent)
+    domain2 = Triangle(parent(π) / 3, parent(π) / 4; parent)
 
     for domain in [domain1, domain2]
         @test has_rational_angles(domain) == ifelse(domain isa Triangle{fmpq}, true, false)

@@ -17,4 +17,7 @@ abstract type AbstractSphericalDomain{S,T} <: AbstractDomain{S,T} end
 struct SphericalTriangle{T<:Union{fmpq,arb}} <: AbstractSphericalDomain{arb,T}
     angles::Tuple{T,T,T}
     parent::ArbField
+
+    SphericalTriangle(angles; parent) = new{eltype(angles)}(angles, parent)
+    SphericalTriangle{T}(angles; parent) where {T} = new{T}(angles, parent)
 end

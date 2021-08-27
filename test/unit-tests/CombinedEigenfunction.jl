@@ -3,7 +3,7 @@
 
     parent = RealField(64)
     series = x -> arb_series(ArbPolyRing(parent, :x)(parent.(x)))
-    triangle = Triangle(fmpq(1 // 5), fmpq(1 // 5), parent)
+    triangle = Triangle(fmpq(1 // 5), fmpq(1 // 5); parent)
 
     u1 = CombinedEigenfunction{Float64,Rational{Int}}(
         triangle,

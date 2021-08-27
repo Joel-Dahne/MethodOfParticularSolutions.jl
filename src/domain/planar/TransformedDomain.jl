@@ -1,10 +1,10 @@
 function TransformedDomain{T,S}(
-    domain::TransformedDomain{T,S},
+    domain::TransformedDomain{T,S};
     parent::ArbField,
 ) where {T,S}
     # TODO: Might need to recompute values here
     return TransformedDomain(
-        S(domain.original, parent),
+        S(domain.original; parent),
         domain.rotation,
         domain.scaling,
         domain.translation,

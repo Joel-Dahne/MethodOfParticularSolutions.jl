@@ -31,7 +31,7 @@ struct Triangle{T<:Union{fmpq,arb}} <: AbstractPlanarDomain{arb,T}
     angles::NTuple{3,T}
     parent::ArbField
 
-    function Triangle(α::fmpq, β::fmpq, parent::ArbField = RealField(64))
+    function Triangle(α::fmpq, β::fmpq; parent::ArbField = RealField(64))
         α > 0 || throw(DomainError(α, "angle must be positive"))
         β > 0 || throw(DomainError(β, "angle must be positive"))
         α + β < 1 || throw(ArgumentError("α + β must be less than 1"))
@@ -39,7 +39,7 @@ struct Triangle{T<:Union{fmpq,arb}} <: AbstractPlanarDomain{arb,T}
         return new{fmpq}((α, β, γ), parent)
     end
 
-    function Triangle(α::arb, β::arb, parent::ArbField = parent(α))
+    function Triangle(α::arb, β::arb; parent::ArbField = parent(α))
         α > 0 || throw(DomainError(α, "angle must be positive"))
         β > 0 || throw(DomainError(β, "angle must be positive"))
         !(α + β > parent(π)) || throw(ArgumentError("α + β must be less than π"))
@@ -63,6 +63,9 @@ struct Polygon{T<:Union{fmpq,arb}} <: AbstractPlanarDomain{arb,T}
     angles::Vector{T}
     vertices::Vector{SVector{2,arb}}
     parent::ArbField
+
+    Polygon(angles, vertices; parent) = new{eltype(angles)}(angles, vertices, parent)
+    Polygon{T}(angles, vertices; parent) where {T} = new{T}(angles, vertices, parent)
 end
 
 """

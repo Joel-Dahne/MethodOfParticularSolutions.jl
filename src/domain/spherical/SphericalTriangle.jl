@@ -1,8 +1,8 @@
 function SphericalTriangle{T}(
-    domain::SphericalTriangle,
+    domain::SphericalTriangle;
     parent::ArbField,
 ) where {T<:Union{fmpq,arb}}
-    SphericalTriangle(domain.angles, parent)
+    SphericalTriangle(domain.angles; parent)
 end
 
 function Base.show(io::IO, domain::SphericalTriangle{fmpq})

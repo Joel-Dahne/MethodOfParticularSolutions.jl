@@ -2,13 +2,13 @@
     Ns = 8:8:16
     optim_prec_final = 64
 
-    RR = RealField(1024)
-    result = RR("[9.6397238440219410527114592624 +/- 1.43e-26]")
+    parent = RealField(1024)
+    result = parent("[9.6397238440219410527114592624 +/- 1.43e-26]")
     goalradius = 3e-2
 
     domain = LShape(RealField(128))
     u = LShapeEigenfunction(domain)
-    interval = ball(RR(9.6), RR(0.5))
+    interval = ball(parent(9.6), parent(0.5))
 
     println("Computing eigenvalue for the $domain")
     λs, _ = iteratemps(

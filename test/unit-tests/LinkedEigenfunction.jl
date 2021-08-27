@@ -1,7 +1,7 @@
 @testset "LinkedEigenfunction" begin
     parent = RealField(64)
     series = x -> arb_series(ArbPolyRing(parent, :x)(parent.(x)))
-    triangle = Triangle(fmpq(1 // 3), fmpq(1 // 3), parent)
+    triangle = Triangle(fmpq(1 // 3), fmpq(1 // 3); parent)
 
     u1 = LinkedEigenfunction(
         [StandaloneVertexEigenfunction{Float64,Rational{Int}}(triangle, i) for i = 1:3],
