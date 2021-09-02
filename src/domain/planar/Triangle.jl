@@ -1,21 +1,20 @@
-function Triangle{T}(domain::Triangle{T}; parent::ArbField) where {T<:Union{arb,fmpq}}
+function Triangle{S,T}(domain::Triangle{S,T}; parent::ArbField) where {S,T}
     Triangle(domain.angles[1], domain.angles[2]; parent)
 end
 
-function Base.show(io::IO, domain::Triangle{fmpq})
-    angles_string = ["$(numerator(a))π/$(denominator(a))" for a in domain.angles]
+function Base.show(io::IO, domain::Triangle{S,T}) where {S,T}
+    if has_rational_angles(domain)
+        angles_string = ["$(numerator(a))π/$(denominator(a))" for a in domain.angles]
+    else
+        angles_string = ["$a" for a in domain.angles]
+    end
     print(
         io,
-        "Triangle with $(domain.parent.prec) bits of precision and angles ($(angles_string[1]), $(angles_string[2]), $(angles_string[3]))",
+        "Triangle{$S,$T} with  angles ($(angles_string[1]), $(angles_string[2]), $(angles_string[3]))",
     )
-end
-
-function Base.show(io::IO, domain::Triangle{arb})
-    angles_string = ["$a" for a in domain.angles]
-    print(
-        io,
-        "Triangle with $(domain.parent.prec) bits of precision and angles ($(angles_string[1]), $(angles_string[2]), $(angles_string[3]))",
-    )
+    if !isnothing(domain.parent)
+        print(io, " and $(precision(domain.parent)) bits of precision")
+    end
 end
 
 vertexindices(::Triangle) = 1:3
@@ -23,25 +22,20 @@ boundaries(::Triangle) = 1:3
 
 angle_raw(domain::Triangle, i::Integer) = domain.angles[i]
 
-"""
-    vertex(domain::Triangle, i::Integer)
-
-Return the Cartesian coordinates of vertex `i` of the triangle.
-"""
-function vertex(domain::Triangle{T}, i::Integer) where {T}
+function vertex(domain::Triangle{S,T}, i::Integer) where {S,T}
     if i == 1
-        return SVector(domain.parent(0), domain.parent(0))
+        return SVector(zero(S), zero(S))
     elseif i == 2
-        return SVector(domain.parent(1), domain.parent(0))
+        return SVector(one(S), zero(S))
     elseif i == 3
-        if T == arb
+        if has_rational_angles(domain)
+            x =
+                sinpi(convert(S, angle_raw(domain, 2))) /
+                sinpi(convert(S, angle_raw(domain, 3)))
+            s, c = sincospi(convert(S, angle_raw(domain, 1)))
+        else
             x = sin(angle(domain, 2)) / sin(angle(domain, 3))
             s, c = sincos(angle(domain, 1))
-        else
-            x =
-                sinpi(angle_raw(domain, 2), domain.parent) /
-                sinpi(angle_raw(domain, 3), domain.parent)
-            s, c = sincospi(angle_raw(domain, 1), domain.parent)
         end
         return SVector(c * x, s * x)
     else
@@ -49,7 +43,48 @@ function vertex(domain::Triangle{T}, i::Integer) where {T}
     end
 end
 
-function orientation_raw(domain::Triangle{T}, i::Integer; reversed = false) where {T}
+function vertex(domain::Triangle{arb,T}, i::Integer) where {T}
+    if i == 1
+        return SVector(domain.parent(0), domain.parent(0))
+    elseif i == 2
+        return SVector(domain.parent(1), domain.parent(0))
+    elseif i == 3
+        if has_rational_angles(domain)
+            x =
+                sinpi(angle_raw(domain, 2), domain.parent) /
+                sinpi(angle_raw(domain, 3), domain.parent)
+            s, c = sincospi(angle_raw(domain, 1), domain.parent)
+        else
+            x = sin(angle(domain, 2)) / sin(angle(domain, 3))
+            s, c = sincos(angle(domain, 1))
+        end
+        return SVector(c * x, s * x)
+    else
+        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
+    end
+end
+
+function orientation_raw(domain::Triangle{S,T}, i::Integer; reversed = false) where {S,T}
+    π = has_rational_angles(domain) ? one(T) : pi
+
+    if i == 1
+        res = zero(T)
+    elseif i == 2
+        res = π - angle_raw(domain, 2)
+    elseif i == 3
+        res = π + angle_raw(domain, 1)
+    else
+        throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
+    end
+
+    if reversed
+        return 2convert(T, π) - angle_raw(domain, i) - res
+    else
+        return res
+    end
+end
+
+function orientation_raw(domain::Triangle{arb,T}, i::Integer; reversed = false) where {T}
     if T == fmpq
         π = fmpq(1)
     else

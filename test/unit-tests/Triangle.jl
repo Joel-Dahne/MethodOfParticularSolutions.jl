@@ -11,9 +11,12 @@
 
     domain1 = Triangle(fmpq(1 // 3), fmpq(1 // 4); parent)
     domain2 = Triangle(parent(π) / 3, parent(π) / 4; parent)
+    domain3 = Triangle(1 // 3, 1 // 4)
+    domain4 = Triangle(π / 3, π / 4)
 
-    for domain in [domain1, domain2]
-        @test has_rational_angles(domain) == ifelse(domain isa Triangle{fmpq}, true, false)
+    for domain in [domain1, domain2, domain3, domain4]
+        @test has_rational_angles(domain) ==
+              (domain isa Triangle{T,<:Union{Rational,fmpq}} where {T})
 
         @test vertexindices(domain) == 1:3
         @test boundaries(domain) == 1:3

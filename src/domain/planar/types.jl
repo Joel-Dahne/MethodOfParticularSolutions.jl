@@ -27,16 +27,17 @@ origin the vertex with angle `β` is taken to have `y = 0`.
 
 Vertex 1, 2 and 3 are opposite of angles α, β and γ respectively.
 """
-struct Triangle{T<:Union{fmpq,arb}} <: AbstractPlanarDomain{arb,T}
+struct Triangle{S,T} <: AbstractPlanarDomain{S,T}
     angles::NTuple{3,T}
-    parent::ArbField
+    parent::Union{ArbField,Nothing}
 
-    function Triangle(α::fmpq, β::fmpq; parent::ArbField = RealField(64))
+    function Triangle(α::T, β::T; parent::Nothing = nothing) where {T<:AbstractFloat}
         α > 0 || throw(DomainError(α, "angle must be positive"))
         β > 0 || throw(DomainError(β, "angle must be positive"))
-        α + β < 1 || throw(ArgumentError("α + β must be less than 1"))
-        γ = 1 - α - β
-        return new{fmpq}((α, β, γ), parent)
+        α + β < π || throw(ArgumentError("α + β must be less than π"))
+        γ = π - α - β
+
+        return new{T,T}((α, β, γ), parent)
     end
 
     function Triangle(α::arb, β::arb; parent::ArbField = parent(α))
@@ -44,8 +45,28 @@ struct Triangle{T<:Union{fmpq,arb}} <: AbstractPlanarDomain{arb,T}
         β > 0 || throw(DomainError(β, "angle must be positive"))
         !(α + β > parent(π)) || throw(ArgumentError("α + β must be less than π"))
         α + β < parent(π) || @warn "α + β might not be less than π"
+
         γ = parent(π) - α - β
-        return new{arb}((α, β, γ), parent)
+
+        return new{arb,arb}((α, β, γ), parent)
+    end
+
+    function Triangle(α::T, β::T; parent::Nothing = nothing) where {T<:Rational}
+        α > 0 || throw(DomainError(α, "angle must be positive"))
+        β > 0 || throw(DomainError(β, "angle must be positive"))
+        α + β < 1 || throw(ArgumentError("α + β must be less than 1"))
+        γ = one(α) - α - β
+
+        return new{float(T),T}((α, β, γ), parent)
+    end
+
+    function Triangle(α::fmpq, β::fmpq; parent::ArbField = RealField(64))
+        α > 0 || throw(DomainError(α, "angle must be positive"))
+        β > 0 || throw(DomainError(β, "angle must be positive"))
+        α + β < 1 || throw(ArgumentError("α + β must be less than 1"))
+        γ = 1 - α - β
+
+        return new{arb,fmpq}((α, β, γ), parent)
     end
 end
 

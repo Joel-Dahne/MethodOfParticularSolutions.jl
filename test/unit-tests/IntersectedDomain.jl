@@ -27,7 +27,7 @@
     for (exterior, interior, domain) in
         [(exterior1, interior1, domain1), (exterior2, interior2, domain2)]
         @test has_rational_angles(domain) ==
-              ifelse(exterior isa Triangle{fmpq}, true, false)
+              ifelse(exterior isa Triangle{arb,fmpq}, true, false)
 
         @test vertexindices(domain) == 1:7
         @test boundaries(domain) == 1:7

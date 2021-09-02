@@ -39,9 +39,10 @@ angle_raw(domain::AbstractDomain, i::Integer)
 
 Return the angle for vertex `i` of `domain`.
 """
+angle(domain::AbstractDomain, i::Integer) =
+    has_rational_angles(domain) ? π * angle_raw(domain, i) : angle_raw(domain, i)
 angle(domain::AbstractDomain{arb,fmpq}, i::Integer) =
     domain.parent(π) * angle_raw(domain, i)
-angle(domain::AbstractDomain{arb,arb}, i::Integer) = angle_raw(domain, i)
 
 """
     angles(domain::AbstractDomain)
@@ -75,10 +76,18 @@ the vertex.
 If `reversed = false` then instead compute the angle going in the
 negative direction.
 """
+orientation(domain::AbstractDomain{S,T}, i::Integer; reversed = false) where {S,T} =
+    has_rational_angles(domain) ? π * orientation_raw(domain, i; reversed) :
+    orientation_raw(domain, i; reversed)
 orientation(domain::AbstractDomain{arb,fmpq}, i::Integer; reversed = false) =
     domain.parent(π) * orientation_raw(domain, i; reversed)
-orientation(domain::AbstractDomain{arb,arb}, i::Integer; reversed = false) =
-    orientation_raw(domain, i; reversed)
+
+"""
+    vertex(domain::AbstractDomain, i::Integer)
+
+Return vertex `i` vertices of `domain`.
+"""
+vertex(domain::AbstractDomain, i::Integer)
 
 """
     vertices(domain::AbstractDomain)
