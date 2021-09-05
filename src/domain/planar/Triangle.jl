@@ -1,4 +1,7 @@
-function Triangle{S,T}(domain::Triangle{S,T}; parent::ArbField) where {S,T}
+function Triangle{S,T}(
+    domain::Triangle{S,T};
+    parent::Union{ArbField,Nothing} = domain.parent,
+) where {S,T}
     Triangle(domain.angles[1], domain.angles[2]; parent)
 end
 

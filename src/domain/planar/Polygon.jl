@@ -1,5 +1,7 @@
-Polygon{S,T}(domain::Polygon{S,T}; parent::ArbField = domain.parent) where {S,T} =
-    Polygon{S,T}(copy(domain.angles), copy(domain.vertices); parent)
+Polygon{S,T}(
+    domain::Polygon{S,T};
+    parent::Union{ArbField,Nothing} = domain.parent,
+) where {S,T} = Polygon{S,T}(copy(domain.angles), copy(domain.vertices); parent)
 
 function Base.show(io::IO, domain::Polygon)
     print(io, "Polygon with $(length(boundaries(domain))) sides")

@@ -25,6 +25,8 @@
         (triangle3, domain3, Float64),
         (triangle4, domain4, Float64),
     ]
+        @test typeof(typeof(domain)(domain)) == typeof(domain)
+
         @test has_rational_angles(domain) ==
               (domain isa Polygon{S,<:Union{Rational,fmpq}} where {S})
 

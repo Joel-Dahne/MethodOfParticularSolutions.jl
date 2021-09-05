@@ -15,6 +15,8 @@
     domain4 = Triangle(π / 3, π / 4)
 
     for domain in [domain1, domain2, domain3, domain4]
+        @test typeof(typeof(domain)(domain)) == typeof(domain)
+
         @test has_rational_angles(domain) ==
               (domain isa Triangle{T,<:Union{Rational,fmpq}} where {T})
 
