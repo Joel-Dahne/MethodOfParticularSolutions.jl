@@ -117,12 +117,11 @@ Return the centroid of the triangle.
 """
 center(domain::Triangle) = sum(vertices(domain)) / 3
 
-function Base.in(xy, domain::Triangle)
+function Base.in(xy, domain::Triangle{S}) where {S}
+    π = S == arb ? domain.parent(pi) : pi
     x, y = xy
     return (
-        y >= 0 &&
-        atan(y, x) <= angle(domain, 1) &&
-        domain.parent(π) - atan(y, x - 1) <= angle(domain, 2) # To the left of the right edge
+        y >= 0 && atan(y, x) <= angle(domain, 1) && π - atan(y, x - 1) <= angle(domain, 2) # To the left of the right edge
     )
 end
 
@@ -135,11 +134,11 @@ function boundary_parameterization(t, domain::Triangle, i::Integer)
 end
 
 function boundary_points(
-    domain::Triangle,
+    domain::Triangle{S},
     i::Integer,
     n::Integer;
     distribution = :chebyshev,
-)
+) where {S}
     i ∈ boundaries(domain) ||
         throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
 
@@ -147,38 +146,72 @@ function boundary_points(
     w = vertex(domain, mod1(i + 2, 3))
 
     if distribution == :linear
-        f = j -> domain.parent(j // (n + 1))
+        if S == arb
+            f = j -> domain.parent(j // (n + 1))
+        else
+            f = j -> convert(S, j // (n + 1))
+        end
     elseif distribution == :chebyshev
-        f = j -> (cospi(domain.parent((2j - 1) // 2n)) + 1) / 2
+        if S == arb
+            f = j -> (cospi(domain.parent((2j - 1) // 2n)) + 1) / 2
+        else
+            f = j -> (cospi(convert(S, (2j - 1) // 2n)) + 1) / 2
+        end
     elseif distribution == :exponential
         m = (n + 1) // 2
-        f = j -> begin
-            d = exp(-domain.parent(m - j))
-            if j < m
-                return d / 2
-            elseif j > m
-                return 1 - inv(d) / 2
-            else
-                return domain.parent(0.5)
+        if S == arb
+            f = j -> begin
+                d = exp(domain.parent(m - j))
+                if j < m
+                    return d / 2
+                elseif j > m
+                    return 1 - inv(d) / 2
+                else
+                    return domain.parent(0.5)
+                end
+            end
+        else
+            f = j -> begin
+                d = exp(-convert(S, m - j))
+                if j < m
+                    return d / 2
+                elseif j > m
+                    return 1 - 1 / 2d
+                else
+                    return convert(S, 1 // 2)
+                end
             end
         end
     elseif distribution == :root_exponential
         m = (n + 1) // 2
-        f = j -> begin
-            d = exp(-domain.parent(m - j) / sqrt(domain.parent(n)))
-            if j < m
-                return d / 2
-            elseif j > m
-                return 1 - inv(d) / 2
-            else
-                return domain.parent(0.5)
+        if S == arb
+            f = j -> begin
+                d = exp(-domain.parent(m - j) / sqrt(domain.parent(n)))
+                if j < m
+                    return d / 2
+                elseif j > m
+                    return 1 - inv(d) / 2
+                else
+                    return domain.parent(0.5)
+                end
+            end
+        else
+            f = j -> begin
+                d = exp(-convert(S, m - j) / sqrt(convert(S, n)))
+                if j < m
+                    return d / 2
+                elseif j > m
+                    return 1 - 1 / 2d
+                else
+                    return convert(S, 1 // 2)
+                end
             end
         end
     else
         throw(ArgumentError("no distribution named $distribution"))
     end
 
-    points = Vector{SVector{2,arb}}(undef, n)
+    points = Vector{typeof(v)}(undef, n)
     for j = 1:n
         t = f(j)
         points[j] = v .+ t .* (w - v)
@@ -191,7 +224,7 @@ function interior_points(domain::Triangle, n::Integer; rng = MersenneTwister(42)
     v = vertex(domain, 2)
     w = vertex(domain, 3)
 
-    points = Vector{SVector{2,arb}}(undef, n)
+    points = Vector{typeof(v)}(undef, n)
     for i = 1:n
         u1, u2 = rand(rng), rand(rng)
         if u1 + u2 > 1

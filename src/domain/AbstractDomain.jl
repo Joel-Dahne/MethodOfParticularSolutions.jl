@@ -104,6 +104,13 @@ Return the area of the domain.
 area(domain::AbstractDomain)
 
 """
+    Base.in(xy, domain::AbstractDomain)
+
+Check if the point `xy` is contained in `domain`.
+"""
+Base.in(xy, domain::AbstractDomain)
+
+"""
     boundary_parameterization(t, domain::AbstractDomain, i::Integer)
 
 Compute a parameterization of boundary number `i`.
