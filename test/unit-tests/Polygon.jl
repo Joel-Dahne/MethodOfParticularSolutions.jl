@@ -86,5 +86,19 @@
 
             @test center(domain) ≈ center(triangle)
         end
+
+        # This only checks that the method runs and returns the
+        # correct number of points, but not the actual values
+        for i in vertexindices(domain)
+            for distribution in [:linear, :chebyshev, :exponential, :root_exponential]
+                points, boundary = boundary_points(domain, i, 10; distribution)
+                @test length(points) == length(boundary) == 10
+                @test boundary == fill(i, 10)
+            end
+        end
+
+        points = interior_points(domain, 10)
+        @test length(points) == 10
+        @test all(∈(domain), points)
     end
 end

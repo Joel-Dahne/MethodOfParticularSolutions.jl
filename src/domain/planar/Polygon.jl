@@ -175,7 +175,12 @@ function boundary_parameterization(t, domain::Polygon, i::Integer)
     return v .+ t .* (w - v)
 end
 
-function boundary_points(domain::Polygon, i::Integer, n::Integer; distribution = :chebyshev)
+function boundary_points(
+    domain::Polygon{S},
+    i::Integer,
+    n::Integer;
+    distribution = :chebyshev,
+) where {S}
     i ∈ boundaries(domain) ||
         throw(ArgumentError("attempt to get vertex $i from a $(typeof(domain))"))
 
@@ -183,39 +188,74 @@ function boundary_points(domain::Polygon, i::Integer, n::Integer; distribution =
     w = vertex(domain, mod1(i + 1, length(boundaries(domain))))
 
     if distribution == :linear
-        f = j -> domain.parent(j // (n + 1))
+        if S == arb
+            f = j -> domain.parent(j // (n + 1))
+        else
+            f = j -> convert(S, j // (n + 1))
+        end
     elseif distribution == :chebyshev
-        f = j -> (cospi(domain.parent((2j - 1) // 2n)) + 1) / 2
+        if S == arb
+            f = j -> (cospi(domain.parent((2j - 1) // 2n)) + 1) / 2
+        else
+            f = j -> (cospi(convert(S, (2j - 1) // 2n)) + 1) / 2
+        end
     elseif distribution == :exponential
         m = (n + 1) // 2
-        f = j -> begin
-            d = exp(-domain.parent(m - j))
-            if j < m
-                return d / 2
-            elseif j > m
-                return 1 - inv(d) / 2
-            else
-                return domain.parent(0.5)
-            end
-        end
-    elseif distribution == :root_exponential
-        m = (n + 1) // 2
-        f =
-            j -> begin
-                d = exp(-4(sqrt(domain.parent(m)) - sqrt(domain.parent(min(j, n - j + 1)))))
+        if S == arb
+            f = j -> begin
+                d = exp(domain.parent(m - j))
                 if j < m
                     return d / 2
                 elseif j > m
-                    return 1 - d / 2
+                    return 1 - inv(d) / 2
                 else
                     return domain.parent(0.5)
                 end
             end
+        else
+            f = j -> begin
+                d = exp(-convert(S, m - j))
+                if j < m
+                    return d / 2
+                elseif j > m
+                    return 1 - 1 / 2d
+                else
+                    return convert(S, 1 // 2)
+                end
+            end
+        end
+    elseif distribution == :root_exponential
+        m = (n + 1) // 2
+        if S == arb
+            f =
+                j -> begin
+                    d = exp(-4(sqrt(domain.parent(m)) - sqrt(domain.parent(min(j, n - j + 1)))))
+                    if j < m
+                        return d / 2
+                    elseif j > m
+                        return 1 - d / 2
+                    else
+                        return domain.parent(0.5)
+                    end
+                end
+        else
+            f =
+                j -> begin
+                    d = exp(-4(sqrt(convert(S, m)) - sqrt(convert(S, min(j, n - j + 1)))))
+                    if j < m
+                        return d / 2
+                    elseif j > m
+                        return 1 - d / 2
+                    else
+                        return convert(S, 1 // 2)
+                    end
+                end
+        end
     else
         throw(ArgumentError("no distribution named $distribution"))
     end
 
-    points = Vector{SVector{2,arb}}(undef, n)
+    points = Vector{typeof(v)}(undef, n)
     for j = 1:n
         t = f(j)
         points[j] = v .+ t .* (w - v)
@@ -224,8 +264,12 @@ function boundary_points(domain::Polygon, i::Integer, n::Integer; distribution =
     return points, fill(i, n)
 end
 
-function interior_points(domain::Polygon, n::Integer; rng = MersenneTwister(42))
-    points = Vector{SVector{2,arb}}(undef, n)
+function interior_points(
+    domain::Polygon{S},
+    n::Integer;
+    rng = MersenneTwister(42),
+) where {S}
+    points = Vector{SVector{2,S}}(undef, n)
     xmin, xmax = extrema(getindex.(vertices(domain), 1))
     ymin, ymax = extrema(getindex.(vertices(domain), 2))
     for i = 1:n
