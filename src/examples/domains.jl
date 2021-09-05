@@ -265,7 +265,7 @@ function example_domain_goal_v1(
         SVector(parent(d // N), parent(h // N) / sqrt(parent(3))),
     ]
 
-    interior_angles = [1 // 3, 1 // 3, 1 // 3]
+    interior_angles = fmpq.([1 // 3, 1 // 3, 1 // 3])
 
     interiors = [
         TransformedDomain(Polygon(interior_angles, points; parent), i // 3, 1, [0, 0])

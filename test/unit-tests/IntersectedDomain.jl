@@ -11,15 +11,25 @@
 
     exterior1 = Triangle(fmpq(1 // 3), fmpq(1 // 4); parent)
     interior1 = Polygon(
-        [1 // 4, 1 // 4, 1 // 4, 1 // 4],
-        [[0.25, 0.1], [0.5, 0.1], [0.5, 0.2], [0.25, 0.2]];
+        fmpq.([1 // 4, 1 // 4, 1 // 4, 1 // 4]),
+        [
+            parent.([0.25, 0.1]),
+            parent.([0.5, 0.1]),
+            parent.([0.5, 0.2]),
+            parent.([0.25, 0.2]),
+        ];
         parent,
     )
     domain1 = IntersectedDomain(exterior1, [interior1])
     exterior2 = Triangle(parent(π) / 3, parent(π) / 4; parent)
     interior2 = Polygon(
         [parent(π) / 4, parent(π) / 4, parent(π) / 4, parent(π) / 4],
-        [[0.25, 0.1], [0.5, 0.1], [0.5, 0.2], [0.25, 0.2]];
+        [
+            parent.([0.25, 0.1]),
+            parent.([0.5, 0.1]),
+            parent.([0.5, 0.2]),
+            parent.([0.25, 0.2]),
+        ];
         parent,
     )
     domain2 = IntersectedDomain(exterior2, [interior2])

@@ -80,13 +80,46 @@ given.
 The boundaries are enumerated by which vertex they are next to, in
 positive order.
 """
-struct Polygon{T<:Union{fmpq,arb}} <: AbstractPlanarDomain{arb,T}
+struct Polygon{S,T} <: AbstractPlanarDomain{S,T}
     angles::Vector{T}
-    vertices::Vector{SVector{2,arb}}
-    parent::ArbField
+    vertices::Vector{SVector{2,S}}
+    parent::Union{ArbField,Nothing}
 
-    Polygon(angles, vertices; parent) = new{eltype(angles)}(angles, vertices, parent)
-    Polygon{T}(angles, vertices; parent) where {T} = new{T}(angles, vertices, parent)
+    function Polygon{S,T}(
+        angles::AbstractVector,
+        vertices::AbstractVector;
+        parent::Union{ArbField,Nothing} = nothing,
+    ) where {S,T}
+        length(angles) == length(vertices) || throw(
+            ArgumentError(
+                "length of angles and vertices don't match, got $length(angles) and length(vertices)",
+            ),
+        )
+
+        angles = convert(Vector{T}, angles)
+        vertices = convert(Vector{SVector{2,S}}, vertices)
+
+        if T == arb && isnothing(parent)
+            parent = Nemo.parent(vertices[1][1])
+        end
+
+        return new{S,T}(angles, vertices, parent)
+    end
+
+    function Polygon(
+        angles::AbstractVector,
+        vertices::AbstractVector;
+        parent::Union{ArbField,Nothing} = nothing,
+    )
+        S = eltype(eltype(vertices))
+        T = eltype(angles)
+
+        if S != arb
+            S = float(S)
+        end
+
+        return Polygon{S,T}(angles, vertices; parent)
+    end
 end
 
 """

@@ -1,34 +1,11 @@
-function Polygon{T}(
-    domain::Polygon{T};
-    parent::ArbField = domain.parent,
-) where {T<:Union{arb,fmpq}}
-    return Polygon(copy(domain.angles), copy(domain.vertices); parent)
-end
-
-
-function Polygon(
-    angles::AbstractVector{T},
-    vertices::AbstractVector;
-    parent::ArbField,
-) where {T}
-    @assert length(angles) == length(vertices)
-    if T == fmpq || T <: Rational
-        S = fmpq
-        angles = fmpq.(angles)
-    else
-        S = arb
-        angles = parent.(angles)
-    end
-    vertices = [SVector{2,arb}(parent.(vertex)) for vertex in vertices]
-    return Polygon{S}(angles, vertices; parent)
-end
-
+Polygon{S,T}(domain::Polygon{S,T}; parent::ArbField = domain.parent) where {S,T} =
+    Polygon{S,T}(copy(domain.angles), copy(domain.vertices); parent)
 
 function Base.show(io::IO, domain::Polygon)
-    print(
-        io,
-        "Polygon with $(length(boundaries(domain))) sides and $(domain.parent.prec) bits of precision",
-    )
+    print(io, "Polygon with $(length(boundaries(domain))) sides")
+    if !isnothing(domain.parent)
+        print(io, " and $(precision(domain.parent)) bits of precision")
+    end
 end
 
 vertexindices(domain::Polygon) = 1:length(domain.angles)
@@ -39,13 +16,85 @@ angle_raw(domain::Polygon, i::Integer) = domain.angles[i]
 vertex(domain::Polygon, i::Integer) = domain.vertices[i]
 vertices(domain::Polygon) = domain.vertices
 
-function orientation_raw(domain::Polygon{arb}, i::Integer; reversed = false)
+function orientation_raw(
+    domain::Polygon{S,<:AbstractFloat},
+    i::Integer;
+    reversed = false,
+) where {S}
+    # Compute the orientation for the first vertex and then use the
+    # angles to get the remaining orientations. Currently we could
+    # compute the orientation directly, but this will be better if we
+    # switch to storing an exact orientation.
+    # FIXME: This is not accurate if v[2] contains zero but is not
+    # exactly zero
+    v = vertex(domain, 2) - vertex(domain, 1)
+    res = atan(v[2], v[1])
+
+    res += (i - 1) * oftype(res, π)
+    for j = 2:i
+        res -= angle_raw(domain, j)
+    end
+
+    if reversed
+        res = 2oftype(res, π) - angle_raw(domain, i) - res
+    end
+
+    return res
+end
+
+function orientation_raw(domain::Polygon{arb,arb}, i::Integer; reversed = false)
     # Compute the orientation for the first vertex and then use the
     # angles to get the remaining orientations. Currently we could
     # compute the orientation directly, but this will be better if we
     # switch to storing an exact orientation.
     # FIXME: This will not be accurate if v[2] contains zero but is
     # not exactly zero
+    v = vertex(domain, 2) - vertex(domain, 1)
+    res = atan(v[2], v[1])
+
+    res += (i - 1) * domain.parent(π)
+    for j = 2:i
+        res -= angle_raw(domain, j)
+    end
+
+    if reversed
+        res = 2domain.parent(π) - angle_raw(domain, i) - res
+    end
+
+    return res
+end
+
+function orientation(domain::Polygon{S,<:Rational}, i::Integer; reversed = false) where {S}
+    # Compute the orientation for the first vertex and then use the
+    # angles to get the remaining orientations. Currently we could
+    # compute the orientation directly, but this will be better if we
+    # switch to storing an exact orientation.
+    # FIXME: This is only needed because we can't implement an
+    # orientation_raw method for rational angles
+    v = vertex(domain, 2) - vertex(domain, 1)
+    res = atan(v[2], v[1])
+
+    res += (i - 1) * oftype(res, π)
+    for j = 2:i
+        res -= angle(domain, j)
+    end
+
+    if reversed
+        res = 2oftype(res, π) - angle(domain, i) - res
+    end
+
+    return res
+end
+
+function orientation(domain::Polygon{arb,fmpq}, i::Integer; reversed = false)
+    # Compute the orientation for the first vertex and then use the
+    # angles to get the remaining orientations. Currently we could
+    # compute the orientation directly, but this will be better if we
+    # switch to storing an exact orientation.
+    # FIXME: This will not be accurate if v[2] contains zero but is
+    # not exactly zero.
+    # FIXME: This is only needed because we can't implement an
+    # orientation_raw method for rational angles
     v = vertex(domain, 2) - vertex(domain, 1)
     res = atan(v[2], v[1])
 
@@ -61,29 +110,20 @@ function orientation_raw(domain::Polygon{arb}, i::Integer; reversed = false)
     return res
 end
 
-function orientation(domain::Polygon{fmpq}, i::Integer; reversed = false)
-    # Compute the orientation for the first vertex and then use the
-    # angles to get the remaining orientations. Currently we could
-    # compute the orientation directly, but this will be better if we
-    # switch to storing an exact orientation.
-    # FIXME: This will not be accurate if v[2] contains zero but is
-    # not exactly zero
-    v = vertex(domain, 2) - vertex(domain, 1)
-    res = atan(v[2], v[1])
-
-    res += (i - 1) * domain.parent(π)
-    for j = 2:i
-        res -= angle(domain, j)
+function area(domain::Polygon{S,T}) where {S,T}
+    # https://en.wikipedia.org/wiki/Polygon#Area
+    A = zero(S)
+    vs = vertices(domain)
+    for i in eachindex(vs)
+        A +=
+            vs[i][1] * vs[mod1(i + 1, length(vs))][2] -
+            vs[mod1(i + 1, length(vs))][1] * vs[i][2]
     end
 
-    if reversed
-        res = 2domain.parent(π) - angle(domain, i) - res
-    end
-
-    return res
+    return abs(A) / 2
 end
 
-function area(domain::Polygon)
+function area(domain::Polygon{arb,T}) where {T}
     # https://en.wikipedia.org/wiki/Polygon#Area
     A = domain.parent(0)
     vs = vertices(domain)
@@ -95,9 +135,9 @@ function area(domain::Polygon)
 
     return abs(A) / 2
 end
+
 center(domain::Polygon) = sum(vertices(domain)) / length(boundaries(domain))
 
-# TODO: Add this
 function Base.in(xy, domain::Polygon)
     vs = vertices(domain)
 
@@ -184,7 +224,6 @@ function boundary_points(domain::Polygon, i::Integer, n::Integer; distribution =
     return points, fill(i, n)
 end
 
-# TODO: Fix this
 function interior_points(domain::Polygon, n::Integer; rng = MersenneTwister(42))
     points = Vector{SVector{2,arb}}(undef, n)
     xmin, xmax = extrema(getindex.(vertices(domain), 1))
