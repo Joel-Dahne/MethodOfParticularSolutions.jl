@@ -123,17 +123,46 @@ struct Polygon{S,T} <: AbstractPlanarDomain{S,T}
 end
 
 """
-    TransformedDomain{T,U<:AbstractPlanarDomain}(domain::U, rotation, scaling, translation)
+    TransformedDomain{S,T,U<:AbstractPlanarDomain{S,T}}(domain::U, rotation, scaling, translation)
 
 Represents a transformation of `domain` corresponding of a rotation,
 a uniform scaling and a translation (in that order).
 """
-struct TransformedDomain{T<:Union{fmpq,arb},U<:AbstractPlanarDomain} <:
-       AbstractPlanarDomain{arb,T}
+struct TransformedDomain{
+    S<:Union{AbstractFloat,arb},
+    T<:Union{AbstractFloat,arb,Rational,fmpq},
+    U<:AbstractPlanarDomain{S,T},
+} <: AbstractPlanarDomain{S,T}
     original::U
     rotation::T
-    scaling::arb
-    translation::SVector{2,arb}
+    scaling::S
+    translation::SVector{2,S}
+
+    function TransformedDomain(
+        domain::AbstractPlanarDomain{S,T},
+        rotation,
+        scaling,
+        translation,
+    ) where {S,T}
+        if S == arb
+            scaling = domain.parent(scaling)
+            translation = convert(SVector{2,S}, domain.parent.(translation))
+        else
+            scaling = convert(S, scaling)
+            translation = convert(SVector{2,S}, translation)
+        end
+        if T == arb
+            rotation = domain.parent(rotation)
+        elseif T == fmpq
+            rotation = fmpq(rotation)
+        else
+            # TODO: Should we do something for rational input but
+            # float output and vice versa?
+            rotation = convert(T, rotation)
+        end
+
+        return new{S,T,typeof(domain)}(domain, rotation, scaling, translation)
+    end
 end
 
 """

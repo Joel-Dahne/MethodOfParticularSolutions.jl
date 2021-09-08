@@ -1,26 +1,12 @@
-function TransformedDomain{T,S}(
-    domain::TransformedDomain{T,S};
-    parent::ArbField,
-) where {T,S}
-    # TODO: Might need to recompute values here
-    return TransformedDomain(
-        S(domain.original; parent),
-        domain.rotation,
-        domain.scaling,
-        domain.translation,
-    )
-end
-
-function TransformedDomain(domain, rotation::T, scaling, translation) where {T}
-    if T == fmpq || T <: Rational
-        rotation = fmpq(rotation)
-    else
-        rotation = domain.parent(rotation)
-    end
-    scaling = domain.parent(scaling)
-    translation = SVector{2,arb}(domain.parent.(translation))
-    return TransformedDomain(domain, rotation, scaling, translation)
-end
+TransformedDomain{S,T,U}(
+    domain::TransformedDomain{S,T,U};
+    parent::Union{ArbField,Nothing} = domain.parent,
+) where {S,T,U} = TransformedDomain(
+    S(domain.original; parent),
+    domain.rotation,
+    domain.scaling,
+    domain.translation,
+)
 
 function Base.show(io::IO, domain::TransformedDomain{T}) where {T}
     println(io, "Transformed Domain")
@@ -37,22 +23,26 @@ function Base.show(io::IO, domain::TransformedDomain{T}) where {T}
     print(io, "Domain: $(domain.original)")
 end
 
-function Base.getproperty(domain::TransformedDomain{T}, name::Symbol) where {T}
+function Base.getproperty(domain::TransformedDomain{S,T}, name::Symbol) where {S,T}
     if name == :parent
         return domain.original.parent
     elseif name == :map
-        if T == arb
-            s, c = sincos(domain.rotation)
-        elseif T == fmpq
+        if T == fmpq
             s, c = sincospi(domain.rotation, domain.parent)
+        elseif has_rational_angles(domain)
+            s, c = sincospi(convert(S, domain.rotation))
+        else
+            s, c = sincos(domain.rotation)
         end
         M = SMatrix{2,2}(c, s, -s, c)
         return xy -> domain.scaling .* M * xy + domain.translation
     elseif name == :invmap
-        if T == arb
-            s, c = sincos(-domain.rotation)
-        elseif T == fmpq
+        if T == fmpq
             s, c = sincospi(-domain.rotation, domain.parent)
+        elseif has_rational_angles(domain)
+            s, c = sincospi(convert(S, -domain.rotation))
+        else
+            s, c = sincos(-domain.rotation)
         end
         M = SMatrix{2,2}(c, s, -s, c)
         return xy -> M * (xy - domain.translation) ./ domain.scaling
