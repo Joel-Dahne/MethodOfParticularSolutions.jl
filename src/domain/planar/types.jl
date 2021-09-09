@@ -166,7 +166,7 @@ struct TransformedDomain{
 end
 
 """
-    IntersectedDomain{U<:AbstractPlanarDomain}(exterior::T, interiors::Vector{AbstractPlanarDomain})
+    IntersectedDomain{S,T,U<:AbstractPlanarDomain{S,T}}(exterior::U, interiors::Vector{AbstractPlanarDomain})
 
 Represents a domain given by removing from `exterior` the domains in
 `interiors`. It's assumed that all domains in `interiors` are
@@ -175,7 +175,8 @@ contained in `exterior` and that they are pairwise disjoint.
 The boundaries are enumerated in a way such that first comes the
 exterior domains boundaries and then comes the interior domains.
 """
-struct IntersectedDomain{S,T} <: AbstractPlanarDomain{S,T}
-    exterior::AbstractPlanarDomain{S,T}
-    interiors::Vector{<:AbstractPlanarDomain{S,T}}
+struct IntersectedDomain{S,T,U<:AbstractPlanarDomain{S,T},V<:AbstractPlanarDomain{S,T}} <:
+       AbstractPlanarDomain{S,T}
+    exterior::U
+    interiors::Vector{V}
 end

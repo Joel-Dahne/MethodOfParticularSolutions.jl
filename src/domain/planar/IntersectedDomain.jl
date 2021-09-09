@@ -1,12 +1,10 @@
-function IntersectedDomain{T}(
+IntersectedDomain{T}(
     domain::IntersectedDomain{T};
-    parent::ArbField,
-) where {T<:AbstractPlanarDomain}
-    return IntersectedDomain(
-        T(domain.exterior; parent),
-        [typeof(d)(d; parent) for d in domain.interiors],
-    )
-end
+    parent::Union{ArbField,Nothing} = domain.parent,
+) where {T<:AbstractPlanarDomain} = IntersectedDomain(
+    T(domain.exterior; parent),
+    [typeof(d)(d; parent) for d in domain.interiors],
+)
 
 IntersectedDomain(exterior::AbstractPlanarDomain, interior::AbstractPlanarDomain) =
     IntersectedDomain(exterior, [interior])
