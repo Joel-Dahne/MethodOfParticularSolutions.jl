@@ -48,7 +48,7 @@ function Base.Float64((θ, ϕ)::NamedTuple{(:θ, :ϕ),Tuple{arb,arb}})
     (θ = Float64(θ), ϕ = Float64(ϕ))
 end
 
-function LinearAlgebra.dot(xyz1::SVector{3,arb}, xyz2::SVector{3,arb})
+function LinearAlgebra.dot(xyz1::SVector{N,arb}, xyz2::SVector{N,arb}) where {N}
     sum(xyz1 .* xyz2)
 end
 

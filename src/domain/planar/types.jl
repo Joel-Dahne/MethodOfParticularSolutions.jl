@@ -71,23 +71,36 @@ struct Triangle{S,T} <: AbstractPlanarDomain{S,T}
 end
 
 """
-    Polygon(angles, vertices)
+    Polygon{S,T}(vertices, angles, orientation; parent)
+    Polygon(vertices[, angles, orientation]; parent)
 
-Create a (planar) polygon with the given angles. To simplify the
-implementation we also require that the location. of the vertices are
-given.
+Create a polygon with the given vertices.
 
-The boundaries are enumerated by which vertex they are next to, in
-positive order.
+The vertices are assumed to be ordered such that when going along the
+boundary from the first to the second vertex the interior of the
+domain is to the left. No check is made to see if the vertices define
+a proper polygon.
+
+In addition to the vertices the polygon also stores the angles of all
+the vertices as well as the orientation of the polygon (given by the
+orientation of the first vertex as defined in [`orientation`](@ref)).
+If the angles are stored as rational numbers these angles can
+typically not be computed exactly from the vertices and they have to
+be given explicitly.
+
+The boundaries are enumerated by which two vertices they are in
+between.
 """
 struct Polygon{S,T} <: AbstractPlanarDomain{S,T}
-    angles::Vector{T}
     vertices::Vector{SVector{2,S}}
+    angles::Vector{T}
+    orientation::T
     parent::Union{ArbField,Nothing}
 
     function Polygon{S,T}(
+        vertices::AbstractVector,
         angles::AbstractVector,
-        vertices::AbstractVector;
+        orientation;
         parent::Union{ArbField,Nothing} = nothing,
     ) where {S,T}
         length(angles) == length(vertices) || throw(
@@ -96,29 +109,37 @@ struct Polygon{S,T} <: AbstractPlanarDomain{S,T}
             ),
         )
 
-        angles = convert(Vector{T}, angles)
         vertices = convert(Vector{SVector{2,S}}, vertices)
+        angles = convert(Vector{T}, angles)
+        orientation = convert(T, orientation)
 
         if T == arb && isnothing(parent)
             parent = Nemo.parent(vertices[1][1])
         end
 
-        return new{S,T}(angles, vertices, parent)
+        return new{S,T}(vertices, angles, orientation, parent)
     end
 
     function Polygon(
-        angles::AbstractVector,
-        vertices::AbstractVector;
+        vertices::AbstractVector{<:AbstractVector{S}},
+        angles::AbstractVector{T},
+        orientation::T;
         parent::Union{ArbField,Nothing} = nothing,
-    )
-        S = eltype(eltype(vertices))
-        T = eltype(angles)
+    ) where {S,T}
+        length(angles) == length(vertices) || throw(
+            ArgumentError(
+                "length of angles and vertices don't match, got $length(angles) and length(vertices)",
+            ),
+        )
 
-        if S != arb
-            S = float(S)
+        vertices = convert(Vector{SVector{2,S}}, vertices)
+        angles = convert(Vector{T}, angles)
+
+        if T == arb && isnothing(parent)
+            parent = Nemo.parent(vertices[1][1])
         end
 
-        return Polygon{S,T}(angles, vertices; parent)
+        return new{S,T}(vertices, angles, orientation, parent)
     end
 end
 

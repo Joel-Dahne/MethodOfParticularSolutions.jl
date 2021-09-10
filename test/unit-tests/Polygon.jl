@@ -10,20 +10,28 @@
     parent = RealField(64)
 
     triangle1 = Triangle(fmpq(1 // 3), fmpq(1 // 4); parent)
-    domain1 =
-        Polygon([angle_raw(triangle1, i) for i = 1:3], collect(vertices(triangle1)); parent)
+    domain1 = Polygon(
+        vertices(triangle1),
+        [angle_raw(triangle1, i) for i = 1:3],
+        orientation_raw(triangle1, 1);
+        parent,
+    )
     triangle2 = Triangle(parent(π) / 3, parent(π) / 4; parent)
-    domain2 = Polygon(collect(angles(triangle2)), collect(vertices(triangle2)); parent)
+    domain2 = Polygon(vertices(triangle2); parent)
     triangle3 = Triangle(1 // 3, 1 // 4)
-    domain3 = Polygon([angle_raw(triangle3, i) for i = 1:3], collect(vertices(triangle3)))
+    domain3 = Polygon(
+        vertices(triangle3),
+        [angle_raw(triangle3, i) for i = 1:3],
+        orientation_raw(triangle3, 1),
+    )
     triangle4 = Triangle(π / 3, π / 4)
-    domain4 = Polygon(collect(angles(triangle4)), collect(vertices(triangle4)))
+    domain4 = Polygon(vertices(triangle4))
 
-    for (triangle, domain, S) in [
-        (triangle1, domain1, arb),
-        (triangle2, domain2, arb),
-        (triangle3, domain3, Float64),
-        (triangle4, domain4, Float64),
+    for (triangle, domain) in [
+        (triangle1, domain1),
+        (triangle2, domain2),
+        (triangle3, domain3),
+        (triangle4, domain4),
     ]
         @test typeof(typeof(domain)(domain)) == typeof(domain)
 
@@ -33,39 +41,47 @@
         @test vertexindices(domain) == vertexindices(triangle)
         @test boundaries(domain) == boundaries(triangle)
 
-        @test all(
-            isequal(angle_raw(domain, i), angle_raw(triangle, i)) for
-            i in vertexindices(domain)
-        )
+        if typeof(domain) <: AbstractDomain{arb,arb}
+            @test all(
+                overlaps(angle_raw(domain, i), angle_raw(triangle, i)) for
+                i in vertexindices(domain)
+            )
+        else
+            @test all(
+                angle_raw(domain, i) == angle_raw(triangle, i) for
+                i in vertexindices(domain)
+            )
+        end
 
         @test all(isequal(angle(domain, i), angles(domain)[i]) for i in boundaries(domain))
-        @test isequal(angles(domain), collect(angles(triangle)))
+        if typeof(domain) <: AbstractDomain{arb,arb}
+            @test all(overlaps.(angles(domain), collect(angles(triangle))))
+        else
+            @test isequal(angles(domain), collect(angles(triangle)))
+        end
 
         @test all(
             isequal(vertex(domain, i), vertices(domain)[i]) for i in boundaries(domain)
         )
         @test isequal(vertices(domain), collect(vertices(triangle)))
 
-        if !has_rational_angles(domain)
-            # This method is only implemented for non-rational angles
-            if S == arb
-                for i in vertexindices(domain)
-                    @test overlaps(orientation_raw(domain, i), orientation_raw(triangle, i))
-                    @test overlaps(
-                        orientation_raw(domain, i, reversed = true),
-                        orientation_raw(triangle, i, reversed = true),
-                    )
-                end
-            else
-                for i in vertexindices(domain)
-                    @test orientation_raw(domain, i) ≈ orientation_raw(triangle, i)
-                    @test orientation_raw(domain, i, reversed = true) ≈
-                          orientation_raw(triangle, i, reversed = true)
-                end
+        if typeof(domain) <: AbstractDomain{arb,arb}
+            for i in vertexindices(domain)
+                @test overlaps(orientation_raw(domain, i), orientation_raw(triangle, i))
+                @test overlaps(
+                    orientation_raw(domain, i, reversed = true),
+                    orientation_raw(triangle, i, reversed = true),
+                )
+            end
+        else
+            for i in vertexindices(domain)
+                @test orientation_raw(domain, i) == orientation_raw(triangle, i)
+                @test orientation_raw(domain, i, reversed = true) ==
+                      orientation_raw(triangle, i, reversed = true)
             end
         end
 
-        if S == arb
+        if typeof(domain) <: AbstractDomain{arb}
             for i in vertexindices(domain)
                 @test overlaps(orientation(domain, i), orientation(triangle, i))
                 @test overlaps(
