@@ -157,9 +157,9 @@ function boundary_points(
         end
     elseif distribution == :chebyshev
         if S == arb
-            f = j -> (cospi(domain.parent((2j - 1) // 2n)) + 1) / 2
+            f = j -> 1 - (cospi(domain.parent((2j - 1) // 2n)) + 1) / 2
         else
-            f = j -> (cospi(convert(S, (2j - 1) // 2n)) + 1) / 2
+            f = j -> 1 - (cospi(convert(S, (2j - 1) // 2n)) + 1) / 2
         end
     elseif distribution == :exponential
         m = (n + 1) // 2
