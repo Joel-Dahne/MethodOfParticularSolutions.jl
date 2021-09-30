@@ -99,6 +99,10 @@ include("eigenfunction/spherical/SphericalInteriorEigenfunction.jl")
 include("eigenfunction/spherical/SphericalCombinedEigenfunction.jl")
 include("eigenfunction/spherical/KrewerasEigenfunction.jl")
 
+include("defect/defect_estimate.jl")
+
+include("norm/norm_estimate.jl")
+
 include("sigma.jl")
 include("enclose.jl")
 include("mps.jl")
