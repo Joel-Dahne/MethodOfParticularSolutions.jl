@@ -103,6 +103,8 @@ include("defect/defect_estimate.jl")
 
 include("norm/norm_estimate.jl")
 
+include("enclosures/eigenvalue.jl")
+
 include("sigma.jl")
 include("enclose.jl")
 include("mps.jl")
