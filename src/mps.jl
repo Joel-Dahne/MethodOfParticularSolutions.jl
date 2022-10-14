@@ -34,7 +34,7 @@ function mps!(
     # used is determined from the beginning.
     set_eigenfunction!(u, zeros(N))
 
-    a > b && throw(ArgumentError("must have a < b, got a = $a, b = $b"))
+    a > b && throw(ArgumentError("must have a <= b, got a = $a, b = $b"))
 
     if a != b
         # Compute minimum of σ(λ)
